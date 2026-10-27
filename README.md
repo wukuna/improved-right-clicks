@@ -1,12 +1,12 @@
 # Improved Right-Clicks
 
-Customize right-click menus with independent misclick protections, item rules, action colors, ground-item menu icons and a configurable extra-options indicator. Choose independent protections for items, bank actions and interface buttons, hide unwanted options with item rules, and color actions so useful choices stand out. Save named profiles, preview imports and undo changes made through the side panel tools.
+Make right-click menus easier to read and harder to misclick. Choose independent protections for inventory items, banking and interface buttons; hide unwanted options; and make useful actions stand out with colours, ground-item icons and an extra-options indicator. Save profiles for different activities and use a reveal modifier when you need a hidden option. Protection switches start off.
 
-Protection switches start off. Enable the features you want in RuneLite's Improved Right-Clicks settings, then use the side panel for profiles, import/export and diagnostics. Hold Ctrl before opening a menu to reveal options hidden by this plugin; the reveal modifier is configurable.
+Configure features in the normal plugin settings; use the side panel for profiles and the released import tools. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.
 
-Previously **Menu Workshop**. The name change keeps your existing settings and profiles. A one-time chatbox notice explains the rename after login.
+Previously **Menu Workshop**. Your saved settings and profiles keep their existing storage keys.
 
-[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Related plugins and sources](#related-plugins-and-sources) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
+[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
 
 ## Features
 
@@ -32,7 +32,7 @@ Enable **Hide side panel** under General to remove the Improved Right-Clicks too
 2. Use the side panel for profiles, imports, custom icon setup and diagnostics.
 3. Hold the configured reveal modifier before opening a menu to temporarily show options this plugin hid.
 
-**Release status:** the latest icon-visibility and indicator refinements are in [Plugin Hub update #19222](https://github.com/runelite/plugin-hub/pull/19222). The [submitted source](https://github.com/wukuna/improved-right-clicks/tree/41fe164bb11d7c034ef514d55d5aa9caf9dd4ab8) contains those changes; Hub availability depends on that update being accepted.
+**Release status:** The Plugin Hub currently distributes the manual filter-import workflow described below. Automatic live icon sharing with Loot Filters remains in development and is not part of that release.
 
 ## Usage
 
@@ -101,7 +101,7 @@ Settings and named profiles retain the existing `improvedmenus` storage keys. Re
 
 ## Compatibility
 
-Users of the features in this table can consolidate them here after checking their settings. This is feature coverage, not a claim that every setting in each source plugin has been reproduced. Cancel/Walk/Set-heading cleanup applies only to opened menus. Option counts use a standard hover tooltip rather than Mouseover Options+'s custom badge layout. Useful Telegrab targets are always allowed rather than individually switchable. Hold-to-reveal is shared rather than Examine-only. Mahogany Homes cleanup preserves non-Remove actions.
+Users of the features in this table can consolidate them here after checking their settings. This is feature coverage, not a claim that every setting in each source plugin has been reproduced. Cancel/Walk/Set-heading cleanup applies only to opened menus. The extra-options indicator has its own placement controls. Useful Telegrab targets are always allowed rather than individually switchable. Hold-to-reveal is shared rather than Examine-only. Mahogany Homes cleanup preserves non-Remove actions.
 
 Keep RuneLite's Menu Entry Swapper for swaps and specialist plugins for their remaining features. Disable overlapping filters/colors before comparing results: this plugin cannot reveal options another plugin has removed.
 
@@ -109,24 +109,31 @@ Menu Entry Swapper's Shift-right-click customization remains available with Exam
 
 Automatic Loot Filters integration is not part of the current public import workflow. Import the same Filterscape script manually as described under Usage. Imported icons decorate menu entries; they do not change ground labels, beams or sounds.
 
-## Related plugins and sources
+## Inspiration and recipe
 
-This project combines features from, and credits, these plugins. Links identify the source versions reviewed for this release. Adapted code/catalogs and complete licenses are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and distributed with the plugin.
+The recipe combines focused menu protections, readable actions and useful visual cues. The plugins below supplied either adapted components and item lists or the feature ideas behind our shared menu controls. Original authors and the exact adapted parts are documented in the code notices; related swap and loot tools remain useful for their own jobs.
 
-| Project | Relationship | Relevant features and limits |
+| Project | Connection | What it contributes or complements |
 | --- | --- | --- |
-| [No Examine](https://github.com/Skretzo/runelite-plugins/tree/ea506dbbfd2aa70dd024f2fc7b761786e2ced91a) | Source / feature overlap | Category-specific Examine removal, keeping lone Examine, right-click Cancel/Walk here/Set heading cleanup |
-| [Not Empty](https://github.com/dekvall/runelite-external-plugins/tree/0c1c5cf2a8588ac3b017e7026c393d2eee4980c3) | Source / feature overlap | Dosed-item Empty protection |
-| [No Misclicks In Bank](https://github.com/Welkon1/No-Misclicks-In-Bank/tree/6f76aa102a04525bdce2424b57b4ad899ba82e8b) | Source / feature overlap | Independent Wield, Wear, Drink and Eat bank guards |
-| [Item Option Hider](https://github.com/kekingbd/item-option-hider/tree/5375d699a8661c157c7e26b699a9c46401237c7e) | Source / feature overlap | Item action/name rules, wildcards and item-on-item targets |
-| [Menu Colorizer](https://github.com/dgalambos/menu-colorizer/tree/3e73b989615aecb2813f0b74bb9ecdf5ba5451ac) | Source / feature overlap | Cosmetic action colors, interactive picker/reset and submenus |
-| [Tool Required](https://github.com/Unmoon/tool-required/tree/031e4986c2235f58888cf158666a02f3497cac60) | Source / feature overlap | Axe/pickaxe requirements and tool catalog |
-| [Home Improvement](https://github.com/Mike-U5/rl-plugin-home-improvement/tree/6b7cca56d95d794bae252f5f7b58b8d2d5f6027e) | Source / feature overlap | House building-mode cleanup and Mahogany Homes catalog |
-| [Misclick Guard](https://github.com/willzero123/misclick-guard/tree/a49e33e7576dbf60ec3caa39be4f470b6be71f47) | Source / feature overlap | Button matching, click-origin protection and Cancel fallback |
-| [Ground Loot Icons](https://github.com/Fiffers/ground-loot-icons/tree/8e3e529f27aef3b7a5323ef8fef4f565d8b00be2) | Source / feature overlap | Take-menu item icons and row geometry |
-| [Mouseover Options+](https://github.com/Petzep/mouseover-options/tree/872f6bf6a0817e5d6292749c2f3d4ae8a8eb9600) | Source / feature overlap | Additional-option counts, minimum threshold, Examine/widget switches and text color |
-| [No Use Player](https://github.com/oohwooh/no-use-players/tree/e76b5612cea2f9fe68b0ba6cecd2bf11b1a5d656) | Source / feature overlap | Item-only player-use protection and default allowed items |
-| [Don't Telegrab NPCs](https://github.com/ldavid432/dont-telekinetic-grab-npcs/tree/71b6675364d67a65eb0023667c42863eeb0e3ea7) | Source / feature overlap | Telegrab-specific NPC protection and useful-target catalog |
+| [No Examine](https://github.com/Skretzo/runelite-plugins/tree/ea506dbbfd2aa70dd024f2fc7b761786e2ced91a) | Feature inspiration | Category-specific Examine removal, lone-Examine exceptions and opened-menu cleanup. |
+| [Not Empty](https://github.com/dekvall/runelite-external-plugins/tree/0c1c5cf2a8588ac3b017e7026c393d2eee4980c3) | Feature inspiration | Protection against emptying dosed items by mistake. |
+| [No Misclicks In Bank](https://github.com/Welkon1/No-Misclicks-In-Bank) | Feature inspiration | Separate Wear, Wield, Drink and Eat guards while banking. |
+| [Item Option Hider](https://github.com/kekingbd/item-option-hider) | Feature inspiration | Item/action matching, wildcards and item-on-item targets. |
+| [Menu Colorizer](https://github.com/dgalambos/menu-colorizer) | Feature inspiration | Action colours and an interactive menu colour picker. |
+| [Tool Required](https://github.com/Unmoon/tool-required) | Adapted ingredient | Reviewed tool lists and special targets for axe/pickaxe checks; credit to Unmoon. |
+| [Home Improvement](https://github.com/Mike-U5/rl-plugin-home-improvement) | Adapted ingredient | Furniture mappings for house and Mahogany Homes cleanup; credit to Mike-U5. |
+| [Misclick Guard](https://github.com/willzero123/misclick-guard) | Adapted ingredient | Protected-button handling, click-origin checks and Cancel fallback; credit to willzero123. |
+| [Ground Loot Icons](https://github.com/Fiffers/ground-loot-icons) | Adapted ingredient | Menu-icon placement and row geometry; original Louis Hong copyright is retained. |
+| [Mouseover Options+](https://github.com/Petzep/mouseover-options) | Feature inspiration | Extra-option counts, thresholds and display choices. |
+| [No Use Player](https://github.com/oohwooh/no-use-players) | Adapted ingredient | The allowed-item list for player-use protection; credit to Lola Egherman. |
+| [Don't Telegrab NPCs](https://github.com/ldavid432/dont-telekinetic-grab-npcs) | Adapted ingredient | Useful-target exceptions for Telegrab; credit to ldavid432. |
+| [Menu Entry Swapper (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/menuentryswapper) | Optional companion | Changes preferred actions. Improved Right-Clicks concentrates on visibility, protection and presentation; existing swap customization remains available. |
+| [Custom Menu Swaps](https://github.com/geheur/More-menu-entry-swaps) | Specialist companion or alternative | Text-based swaps, hiding and hotkeys. Avoid duplicate hide rules; our reveal modifier cannot recover options another plugin removes. |
+| [Menu Swapper Extended](https://github.com/raiyni/menu-swapper-extended) | Specialist companion | Additional targeted swaps. Review its rules alongside any overlapping menu protections. |
+| [Ground Items (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/grounditems) | Optional ground-label tool | Ground labels, values and highlighting; menu icons and action colours are a separate presentation layer. |
+| [Loot Filters / Filterscape](https://github.com/riktenx/loot-filters) | Adapted RS2F ingredients; separate loot tool | The released manual importer uses adapted parser components and supports Filterscape scripts. Automatic live icon sharing remains in development; it is not supplied by ordinary Loot Filters today. |
+
+The [Filterscape editor](https://filterscape.xyz/) prepares Loot Filters scripts. Importing one into Improved Right-Clicks affects menu icons, not ground labels, beams or sounds. Feature overlap does not imply complete replacement. Full licenses and adaptation details remain in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Development
 

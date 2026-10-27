@@ -56,6 +56,41 @@ final class MenuEngine
         });
         ownedColors.clear();
     }
+    void highlightHovered(Menu menu)
+    {
+        // Release the previous hover before finding this frame's row. Only change
+        // entries whose identity and text still match our own decoration.
+        ownedColors.forEach((entry,edit) -> {
+            if (edit.matches(entry)) { entry.setOption(edit.colored); edit.after=edit.colored; }
+        });
+        if (!config.enableColors() || !config.yellowHover() || menu == null) { return; }
+        MenuEntry hovered=hovered(menu);
+        ColorEdit edit=ownedColors.get(hovered);
+        if (edit != null && edit.matches(hovered))
+        {
+            // Native rendering supplies yellow. Keep image tags and target colors.
+            edit.after=edit.colored.replaceAll("</?col(?:=[^>]*)?>", "");
+            hovered.setOption(edit.after);
+        }
+    }
+    private MenuEntry hovered(Menu menu)
+    {
+        if (menu.getMenuWidth() <= 0 || menu.getMenuHeight() <= 0) { return null; }
+        MenuEntry[] entries=menu.getMenuEntries();
+        // Public Menu bounds are valid only while open. The API does not expose
+        // which submenu is open, so never use cached child bounds for hit testing.
+        Point mouse=client.getMouseCanvasPosition();
+        int x=mouse.getX(), y=mouse.getY();
+        if (x <= menu.getMenuX() || x >= menu.getMenuX()+menu.getMenuWidth()
+            || y <= menu.getMenuY()+18 || y >= menu.getMenuY()+menu.getMenuHeight()) { return null; }
+        int scroll=client.isMenuScrollable() ? client.getMenuScroll() : 0;
+        for (int i=0;i<entries.length;i++)
+        {
+            int baseline=menu.getMenuY()+31+(entries.length-1-i-scroll)*15;
+            if (y > baseline-13 && y < baseline+3) { return entries[i]; }
+        }
+        return null;
+    }
 
     void apply(Menu menu)
     { apply(menu,true); }
@@ -67,7 +102,7 @@ final class MenuEngine
         StringBuilder report = new StringBuilder(validation);
         Context context = context();
         int before=menu.getMenuEntries().length;
-        apply(menu, "", context, report, 0);
+        apply(menu, "", context, report, 0, capture && client.isKeyPressed(KeyCode.KC_SHIFT));
         if (!capture) { cleanOpenedMenu(menu,report,0); }
         if (capture || before != menu.getMenuEntries().length)
         {
@@ -114,13 +149,23 @@ final class MenuEngine
         if (kept.isEmpty() && cancel != null) { kept.add(cancel); report.append("\nKeep Cancel — empty-menu fallback"); }
         if (kept.size() != entries.length) { menu.setMenuEntries(kept.toArray(new MenuEntry[0])); }
     }
-    private void apply(Menu menu, String inheritedTarget, Context context, StringBuilder report, int depth)
+    private void apply(Menu menu, String inheritedTarget, Context context, StringBuilder report, int depth, boolean preserveSwapAnchors)
     {
         if (depth > 8) { return; }
         MenuEntry[] entries = menu.getMenuEntries();
         List<MenuEntry> kept = new ArrayList<>(entries.length);
         for (MenuEntry entry : entries)
         {
+            // Menu Entry Swapper discovers customization targets from native Examine
+            // entries on MenuOpened. Keep both their identity and exact text until
+            // its handler has run; our lower-priority open handler cleans up after it.
+            if (preserveSwapAnchors && isSwapAnchor(entry))
+            {
+                ColorEdit edit = ownedColors.remove(entry);
+                if (edit != null && edit.matches(entry)) { entry.setOption(edit.before); }
+                kept.add(entry);
+                continue;
+            }
             String target = MenuRules.plain(entry.getTarget());
             if (target.isEmpty()) { target = inheritedTarget; }
             String option = MenuRules.plain(entry.getOption());
@@ -130,7 +175,7 @@ final class MenuEngine
                 if (report.length() < 12000) { report.append("\nHide ").append(option).append(" ").append(target).append(" — ").append(reason); }
                 continue;
             }
-            if (entry.getSubMenu() != null) { apply(entry.getSubMenu(), target, context, report, depth + 1); }
+            if (entry.getSubMenu() != null) { apply(entry.getSubMenu(), target, context, report, depth + 1, preserveSwapAnchors); }
             if (config.enableColors())
             {
                 String color = color(target, option);
@@ -150,6 +195,16 @@ final class MenuEngine
         }
         // Do not remove one entry at a time: backed entry objects can be remapped on removal.
         if (kept.size() != entries.length) { menu.setMenuEntries(kept.toArray(new MenuEntry[0])); }
+    }
+    private static boolean isSwapAnchor(MenuEntry entry)
+    {
+        MenuAction type = entry.getType();
+        if (type == MenuAction.EXAMINE_OBJECT || type == MenuAction.EXAMINE_NPC) { return true; }
+        int group = entry.getParam1() >>> 16;
+        return (type == MenuAction.CC_OP || type == MenuAction.CC_OP_LOW_PRIORITY)
+            && (group == InterfaceID.INVENTORY || group == InterfaceID.WORNITEMS)
+            && entry.getIdentifier() == 10
+            && MenuRules.plain(entry.getOption()).equals("Examine");
     }
     String color(String target, String option)
     {
@@ -191,12 +246,15 @@ final class MenuEngine
             && !(config.keepLoneNpc() && loneExamine(entry, siblings))) { return "NPC Examine"; }
         if (type == MenuAction.EXAMINE_OBJECT && config.examineObject()
             && !(config.keepLoneObject() && loneExamine(entry, siblings))) { return "object Examine"; }
+        // Temple Trekking swamp vines use a knife, and quest cave entrances may start dialogue.
         if (type == MenuAction.GAME_OBJECT_FIRST_OPTION && c.toolsKnown)
         {
             if (config.chop() && !c.axe
+                && entry.getIdentifier() != net.runelite.api.gameval.ObjectID.TEMPLETREK_SWAMPTREE_SMALL_VINES
                 && (option.startsWith("Chop") && (target.contains("ree") || ToolCatalog.CHOP.contains(target))
                 || option.startsWith("Cut") && (target.contains("ree") || target.equals("Sulliuscep")))) { return "axe required"; }
-            if (config.mine() && !c.pick && option.equals("Mine")) { return "pickaxe required"; }
+            if (config.mine() && !c.pick && option.equals("Mine")
+                && !target.equalsIgnoreCase("Cave entrance")) { return "pickaxe required"; }
         }
         if (OBJECTS.contains(type))
         {
@@ -271,10 +329,14 @@ final class MenuEngine
     static final class Context { boolean bank, toolsKnown, axe, pick, house, building; }
     private static final class ColorEdit
     {
-        final String before, after, target;
+        final String before, colored, target;
+        String after;
         final MenuAction type;
         final int identifier;
         ColorEdit(String before,String after,MenuEntry entry)
-        { this.before=before; this.after=after; target=MenuRules.plain(entry.getTarget()); type=entry.getType(); identifier=entry.getIdentifier(); }
+        { this.before=before; this.after=after; this.colored=after; target=MenuRules.plain(entry.getTarget()); type=entry.getType(); identifier=entry.getIdentifier(); }
+        boolean matches(MenuEntry entry)
+        { return entry.getOption().equals(after) && MenuRules.plain(entry.getTarget()).equals(target)
+            && entry.getType() == type && entry.getIdentifier() == identifier; }
     }
 }

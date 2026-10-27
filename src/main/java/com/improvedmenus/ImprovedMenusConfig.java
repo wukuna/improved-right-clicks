@@ -26,8 +26,10 @@ public interface ImprovedMenusConfig extends Config
     String bankSection = "bank";
 
     enum RevealKey { CONTROL, SHIFT, ALT, NONE }
-    @ConfigItem(keyName="revealKey", name="Hold to reveal", description="Hold before opening a menu to reveal options hidden by Menu Workshop", position=0, section=generalSection)
+    @ConfigItem(keyName="revealKey", name="Hold to reveal", description="Hold before opening a menu to reveal options hidden by Improved Right-Clicks", position=0, section=generalSection)
     default RevealKey revealKey() { return RevealKey.CONTROL; }
+    @ConfigItem(keyName="hideSidePanel", name="Hide side panel", description="Hide the Improved Right-Clicks toolbar button; configure all features in RuneLite settings", position=1, section=generalSection)
+    default boolean hideSidePanel() { return false; }
     @ConfigItem(keyName="potionEmpty", name="No Empty on potions", description="Hide Empty on dosed inventory potions", position=7, section=hideOptionsSection)
     default boolean potionEmpty() { return false; }
     @ConfigItem(keyName="bankWield", name="Bank: hide Wield", description="Hide inventory Wield while the bank is open", position=35, section=bankSection)
@@ -58,6 +60,8 @@ public interface ImprovedMenusConfig extends Config
     default String colors() { return ""; }
     @ConfigItem(keyName="enableColors", name="Enable colors", description="Color supported menu options, including submenus", position=15, section=colorsSection)
     default boolean enableColors() { return true; }
+    @ConfigItem(keyName="yellowHover", name="Yellow hover highlight", description="Use the native yellow highlight when hovering over a colored menu option", position=17, section=colorsSection)
+    default boolean yellowHover() { return true; }
     @ConfigItem(keyName="colorPicker", name="Shift menu color editor", description="Hold Shift and open a menu to add local color controls", position=16, section=colorsSection)
     default boolean colorPicker() { return true; }
     @ConfigItem(keyName="chop", name="Require axe", description="Hide tree Chop/Cut when no axe is carried or equipped", position=17, section=toolsSection)
@@ -80,6 +84,17 @@ public interface ImprovedMenusConfig extends Config
     default boolean deprioritizeLeftClickOffEntries() { return true; }
     @ConfigItem(keyName="groundIcons", name="Ground loot icons", description="Show item icons in Take menus", position=26, section=presentationSection)
     default boolean groundIcons() { return false; }
+    enum GroundIconSource
+    {
+        NATIVE("Native"), CUSTOM("Custom"), BOTH("Both");
+        private final String label;
+        GroundIconSource(String label) { this.label=label; }
+        @Override public String toString() { return label; }
+    }
+    @ConfigItem(keyName="groundIconSource", name="Icon source", description="Used when Ground loot icons is enabled. Custom shows only visible imported or manually assigned icons, with no native fallback. Both keeps native item icons and adds visible custom icons. Colors are controlled separately.", position=27, section=presentationSection)
+    default GroundIconSource groundIconSource() { return GroundIconSource.NATIVE; }
+    @ConfigItem(keyName="bothRespectFilterVisibility", name="Both: respect filter visibility", description="In Both mode, show native and custom icons only when a visible custom icon is available. Hidden, unassigned or unavailable filter icons suppress both. Manual assignments still take priority. Native mode is unaffected.", position=29, section=presentationSection)
+    default boolean bothRespectFilterVisibility() { return false; }
     @ConfigItem(keyName="optionCount", name="Additional option count", description="Show the number of other available actions on hover", position=27, section=presentationSection)
     default boolean optionCount() { return false; }
     @ConfigItem(keyName="hideCancel", name="Hide Cancel", description="Hide Cancel in opened right-click menus; keep a safe fallback if nothing remains", position=1, section=hideOptionsSection)
@@ -103,6 +118,13 @@ public interface ImprovedMenusConfig extends Config
     default boolean countExamine() { return true; }
     @ConfigItem(keyName="countOnWidgets", name="Show count on interface widgets", description="Show counts on inventory, bank, shop and other interface widgets", position=41, section=presentationSection)
     default boolean countOnWidgets() { return true; }
+    @ConfigItem(keyName="countHidePlayers", name="Hide player option counts", description="Exclude player actions from the hover count without hiding overlapping loot or object options", position=44, section=presentationSection)
+    default boolean countHidePlayers() { return false; }
+    @ConfigItem(keyName="countHideWalkHere", name="Hide counts when Walk here", description="Exclude deprioritized NPC and object options when Walk here is the preferred action; loot and interface options remain counted", position=45, section=presentationSection)
+    default boolean countHideWalkHere() { return false; }
+    enum CountAnchor { BELOW_LEFT, BELOW_RIGHT, ABOVE_LEFT, ABOVE_RIGHT }
+    @ConfigItem(keyName="countAnchor", name="Option count anchor", description="Position relative to the hover tooltip stack; RuneLite still controls whether the stack is above or below the cursor", position=46, section=presentationSection)
+    default CountAnchor countAnchor() { return CountAnchor.BELOW_LEFT; }
     @ConfigItem(keyName="optionCountColor", name="Option count text color", description="Color in #RRGGBB format", position=42, section=presentationSection)
     default String optionCountColor() { return "#ffffff"; }
     @ConfigItem(keyName="defaultPickerColor", name="Default picker color", description="Initial color for entries with no matching color rule, in #RRGGBB format", position=43, section=colorsSection)

@@ -20,7 +20,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-@PluginDescriptor(name="Menu Workshop", description="Independent menu protections, item rules, colors and profiles", tags={"menu","bank","inventory","misclick","examine","color"})
+@PluginDescriptor(name="Improved Right-Clicks", description = "Tidy right-click menus with optional misclick protection, item rules, action colours, loot icons, extra-option indicators and saved profiles.", tags={"menu","bank","inventory","misclick","examine","color"})
 public class ImprovedMenusPlugin extends Plugin
 {
     @Inject private Client client;
@@ -30,9 +30,12 @@ public class ImprovedMenusPlugin extends Plugin
     @Inject private ButtonGuard buttons;
     @Inject private MenuEngine engine;
     @Inject private ProfileStore store;
+    @Inject private RenameNotice renameNotice;
     @Inject private ClientToolbar toolbar;
     @Inject private OverlayManager overlays;
     @Inject private MenuPresentation presentation;
+    @Inject private OptionCountOverlay optionCounts;
+    @Inject private ItemIcons itemIcons;
     private ImprovedMenusPanel panel;
     private NavigationButton navigation;
     private volatile boolean active;
@@ -44,19 +47,18 @@ public class ImprovedMenusPlugin extends Plugin
     @Override protected void startUp()
     {
         active=true;
+        presentation.setItemIcons(itemIcons);
+        if(itemIcons.filters!=null) { itemIcons.filters.reload(); }
+        renameNotice.startUp();
         clientThread.invokeLater(() -> { if (active) { engine.reload(); } });
-        buttons.startUp(); eventBus.register(buttons); overlays.add(presentation); presentation.start();
-        SwingUtilities.invokeLater(() -> {
-            if (!active) { return; }
-            panel=new ImprovedMenusPanel(store,engine);
-            navigation=NavigationButton.builder().tooltip("Menu Workshop").icon(icon()).priority(6).panel(panel).build();
-            toolbar.addNavigation(navigation);
-        });
+        buttons.startUp(); eventBus.register(buttons); overlays.add(presentation); overlays.add(optionCounts); presentation.start();
+        SwingUtilities.invokeLater(this::updateSidePanel);
     }
     @Override protected void shutDown()
     {
         active=false;
-        eventBus.unregister(buttons); buttons.shutDown(); overlays.remove(presentation);
+        renameNotice.shutDown();
+        eventBus.unregister(buttons); buttons.shutDown(); overlays.remove(presentation); overlays.remove(optionCounts);
         clientThread.invoke(() -> { removeColorEditor(); presentation.stop(); engine.clear(); }); store.clearHistory();
         SwingUtilities.invokeLater(() -> {
             if (panel != null) { panel.stop(); panel=null; }
@@ -75,11 +77,43 @@ public class ImprovedMenusPlugin extends Plugin
     @Subscribe public void onConfigChanged(ConfigChanged event)
     {
         if (ImprovedMenusConfig.GROUP.equals(event.getGroup()))
-        { clientThread.invokeLater(() -> { if (active) { if (!config.groundIcons()) { presentation.stop(); } engine.reload(); } }); }
+        {
+            if(itemIcons.filters!=null && (event.getKey().equals(FilterIcons.KEY) || event.getKey().equals(FilterIcons.BACKUP))) { itemIcons.filters.reload(); }
+            clientThread.invokeLater(() -> { if (active) { if (!config.groundIcons()) { presentation.stop(); } engine.reload(); } });
+            if (event.getKey().equals("hideSidePanel")) { SwingUtilities.invokeLater(this::updateSidePanel); }
+        }
+    }
+    @Subscribe public void onProfileChanged(net.runelite.client.events.ProfileChanged event) { if(itemIcons.filters!=null) { itemIcons.filters.reload(); } }
+    @Subscribe public void onBeforeMenuRender(BeforeMenuRender event)
+    { if (active && client.isMenuOpen()) { engine.highlightHovered(client.getMenu()); } }
+    private void updateSidePanel()
+    {
+        if (!active || config.hideSidePanel())
+        {
+            if (navigation != null) { toolbar.removeNavigation(navigation); navigation=null; }
+            if (panel != null) { panel.stop(); panel=null; }
+        }
+        else if (navigation == null)
+        {
+            panel=new ImprovedMenusPanel(store,engine,this::openSettings);
+            panel.addIconControls(itemIcons);
+            navigation=NavigationButton.builder().tooltip("Improved Right-Clicks").icon(icon()).priority(6).panel(panel).build();
+            toolbar.addNavigation(navigation);
+        }
+    }
+    private void openSettings()
+    {
+        net.runelite.client.ui.overlay.Overlay target = new net.runelite.client.ui.overlay.Overlay(this) {
+            @Override public java.awt.Dimension render(Graphics2D graphics) { return null; }
+        };
+        eventBus.post(new net.runelite.client.events.OverlayMenuClicked(
+            new net.runelite.client.ui.overlay.OverlayMenuEntry(MenuAction.RUNELITE_OVERLAY_CONFIG,
+                net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE,"Improved Right-Clicks"),target));
     }
     @Subscribe public void onGameStateChanged(GameStateChanged event)
     {
         if (event.getGameState() != GameState.LOGGED_IN) { buttons.reset(); engine.clear(); }
+        else { renameNotice.showIfLoggedIn(); }
     }
     @Subscribe public void onFocusChanged(FocusChanged event) { if (!event.isFocused()) { clientThread.invoke(buttons::reset); } }
 

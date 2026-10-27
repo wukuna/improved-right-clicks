@@ -98,3 +98,7 @@ commit=0c1c5cf2a8588ac3b017e7026c393d2eee4980c3
 repository=https://github.com/Unmoon/tool-required.git
 commit=031e4986c2235f58888cf158666a02f3497cac60
 ```
+
+## Loot Filters RS2F components
+
+The released manual importer contains adapted RS2F lexer, parser, preprocessor, condition and utility components from [riktenx/loot-filters](https://github.com/riktenx/loot-filters), copyright (c) 2025 riktenx, BSD 2-Clause. Adapted files identify this origin. The complete license is distributed in `src/main/resources/com/improvedmenus/loot-filters-LICENSE.txt` and `META-INF/licenses/loot-filters.txt`. Our menu-icon evaluation and import interface do not establish automatic integration with ordinary Loot Filters. This attribution remains required independently of later integration plans.

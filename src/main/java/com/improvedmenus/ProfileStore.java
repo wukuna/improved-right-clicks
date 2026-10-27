@@ -11,7 +11,7 @@ final class ProfileStore
 {
     @Inject private ConfigManager manager;
     @Inject private Gson gson;
-    private final Deque<Map<String,String>> undo = new ArrayDeque<>();
+    private final Deque<Edit> undo = new ArrayDeque<>();
     static final String PROFILE_KEY = "savedProfiles";
     static final int MAX_JSON = 100000;
 
@@ -29,9 +29,16 @@ final class ProfileStore
     synchronized void apply(Map<String,String> settings)
     {
         validate(settings);
-        undo.addLast(snapshot());
+        Map<String,String> before = new LinkedHashMap<>();
+        Map<String,String> after = new LinkedHashMap<>();
+        settings.forEach((key,next) -> {
+            String current = value(SettingsCatalog.ALL.get(key));
+            if (!current.equals(next)) { before.put(key,current); after.put(key,next); }
+        });
+        if (after.isEmpty()) { return; }
+        undo.addLast(new Edit(before,after));
         if (undo.size() > 20) { undo.removeFirst(); }
-        write(settings);
+        write(after);
     }
     private void write(Map<String,String> settings)
     {
@@ -40,7 +47,19 @@ final class ProfileStore
     synchronized boolean undo()
     {
         if (undo.isEmpty()) { return false; }
-        write(undo.removeLast()); return true;
+        Edit edit = undo.removeLast();
+        Map<String,String> restore = new LinkedHashMap<>();
+        edit.before.forEach((key,previous) -> {
+            // Preserve subsequent edits made through RuneLite or another plugin.
+            if (value(SettingsCatalog.ALL.get(key)).equals(edit.after.get(key))) { restore.put(key,previous); }
+        });
+        write(restore); return true;
+    }
+    private static final class Edit
+    {
+        final Map<String,String> before;
+        final Map<String,String> after;
+        Edit(Map<String,String> before,Map<String,String> after) { this.before=before; this.after=after; }
     }
     synchronized void clearHistory() { undo.clear(); }
     static void validate(Map<String,String> settings)
@@ -65,7 +84,10 @@ final class ProfileStore
         try
         {
             JsonObject root = gson.fromJson(json, JsonObject.class);
-            if (root == null || root.size() != 2 || !root.has("version") || root.get("version").getAsInt() != 1 || !root.has("settings"))
+            if (root == null || root.size() != 2 || !root.has("version")
+                || !root.get("version").isJsonPrimitive() || !root.getAsJsonPrimitive("version").isNumber()
+                || root.get("version").getAsBigDecimal().compareTo(java.math.BigDecimal.ONE) != 0
+                || !root.has("settings") || !root.get("settings").isJsonObject())
             { throw new IllegalArgumentException("Unsupported profile version or format"); }
             JsonObject settings = root.getAsJsonObject("settings");
             Map<String,String> result = new LinkedHashMap<>();
@@ -77,7 +99,7 @@ final class ProfileStore
             }
             validate(result); return result;
         }
-        catch (JsonParseException | IllegalStateException | ClassCastException e) { throw new IllegalArgumentException("Invalid profile JSON",e); }
+        catch (JsonParseException | IllegalStateException | ClassCastException | NumberFormatException e) { throw new IllegalArgumentException("Invalid profile JSON",e); }
     }
     private JsonObject profiles()
     {

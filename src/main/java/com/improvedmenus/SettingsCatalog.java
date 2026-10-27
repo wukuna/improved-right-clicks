@@ -32,6 +32,7 @@ final class SettingsCatalog
     static
     {
         add("revealKey", "Hold to reveal", "General", "CONTROL", "CONTROL", "SHIFT", "ALT", "NONE");
+        bool("hideSidePanel", "Hide side panel", "General", false);
         bool("potionEmpty", "No Empty on potions", "Inventory", false);
         bool("examineInventory", "Hide item Examine", "Examine", false); bool("examineGround", "Hide ground Examine", "Examine", false);
         bool("examineNpc", "Hide NPC Examine", "Examine", false); bool("examineObject", "Hide scenery Examine", "Examine", false);
@@ -40,6 +41,7 @@ final class SettingsCatalog
         add("itemRules", "Item rules: action,item name", "Rules", "");
         add("colors", "Colors: target:action:#RRGGBB;", "Colors", "");
         bool("enableColors", "Enable colors", "Colors", true); bool("colorPicker", "Shift menu color editor", "Colors", true);
+        bool("yellowHover", "Yellow hover highlight", "Colors", true);
         add("defaultPickerColor", "Default picker color", "Colors", "#00ff00");
         bool("chop", "Require axe", "Tools", false); bool("mine", "Require pickaxe", "Tools", false);
         bool("house", "House menu cleanup", "House", false); bool("mahogany", "Mahogany Homes cleanup", "House", false);
@@ -49,10 +51,15 @@ final class SettingsCatalog
         add("report", "Report", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");
         bool("deprioritizeLeftClickOffEntries", "Deprioritize protected buttons", "Buttons", true);
         bool("groundIcons", "Ground loot icons", "Presentation", false);
+        add("groundIconSource", "Icon source", "Presentation", "NATIVE", "NATIVE", "CUSTOM", "BOTH");
+        bool("bothRespectFilterVisibility", "Both: respect filter visibility", "Presentation", false);
         bool("optionCount", "Additional option count", "Presentation", false);
         add("minimumOptions", "Minimum extra options", "Presentation", "1");
         bool("countExamine", "Count Examine", "Presentation", true);
         bool("countOnWidgets", "Show count on interface widgets", "Presentation", true);
+        bool("countHidePlayers", "Hide player option counts", "Presentation", false);
+        bool("countHideWalkHere", "Hide counts when Walk here", "Presentation", false);
+        add("countAnchor", "Option count anchor", "Presentation", "BELOW_LEFT", "BELOW_LEFT", "BELOW_RIGHT", "ABOVE_LEFT", "ABOVE_RIGHT");
         add("optionCountColor", "Option count text color", "Presentation", "#ffffff");
         bool("hideCancel", "Hide Cancel (right-click menu)", "Menu cleanup", false);
         bool("hideWalkHere", "Hide Walk here (right-click menu)", "Menu cleanup", false);

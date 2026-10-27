@@ -31,8 +31,8 @@ package com.improvedmenus;
 public enum ClickMode
 {
 	NORMAL("Normal", false, false),
-	LEFT_CLICK_OFF("Left click off", true, false),
-	DISABLED("Disabled", true, true);
+	LEFT_CLICK_OFF("Right-click only", true, false),
+	DISABLED("Hidden", true, true);
 
 	private final String displayName;
 	private final boolean blocksLeftClick;

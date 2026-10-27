@@ -101,4 +101,22 @@ public class ButtonGuardTest
     {
         MenuEntry e=button("Auto Retaliate",InterfaceID.COMBAT_INTERFACE); when(e.getType()).thenReturn(MenuAction.NPC_FIRST_OPTION); assertNull(GuardedAction.find(e));
     }
+    @Test public void auditAllButtonModesWithCleanupAndClickOrigins()
+    {
+        MenuEngine engine=Guice.createInjector(new AbstractModule() { protected void configure() {
+            bind(Client.class).toInstance(client); bind(ImprovedMenusConfig.class).toInstance(config);
+            bind(net.runelite.client.game.ItemManager.class).toInstance(mock(net.runelite.client.game.ItemManager.class));
+        } }).getInstance(MenuEngine.class);
+        when(config.itemRules()).thenReturn("");when(config.colors()).thenReturn("");when(config.exceptions()).thenReturn("");engine.reload();
+        String[] options={"Auto Retaliate","Show XP drops","Always set placeholders","Report abuse"};
+        int[] groups={InterfaceID.COMBAT_INTERFACE,InterfaceID.ORBS,InterfaceID.BANKMAIN,InterfaceID.CHATBOX};int cases=0;
+        for(ClickMode mode:ClickMode.values())for(int settings=0;settings<8;settings++)for(int target=0;target<4;target++)for(boolean fromMenu:new boolean[]{false,true})
+        {
+            when(config.autoRetaliate()).thenReturn(mode);when(config.xpDrops()).thenReturn(mode);when(config.alwaysSetPlaceholders()).thenReturn(mode);when(config.report()).thenReturn(mode);
+            when(config.hideCancel()).thenReturn((settings&1)!=0);when(config.hideWalkHere()).thenReturn((settings&2)!=0);when(config.deprioritizeLeftClickOffEntries()).thenReturn((settings&4)!=0);
+            MenuEntry entry=button(options[target],groups[target]),cancel=TestMenus.entry("Cancel","",MenuAction.CANCEL,-1,0);Menu menu=TestMenus.menu(cancel,entry);when(client.getMenu()).thenReturn(menu);when(client.isMenuOpen()).thenReturn(false);
+            guard.onPostMenuSort(new PostMenuSort());guard.onMenuOpened(new MenuOpened());engine.applyOpened(menu);assertTrue("Cleanup must retain a safe fallback",menu.getMenuEntries().length>0);
+            press(fromMenu);MenuOptionClicked event=click(entry);if(mode.removesMenuEntry()||mode.blocksLeftClick()&&!fromMenu)verify(event).consume();else verify(event,never()).consume();guard.reset();cases++;
+        }guard.shutDown();System.out.println("AUDIT button protection/cleanup/origin cases="+cases);
+    }
 }
