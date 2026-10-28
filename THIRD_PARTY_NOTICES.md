@@ -99,7 +99,6 @@ repository=https://github.com/Unmoon/tool-required.git
 commit=031e4986c2235f58888cf158666a02f3497cac60
 ```
 
+## Loot Filters RS2F components
 
-## Loot Filters local compatibility
-
-The RS2F parser, condition semantics, preamble, highlighted/hidden item-list behavior and three bundled default filters are adapted from riktenx/loot-filters at 993fd054e08d42a77d3415acbb9ac7c2797726ed. The complete BSD 2-Clause license is distributed at src/main/resources/com/improvedmenus/loot-filters-LICENSE.txt. Defaults retain the Rikten, Joe and Storn names. Our independent loader reads selected local data without changing Loot Filters files or settings. No upstream classes are packaged or required at runtime.
+Support for previously saved manual imports contains adapted RS2F lexer, parser, preprocessor, condition and utility components from [riktenx/loot-filters](https://github.com/riktenx/loot-filters), copyright (c) 2025 riktenx, BSD 2-Clause. Adapted files identify this origin. The complete license is distributed in `src/main/resources/com/improvedmenus/loot-filters-LICENSE.txt` and `META-INF/licenses/loot-filters.txt`. Automatic compatibility uses messages and independent images supplied by a compatible Loot Filters version. It does not read Loot Filters files or evaluate its live filter. These RS2F notices remain applicable to saved manual imports.

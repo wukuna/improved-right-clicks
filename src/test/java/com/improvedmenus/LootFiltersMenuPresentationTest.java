@@ -7,6 +7,34 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class LootFiltersMenuPresentationTest {
+    @Test public void asynchronousRedecorationRestoresColorsAndIconSpacing() throws Exception {
+        when(config.useLootFiltersInMenu()).thenReturn(true);
+        when(config.lootFiltersMenuColors()).thenReturn(true);
+        when(config.groundIcons()).thenReturn(true);
+        when(config.groundIconSource()).thenReturn(ImprovedMenusConfig.GroundIconSource.NATIVE);
+        MenuEntry item=take("Shark",385,1,false); Menu menu=TestMenus.menu(item);
+        Client client=mock(Client.class); when(client.getMenu()).thenReturn(menu);
+        var icons=mock(net.runelite.client.game.ChatIconManager.class);
+        when(icons.chatIconIndex(anyInt())).thenReturn(42);
+        MenuPresentation iconPresentation=new MenuPresentation();
+        field(iconPresentation,"client",client); field(iconPresentation,"config",config); field(iconPresentation,"icons",icons);
+        iconPresentation.start();
+        ImprovedMenusPlugin plugin=new ImprovedMenusPlugin();
+        field(plugin,"client",client); field(plugin,"presentation",iconPresentation);
+        field(plugin,"lootMenu",presentation); field(plugin,"lootCompatibility",compatibility);
+        var decorate=ImprovedMenusPlugin.class.getDeclaredMethod("decorateMenu"); decorate.setAccessible(true);
+        for(int i=0;i<3;i++) {
+            decorate.invoke(plugin);
+            assertEquals("<img=42><col=00ffff>Shark</col>",item.getTarget());
+        }
+        when(config.lootFiltersMenuColors()).thenReturn(false); decorate.invoke(plugin);
+        assertEquals("<img=42><col=ff0000>Shark</col>",item.getTarget());
+        iconPresentation.stop(); presentation.stop();
+        assertEquals("<col=ff0000>Shark</col>",item.getTarget());
+    }
+    private static void field(Object object,String name,Object value) throws Exception {
+        var field=object.getClass().getDeclaredField(name);field.setAccessible(true);field.set(object,value);
+    }
     private final ImprovedMenusConfig config=mock(ImprovedMenusConfig.class);
     private final LootFiltersCompatibility compatibility=mock(LootFiltersCompatibility.class);
     private final LootFiltersMenuPresentation presentation=com.google.inject.Guice.createInjector(new com.google.inject.AbstractModule() {

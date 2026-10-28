@@ -1,179 +1,118 @@
 package com.improvedmenus;
 
-import com.improvedmenus.rs2f.LootFilter;
-import com.improvedmenus.rs2f.model.BufferedImageProvider;
-import com.improvedmenus.rs2f.model.ItemFacts;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
-import net.runelite.api.ItemComposition;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Tile;
-import net.runelite.api.TileItem;
 import net.runelite.api.WorldView;
-import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.SpriteManager;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginManager;
 
-/** Independent, read-only consumer of the regular plugin's selected script and settings. */
+/** Optional resolved-display messages; never reads another plugin's files or implementation classes. */
 @Singleton
-class LootFiltersCompatibility
-{
-    final Client client;
-    final ConfigManager configs;
-    final ImprovedMenusConfig config;
-    final PluginManager plugins;
-    final ItemManager items;
-    final SpriteManager sprites;
-    final LootFilterFileIcons fileIcons;
-    final LocalLootFilterSource source;
-    @Inject LootFiltersCompatibility(Client client, ConfigManager configs, ImprovedMenusConfig config,
-        PluginManager plugins, ItemManager items, SpriteManager sprites, LootFilterFileIcons fileIcons, LocalLootFilterSource source)
-    {
-        this.client=client; this.configs=configs; this.config=config; this.plugins=plugins;
-        this.items=items; this.sprites=sprites; this.fileIcons=fileIcons; this.source=source;
+class LootFiltersCompatibility {
+    private final Client client;
+    private final ImprovedMenusConfig config;
+    private final PluginManager plugins;
+    private final EventBus events;
+    private final LootFilterImageCache images;
+    private boolean collecting,enabled;
+    private final Map<Tile,Map<Integer,Result>> menuResults=new IdentityHashMap<>();
+    private volatile String status="Open a Take menu to check Loot Filters compatibility.";
+    @Inject LootFiltersCompatibility(Client client,ClientThread clientThread,ImprovedMenusConfig config,PluginManager plugins,EventBus events) {
+        this.client=client;this.config=config;this.plugins=plugins;this.events=events;
+        images=new LootFilterImageCache(clientThread::invokeLater);
     }
-    private boolean collecting;
-    private final Map<Tile, Map<Integer, Result>> menuResults = new IdentityHashMap<>();
-    private volatile String itemStatus = "";
-
-    static final class Result
-    {
+    static final class Result {
         final BufferedImage image;
-        final boolean itemIcon, hidden, hideOverlay;
+        final boolean itemIcon,hidden,hideOverlay;
         final int menuSort;
         final Color menuColor;
-        final BufferedImageProvider descriptor;
-        final int itemId, quantity;
-        Result(BufferedImage image, boolean itemIcon) { this(image,itemIcon,false,false,0,null); }
-        Result(BufferedImage image, boolean itemIcon, boolean hidden, boolean hideOverlay, int sort, Color color)
-        { this(image,itemIcon,hidden,hideOverlay,sort,color,null,-1,1); }
-        Result(BufferedImage image, boolean itemIcon, boolean hidden, boolean hideOverlay, int sort, Color color,
-               BufferedImageProvider descriptor, int itemId, int quantity)
-        {
-            this.image=image; this.itemIcon=itemIcon; this.hidden=hidden; this.hideOverlay=hideOverlay;
-            this.menuSort=sort; this.menuColor=color; this.descriptor=descriptor; this.itemId=itemId; this.quantity=quantity;
+        final Map<String,Object> icon;
+        final Supplier<?> provider;
+        Result(BufferedImage image,boolean itemIcon) { this(image,itemIcon,false,false,0,null); }
+        Result(BufferedImage image,boolean itemIcon,boolean hidden,boolean hideOverlay,int menuSort,Color menuColor) {
+            this(image,itemIcon,hidden,hideOverlay,menuSort,menuColor,null,null);
         }
-        boolean hasIcon() { return !hidden && !hideOverlay && (image!=null || descriptor!=null); }
+        Result(BufferedImage image,boolean itemIcon,boolean hidden,boolean hideOverlay,int menuSort,Color menuColor,Map<String,Object> icon,Supplier<?> provider) {
+            this.image=image;this.itemIcon=itemIcon;this.hidden=hidden;this.hideOverlay=hideOverlay;
+            this.menuSort=menuSort;this.menuColor=menuColor;this.icon=icon;this.provider=provider;
+        }
+        boolean hasIcon() { return !hidden && !hideOverlay && (image!=null || icon!=null && provider!=null); }
     }
-
-    String status() { return source.status() + (itemStatus.isEmpty() ? "" : " " + itemStatus) + " " + fileIcons.problem(); }
-    long revision() { return source.revision(); }
-    void refresh()
-    {
-        if (!client.isClientThread()) return;
-        if (!config.lootFiltersCompatibility() && !config.useLootFiltersInMenu())
-        { source.clear("Loot Filters compatibility is off."); return; }
+    String status() { return status; }
+    long revision() { return images.revision(); }
+    void refresh() {
+        if(!client.isClientThread()) return;
         boolean running=false;
-        for (Plugin plugin : plugins.getPlugins())
-            if ("Loot Filters".equals(plugin.getName()) && plugins.isPluginActive(plugin)) { running=true; break; }
-        if (!running)
-        { source.clear("Enable the regular Loot Filters plugin to use its selected filter."); fileIcons.clear(); return; }
-        source.refresh(LocalFilterSettings.read(configs));
+        if(config.lootFiltersCompatibility() || config.useLootFiltersInMenu())
+            for(Plugin plugin:plugins.getPlugins())
+                if("Loot Filters".equals(plugin.getName()) && plugins.isPluginActive(plugin)) { running=true;break; }
+        if(running!=enabled) { images.clear();endMenu();enabled=running; }
+        if(!config.lootFiltersCompatibility() && !config.useLootFiltersInMenu()) status="Loot Filters compatibility is off.";
+        else if(!running) status="Enable Loot Filters to use its resolved display settings.";
     }
-    void reset() { endMenu(); fileIcons.clear(); source.clear("Reading selected Loot Filters rules..."); itemStatus=""; }
-    void beginMenu() { menuResults.clear(); collecting=true; itemStatus=""; refresh(); }
-    void endMenu() { menuResults.clear(); collecting=false; }
-
-    Result findIcon(MenuEntry entry)
-    {
-        Result result=find(entry);
-        if (result!=null && result.hasIcon()) image(result); // Warm asynchronous files; never read them on this thread.
-        return result;
+    void reset() { endMenu();images.clear();enabled=false;status="Open a Take menu to check Loot Filters compatibility."; }
+    void beginMenu() { refresh();menuResults.clear();collecting=true; }
+    void endMenu() { menuResults.clear();collecting=false; }
+    Result findIcon(MenuEntry entry) { Result result=find(entry);image(result);return result; }
+    BufferedImage image(Result result) {
+        if(result==null || !result.hasIcon() || !client.isClientThread()) return null;
+        if(result.image!=null) return result.image;
+        return images.get(result.icon,result.provider);
     }
-
-    BufferedImage image(Result result)
-    {
-        if (result==null || !result.hasIcon()) return null;
-        if (result.image!=null) return result.image;
-        BufferedImageProvider icon=result.descriptor;
-        if (icon instanceof BufferedImageProvider.File)
-            return fileIcons.get(((BufferedImageProvider.File)icon).getFilename());
-        if (!client.isClientThread()) return null;
-        if (icon instanceof BufferedImageProvider.CurrentItem)
-            return items.getImage(result.itemId,result.quantity,false);
-        if (icon instanceof BufferedImageProvider.Item)
-            return items.getImage(((BufferedImageProvider.Item)icon).getItemId());
-        if (icon instanceof BufferedImageProvider.Sprite)
-        {
-            BufferedImageProvider.Sprite sprite=(BufferedImageProvider.Sprite)icon;
-            try { return sprites.getSprite(sprite.getSpriteId(),sprite.getIndex()); }
-            catch (IndexOutOfBoundsException ex) { return null; }
-        }
-        return null;
-    }
-
-    Result find(MenuEntry entry)
-    {
-        if (!client.isClientThread()) return null;
-        LocalLootFilterSource.Loaded loaded=source.current();
-        if (loaded==null) return null;
+    Result find(MenuEntry entry) {
+        if(!enabled || !client.isClientThread()) return null;
         WorldView view=client.getWorldView(entry.getWorldViewId());
-        if (view==null || view.getScene()==null) return null;
+        if(view==null || view.getScene()==null) return null;
         Tile[][][] tiles=view.getScene().getTiles();
-        int plane=view.getPlane(), x=entry.getParam0(), y=entry.getParam1();
-        if (tiles==null || plane<0 || plane>=tiles.length || tiles[plane]==null || x<0
-            || x>=tiles[plane].length || tiles[plane][x]==null || y<0 || y>=tiles[plane][x].length) return null;
-        Tile tile=tiles[plane][x][y];
-        if (tile==null) return null;
-        if (!collecting) return evaluate(loaded,tile,entry.getIdentifier());
-        Map<Integer,Result> results=menuResults.computeIfAbsent(tile,ignored -> new HashMap<>());
-        if (!results.containsKey(entry.getIdentifier())) results.put(entry.getIdentifier(),evaluate(loaded,tile,entry.getIdentifier()));
+        int plane=view.getPlane(),x=entry.getParam0(),y=entry.getParam1();
+        if(tiles==null || plane<0 || plane>=tiles.length || tiles[plane]==null || x<0 || x>=tiles[plane].length
+            || tiles[plane][x]==null || y<0 || y>=tiles[plane][x].length || tiles[plane][x][y]==null) return null;
+        if(!collecting) return request(view,x,y,plane,entry.getIdentifier());
+        Map<Integer,Result> results=menuResults.computeIfAbsent(tiles[plane][x][y],ignored->new HashMap<>());
+        if(!results.containsKey(entry.getIdentifier())) results.put(entry.getIdentifier(),request(view,x,y,plane,entry.getIdentifier()));
         return results.get(entry.getIdentifier());
     }
-
-    private Result evaluate(LocalLootFilterSource.Loaded loaded, Tile tile, int id)
-    {
-        if (id<0 || id>=client.getItemCount()) return null;
-        List<TileItem> ground=tile.getGroundItems();
-        if (ground==null) return null;
-        LootFilter.Resolved chosen=null;
-        int quantity=1;
-        for (TileItem item : ground)
-        {
-            if (item.getId()!=id) continue;
-            ItemComposition composition=items.getItemComposition(id);
-            if (composition==null || composition.getName()==null) return null;
-            ItemComposition note=composition.getLinkedNoteId()<0 ? null : items.getItemComposition(composition.getLinkedNoteId());
-            // Match the released evaluator's instance/template coordinate interpretation.
-            if (tile.getLocalLocation()==null || client.getWorldView(tile.getLocalLocation().getWorldView())==null) return null;
-            WorldPoint location=WorldPoint.fromLocalInstance(client,tile.getLocalLocation());
-            if (location==null) return null;
-            long price=id==995 ? 1 : id==13204 ? 1000 : items.getItemPrice(id);
-            ItemFacts facts=ItemFacts.builder().id(id).name(composition.getName()).quantity(item.getQuantity())
-                .ownership(item.getOwnership()).accountType(client.getVarbitValue(VarbitID.IRONMAN))
-                .gePrice(price).haPrice(composition.getHaPrice()).stackable(composition.isStackable())
-                .noted(composition.getNote()!=-1).tradeable(composition.isTradeable() || note!=null && note.isTradeable())
-                .geTradeable(composition.isGeTradeable() || note!=null && note.isGeTradeable()).worldPoint(location).build();
-            LootFilter.Resolved display=loaded.program.resolve(facts,loaded.settings.isCompact());
-            if (chosen!=null && (!chosen.equals(display) || display.getIcon() instanceof BufferedImageProvider.CurrentItem
-                && quantity!=item.getQuantity()))
-            { itemStatus="Different stacks resolve differently; their shared menu row has no custom icon."; return null; }
-            chosen=display;
-            quantity=item.getQuantity();
+    Result request(WorldView view,int x,int y,int plane,int itemId) {
+        Map<String,Object> data=new HashMap<>();
+        data.put("worldViewId",view.getId());data.put("x",view.getBaseX()+x);data.put("y",view.getBaseY()+y);data.put("z",plane);data.put("itemId",itemId);
+        events.post(new PluginMessage("loot-filters","resolved-display-request-v1",data));
+        Result result=decode(data,itemId);
+        status=result!=null?"Connected to Loot Filters. Icons, menu behavior and colors use their separate settings.":
+            data.containsKey("status")?"Loot Filters has no ready, unambiguous display settings for this item.":
+            "This Loot Filters version does not provide resolved display settings. A compatible provider update is required.";
+        return result;
+    }
+    static Result decode(Map<String,Object> data,int itemId) {
+        if(!"ok".equals(data.get("status")) || !(data.get("display") instanceof Map)) return null;
+        Map<?,?> display=(Map<?,?>)data.get("display");
+        if(!(display.get("hidden") instanceof Boolean) || !(display.get("hideOverlay") instanceof Boolean)
+            || !(display.get("menuSort") instanceof Integer) || display.get("menuTextColor")!=null && !(display.get("menuTextColor") instanceof Color)) return null;
+        Map<String,Object> descriptor=null;Supplier<?> provider=null;boolean same=false;
+        if(display.get("icon")!=null) {
+            if(!(display.get("icon") instanceof Map)) return null;
+            Map<?,?> icon=(Map<?,?>)display.get("icon");
+            Object type=icon.get("type");if(!(type instanceof String)) return null;
+            if(icon.get("getImage") instanceof Supplier) provider=(Supplier<?>)icon.get("getImage");
+            descriptor=new HashMap<>();descriptor.put("type",type);
+            for(String key:Arrays.asList("id","index","quantity","height","filename")) {
+                Object value=icon.get(key);
+                if(value!=null && !(value instanceof Integer) && !(key.equals("filename") && value instanceof String)) return null;
+                if(value!=null) descriptor.put(key,value);
+            }
+            descriptor=Collections.unmodifiableMap(descriptor);
+            same=("item".equals(type) || "current-item".equals(type)) && Integer.valueOf(itemId).equals(icon.get("id"));
         }
-        if (chosen==null) return null;
-        BufferedImageProvider icon=chosen.visibleIcon();
-        if (icon instanceof BufferedImageProvider.Item
-            && ((BufferedImageProvider.Item)icon).getItemId()>=client.getItemCount()) icon=null;
-        if (icon instanceof BufferedImageProvider.Sprite && ((BufferedImageProvider.Sprite)icon).getSpriteId()==9000000) icon=null;
-        if (icon instanceof BufferedImageProvider.File)
-        {
-            try { IconImages.safeName(((BufferedImageProvider.File)icon).getFilename()); }
-            catch (IllegalArgumentException ex) { icon=null; itemStatus="The filter selected an unsupported image filename."; }
-        }
-        boolean same=icon instanceof BufferedImageProvider.CurrentItem || icon instanceof BufferedImageProvider.Item
-            && ((BufferedImageProvider.Item)icon).getItemId()==id;
-        return new Result(null,same,chosen.isHidden(),chosen.isHideOverlay(),chosen.getMenuSort(),chosen.getMenuColor(),icon,id,quantity);
+        return new Result(null,same,(Boolean)display.get("hidden"),(Boolean)display.get("hideOverlay"),
+            (Integer)display.get("menuSort"),(Color)display.get("menuTextColor"),descriptor,provider);
     }
 }

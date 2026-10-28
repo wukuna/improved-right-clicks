@@ -20,7 +20,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-@PluginDescriptor(name="Improved Right-Clicks", description = "Customize right-click menus, hide unwanted options, protect against misclicks, and color useful actions.", tags={"menu","bank","inventory","misclick","examine","color"})
+@PluginDescriptor(name="Improved Right-Clicks", description = "Tidy right-click menus with optional misclick protection, item rules, action colours, loot icons, extra-option indicators and saved profiles.", tags={"menu","bank","inventory","misclick","examine","color"})
 public class ImprovedMenusPlugin extends Plugin
 {
     @Inject private Client client;
@@ -98,11 +98,13 @@ public class ImprovedMenusPlugin extends Plugin
             clientThread.invokeLater(() -> { if (active) { presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });
             if (event.getKey().equals("hideSidePanel")) { SwingUtilities.invokeLater(this::updateSidePanel); }
         }
-        else if (LocalFilterSettings.GROUP.equals(event.getGroup())) refreshLootFilter();
+        else if ("loot-filters".equals(event.getGroup())) refreshLootFilter();
     }
     @Subscribe public void onProfileChanged(net.runelite.client.events.ProfileChanged event) { refreshLootFilter(); if(itemIcons.filters!=null) { itemIcons.filters.reload(); } }
     @Subscribe public void onPluginChanged(net.runelite.client.events.PluginChanged event)
     { if ("Loot Filters".equals(event.getPlugin().getName())) refreshLootFilter(); }
+    @Subscribe public void onPluginMessage(net.runelite.client.events.PluginMessage event)
+    { if ("loot-filters".equals(event.getNamespace()) && "filter-reloaded".equals(event.getName())) refreshLootFilter(); }
     private void refreshLootFilter()
     {
         clientThread.invokeLater(() -> {
@@ -112,6 +114,8 @@ public class ImprovedMenusPlugin extends Plugin
         });
     }
     private void decorateMenu() {
+        // Unwind in reverse order before reapplying asynchronously refreshed icons/colors.
+        presentation.stop(); lootMenu.stop();
         lootCompatibility.beginMenu();
         try { lootMenu.apply(client.getMenu()); presentation.decorate(client.getMenu()); }
         finally { lootCompatibility.endMenu(); }

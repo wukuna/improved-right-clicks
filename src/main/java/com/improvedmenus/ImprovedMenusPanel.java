@@ -74,7 +74,9 @@ final class ImprovedMenusPanel extends PluginPanel
     private void profiles()
     {
         JPanel contents = new JPanel(new GridLayout(0,1,4,4));
-        JTextField name = new JTextField(); JComboBox<String> saved = new JComboBox<>(store.names().toArray(new String[0]));
+        JTextField name = new JTextField(); JComboBox<String> saved = new JComboBox<>();
+        saved.setRenderer(PlainText.renderer());
+        saved.setModel(new DefaultComboBoxModel<>(store.names().toArray(new String[0])));
         contents.add(new JLabel("Save current settings as")); contents.add(name);
         button(contents,"Save profile",() -> { store.save(name.getText()); status.setText("Profile saved"); saved.setModel(new DefaultComboBoxModel<>(store.names().toArray(new String[0]))); });
         contents.add(saved);

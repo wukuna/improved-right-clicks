@@ -91,7 +91,7 @@ public interface ImprovedMenusConfig extends Config
         GroundIconSource(String label) { this.label=label; }
         @Override public String toString() { return label; }
     }
-    @ConfigItem(keyName="lootFiltersCompatibility", name="Loot Filters compatibility", description="Read the selected filter and icon files from regular Loot Filters automatically. Requires Custom or Both. No upload or modified Loot Filters build needed. Colors stay separate.", position=27, section=presentationSection)
+    @ConfigItem(keyName="lootFiltersCompatibility", name="Loot Filters compatibility", description="Use resolved icons from a compatible Loot Filters version. Requires Custom or Both and its image-provider update. Colors stay separate.", position=27, section=presentationSection)
     default boolean lootFiltersCompatibility() { return false; }
     @ConfigItem(keyName="useLootFiltersInMenu", name="Use Loot Filters in menu", description="Use Loot Filters ordering and hidden-item priority for Take rows in opened menus. Does not remove actions or change left-click behavior. Icons keep their own settings; colors use the separate color option.", position=27, section=presentationSection)
     default boolean useLootFiltersInMenu() { return false; }
