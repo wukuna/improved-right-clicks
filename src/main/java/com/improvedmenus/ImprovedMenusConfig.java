@@ -22,8 +22,27 @@ public interface ImprovedMenusConfig extends Config
     String buttonsSection = "buttons";
     @ConfigSection(name="Presentation", description="Ground icons and hover option counts", position=7, closedByDefault=true)
     String presentationSection = "presentation";
-    @ConfigSection(name="Bank", description="Bank menu protections", position=8, closedByDefault=true)
+    @ConfigSection(name="Player badges", description="Optional badges in opened player menus; hover a row for their meaning", position=8, closedByDefault=true)
+    String playersSection = "players";
+    @ConfigSection(name="Bank", description="Bank menu protections", position=9, closedByDefault=true)
     String bankSection = "bank";
+
+    @ConfigItem(keyName="playerFriendBadge", name="Friend badge", description="Green smiley for friends the client identifies as online; does not reveal offline/private friends", position=0, section=playersSection)
+    default boolean playerFriendBadge() { return false; }
+    @ConfigItem(keyName="playerIgnoreBadge", name="Ignored badge", description="Red blocked icon for players on your ignore list", position=1, section=playersSection)
+    default boolean playerIgnoreBadge() { return false; }
+    @ConfigItem(keyName="playerFriendsChatBadge", name="Friends Chat badge", description="Blue chat bubble for members of your Friends Chat; omitted when an existing Friends Chat rank icon is present", position=2, section=playersSection)
+    default boolean playerFriendsChatBadge() { return false; }
+    @ConfigItem(keyName="playerPartyBadge", name="RuneLite party badge", description="Purple people icon for members of your current RuneLite party", position=3, section=playersSection)
+    default boolean playerPartyBadge() { return false; }
+    @ConfigItem(keyName="playerIronmanBadge", name="Ironman badge", description="Reuse account-mode helmets observed in player chat this session. Existing helmets are preserved. Unknown modes stay blank unless Hiscores fallback is enabled.", position=4, section=playersSection)
+    default boolean playerIronmanBadge() { return false; }
+    @ConfigItem(keyName="playerHiscores", name="Hiscores fallback", description="With Ironman badge enabled, look up unknown players when opening their menu. A helmet with ? means an Ironman Hiscores listing, not verified current mode. Results appear on the next menu opening. Group variants require an observed chat icon.", warning="Sends the names of players you right-click to Jagex's official Hiscores service. Results are cached briefly in memory. Rankings cannot confirm current Hardcore or other account-mode status.", position=5, section=playersSection)
+    default boolean playerHiscores() { return false; }
+    @ConfigItem(keyName="playerCopyName", name="Copy name", description="Add a local Copy name option to opened player menus. Copies the plain player name to your clipboard.", position=6, section=playersSection)
+    default boolean playerCopyName() { return false; }
+    @ConfigItem(keyName="playerClanRankInfo", name="Clan rank icons (info)", description="Enable or disable right-click rank icons in Player Indicators. Enable or disable chat-message icons in Chat Channels. This text is informational and does not change either plugin.", position=7, section=playersSection)
+    default String playerClanRankInfo() { return "Player Indicators / Chat Channels"; }
 
     enum RevealKey { CONTROL, SHIFT, ALT, NONE }
     @ConfigItem(keyName="revealKey", name="Hold to reveal", description="Hold before opening a menu to reveal options hidden by Improved Right-Clicks", position=0, section=generalSection)

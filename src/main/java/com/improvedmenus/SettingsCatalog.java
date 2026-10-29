@@ -71,6 +71,14 @@ final class SettingsCatalog
         add("playerUseItems", "Allow items on players (comma separated)", "Target protection", TargetProtections.DEFAULT_PLAYER_ITEMS);
         bool("noTelegrabNpc", "Don't Telegrab NPCs", "Target protection", false);
         add("telegrabNpcNames", "Allow Telegrab NPC names (comma separated)", "Target protection", "");
+        bool("playerFriendBadge", "Friend badge", "Player badges", false);
+        bool("playerIgnoreBadge", "Ignored badge", "Player badges", false);
+        bool("playerFriendsChatBadge", "Friends Chat badge", "Player badges", false);
+        bool("playerPartyBadge", "RuneLite party badge", "Player badges", false);
+        bool("playerIronmanBadge", "Ironman badge", "Player badges", false);
+        bool("playerHiscores", "Hiscores fallback", "Player badges", false);
+        bool("playerCopyName", "Copy name", "Player badges", false);
+        add("playerClanRankInfo", "Clan rank icons (info)", "Player badges", "Player Indicators / Chat Channels");
         bool("bankWield", "Hide Wield", "Bank", false); bool("bankWear", "Hide Wear", "Bank", false);
         bool("bankDrink", "Hide Drink", "Bank", false); bool("bankEat", "Hide Eat", "Bank", false);
     }

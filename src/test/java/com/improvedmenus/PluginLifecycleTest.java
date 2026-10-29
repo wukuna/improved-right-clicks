@@ -31,7 +31,7 @@ public class PluginLifecycleTest
         when(config.itemRules()).thenReturn(""); when(config.colors()).thenReturn(""); when(config.exceptions()).thenReturn("");
         doAnswer(i -> { ((Runnable)i.getArgument(0)).run(); return null; }).when(thread).invoke(any(Runnable.class));
         doAnswer(i -> { ((Runnable)i.getArgument(0)).run(); return null; }).when(thread).invokeLater(any(Runnable.class));
-        Injector injector=Guice.createInjector(new AbstractModule() { protected void configure() { bind(LootFiltersCompatibility.class).toInstance(mock(LootFiltersCompatibility.class));
+        Injector injector=Guice.createInjector(new AbstractModule() { protected void configure() { bind(net.runelite.client.party.PartyService.class).toInstance(mock(net.runelite.client.party.PartyService.class)); bind(net.runelite.client.hiscore.HiscoreClient.class).toInstance(mock(net.runelite.client.hiscore.HiscoreClient.class)); bind(LootFiltersCompatibility.class).toInstance(mock(LootFiltersCompatibility.class));
             bind(net.runelite.client.chat.ChatMessageManager.class).toInstance(mock(net.runelite.client.chat.ChatMessageManager.class));
             bind(net.runelite.client.config.RuneLiteConfig.class).toInstance(mock(net.runelite.client.config.RuneLiteConfig.class)); bind(Client.class).toInstance(client); bind(ClientThread.class).toInstance(thread); bind(ImprovedMenusConfig.class).toInstance(config);
             bind(net.runelite.client.game.SpriteManager.class).toInstance(mock(net.runelite.client.game.SpriteManager.class)); bind(java.util.concurrent.ScheduledExecutorService.class).toInstance(mock(java.util.concurrent.ScheduledExecutorService.class)); bind(ItemIcons.class).toInstance(library); bind(ConfigManager.class).toInstance(manager); bind(Gson.class).toInstance(new Gson()); bind(EventBus.class).toInstance(bus);
@@ -45,7 +45,7 @@ public class PluginLifecycleTest
         verify(overlays,times(2)).add(any(OptionCountOverlay.class)); verify(overlays,times(2)).remove(any(OptionCountOverlay.class));
         verify(overlays,times(2)).add(any(MenuPresentation.class)); verify(overlays,times(2)).remove(any(MenuPresentation.class));
         verify(toolbar,times(2)).addNavigation(any(NavigationButton.class)); verify(toolbar,times(2)).removeNavigation(any(NavigationButton.class));
-        verify(icons,times(1)).registerChatIcon(any());
+        verify(icons,times(5)).registerChatIcon(any());
         when(config.hideSidePanel()).thenReturn(true);
         plugin.startUp(); SwingUtilities.invokeAndWait(() -> {});
         verify(toolbar,times(2)).addNavigation(any(NavigationButton.class));

@@ -89,6 +89,25 @@ Resolved settings follow the active filter. A `filter-reloaded` message, configu
 
 The retained RS2F parser, rule evaluation helpers and preamble for previously saved imports are adapted from [riktenx/loot-filters at 993fd054](https://github.com/riktenx/loot-filters/tree/993fd054e08d42a77d3415acbb9ac7c2797726ed), under its [BSD 2-Clause license](src/main/resources/com/improvedmenus/loot-filters-LICENSE.txt). This integration changes menu presentation only; it does not render ground overlays or play sounds.
 
+### Player badges and Copy name
+
+Open **Player badges** in Improved Right-Clicks settings. Each feature starts off and has its own switch:
+
+- **Friend badge:** a green smiley, distinct from the gold stars used for chat ranks. Uses the client's online-friend information.
+- **Ignored badge:** a red blocked symbol for someone on your ignore list.
+- **Friends Chat badge:** a blue speech bubble for members of your current Friends Chat.
+- **RuneLite party badge:** purple people for your current party members.
+- **Ironman badge:** the native helmet variant seen in the player's recent chat during this session, including group variants. Unknown modes remain blank.
+- **Copy name:** one local menu option per player, copying their plain name to the clipboard.
+
+Badges appear in opened player menus. Hover a decorated row to see their meaning. Existing name colors and rank icons are preserved. Matching icons (including identical images registered under another index) are not added twice. A Friends Chat rank already conveys membership, so it suppresses the extra blue bubble. An existing account helmet suppresses ours. Other plugins can use different artwork for the same meaning; disable our corresponding toggle if their badge overlaps semantically. Native player actions retain their order and behavior.
+
+**Hiscores fallback** is a separate, optional switch under Ironman badge. It sends the name of a player whose menu you open to Jagex's official Ironman Hiscores through RuneLite's asynchronous client. A successful listing supplies a helmet with **?** when you next open that menu. The tooltip says that current account mode is unverified. It does not guess a Hardcore, Ultimate or group variant from a leaderboard entry. Jagex retains Hardcore rankings after death, so a Hiscores entry alone cannot prove current Hardcore status. Missing or failed results remain blank.
+
+Lookups are limited to one new name every three seconds and two outstanding requests, with at most 256 short-lived entries kept in memory. No nearby-player scan, disk history or player-data upload is used. Logout, hopping, profile changes and disabling the plugin clear these observations. Other badge settings work without network requests.
+
+**Clan rank icons (info)** points to the existing controls: **Player Indicators** controls right-click rank icons, while **Chat Channels** controls chat-message icons. Improved Right-Clicks does not change those settings or add another clan-rank badge.
+
 ### Additional option indicator
 
 Under Presentation, **Hide player option counts** excludes player actions while retaining loot and object actions underneath them. **Hide counts when Walk here** suppresses deprioritized NPC/object counts when walking is preferred; ground items and widgets remain eligible. These switches affect only the hover indicator, not the menu entries. Both start off.

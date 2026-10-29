@@ -21,6 +21,7 @@ public class LootFiltersMenuPresentationTest {
         iconPresentation.start();
         ImprovedMenusPlugin plugin=new ImprovedMenusPlugin();
         field(plugin,"client",client); field(plugin,"presentation",iconPresentation);
+        field(plugin,"playerBadges",new PlayerMenuBadges(client,config,icons,mock(net.runelite.client.party.PartyService.class),mock(PlayerAccountBadges.class),mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class)));
         field(plugin,"lootMenu",presentation); field(plugin,"lootCompatibility",compatibility);
         var decorate=ImprovedMenusPlugin.class.getDeclaredMethod("decorateMenu"); decorate.setAccessible(true);
         for(int i=0;i<3;i++) {

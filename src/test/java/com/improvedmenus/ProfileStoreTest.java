@@ -20,6 +20,17 @@ public class ProfileStoreTest
         doAnswer(i -> { values.put(i.getArgument(0)+"/"+i.getArgument(1),i.getArgument(2).toString()); return null; }).when(manager).setConfiguration(anyString(),anyString(),any());
         store=Guice.createInjector(new AbstractModule() { protected void configure() { bind(ConfigManager.class).toInstance(manager); bind(Gson.class).toInstance(new Gson()); } }).getInstance(ProfileStore.class);
     }
+    @Test public void playerBadgeSettingsRoundTripAndUndoIndependently()
+    {
+        Map<String,String> settings=new LinkedHashMap<>();
+        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerIronmanBadge","playerHiscores","playerCopyName"})
+        { assertEquals("false",store.snapshot().get(key)); settings.put(key,"true"); }
+        store.apply(store.previewImport(store.exportSettings(settings)));
+        for (String key : settings.keySet()) assertEquals("true",store.snapshot().get(key));
+        store.save("Social"); assertEquals("true",store.load("Social").get("playerFriendBadge"));
+        assertTrue(store.undo());
+        for (String key : settings.keySet()) assertEquals("false",store.snapshot().get(key));
+    }
     @Test public void roundTripProfiles()
     { Map<String,String> initial=store.snapshot(); assertEquals(initial,store.previewImport(store.exportSettings(initial))); }
     @Test public void hoverAndSidebarSettingsRoundTripAndUndo()
