@@ -104,7 +104,7 @@ Badges appear in opened player menus. Hover a decorated row to see their meaning
 
 **Hiscores fallback** is a separate, optional switch under Ironman badge. It sends the name of a player whose menu you open to Jagex's official Ironman Hiscores through RuneLite's asynchronous client. A successful listing supplies a helmet with **?** when you next open that menu. The tooltip says that current account mode is unverified. It does not guess a Hardcore, Ultimate or group variant from a leaderboard entry. Jagex retains Hardcore rankings after death, so a Hiscores entry alone cannot prove current Hardcore status. Missing or failed results remain blank.
 
-Lookups are limited to one new name every three seconds and two outstanding requests, with at most 256 short-lived entries kept in memory. No nearby-player scan, disk history or player-data upload is used. Logout, hopping, profile changes and disabling the plugin clear these observations. Other badge settings work without network requests.
+Lookups are limited to one new name every three seconds and two outstanding requests, with at most 256 short-lived entries kept in memory. No nearby-player scan or disk history is used. Only the requested name is sent for each Hiscores lookup. Logout, hopping, profile changes and disabling the plugin clear these observations. Other badge settings work without network requests.
 
 **Clan rank icons (info)** points to the existing controls: **Player Indicators** controls right-click rank icons, while **Chat Channels** controls chat-message icons. Improved Right-Clicks does not change those settings or add another clan-rank badge.
 
