@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: New optional Player badges include a green friend smiley, ignore, Friends Chat, party and Ironman helmets. Hiscores fallback marks unverified rankings with ?. Copy name is also available. Enable each in Player badges settings. Saved settings are unchanged.").build());
+            "Improved Right-Clicks: New optional Player badges include a green friend smiley, ignore, Friends Chat, party and Ironman helmets. Hiscores fallback estimates the helmet using XP comparisons; its tooltip says Hiscores estimate. Observed chat icons take priority. Copy name is also available. Enable each in Player badges settings. Saved settings are unchanged.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

@@ -19,7 +19,7 @@ import net.runelite.client.hiscore.HiscoreEndpoint;
 import net.runelite.client.hiscore.HiscoreResult;
 import net.runelite.client.hiscore.HiscoreSkill;
 
-/** Client-thread state. Hiscores listings are evidence of a ranking, not current account mode. */
+/** Client-thread state. XP comparisons estimate account mode; native chat takes precedence. */
 @Singleton
 class PlayerAccountBadges
 {
@@ -82,36 +82,87 @@ class PlayerAccountBadges
         if (known != null && known.expires > now) return known.badge;
         cache.remove(name);
         if (!config.playerHiscores() || pending >= 2 || nextRequest != 0 && now < nextRequest) return null;
-        nextRequest = now + 3_000_000_000L;
+        // Up to four sequential requests per name, with no queue of nearby players.
+        nextRequest = now + 12_000_000_000L;
         pending++;
-        int requestGeneration = generation;
-        Cached request = new Cached(null, now + MINUTE);
-        put(name, request);
+        Lookup request = new Lookup(name, generation, new Cached(null, now + MINUTE));
+        put(name, request.entry);
+        fetch(request, HiscoreEndpoint.IRONMAN);
+        return null;
+    }
+
+    private boolean current(Lookup request)
+    {
+        return active && request.generation == generation && cache.get(request.name) == request.entry
+            && config.playerIronmanBadge() && config.playerHiscores();
+    }
+
+    private void fetch(Lookup request, HiscoreEndpoint endpoint)
+    {
+        if (!current(request)) { finish(request, null, 2); return; }
         CompletableFuture<HiscoreResult> future;
         try
         {
             // The injected core client uses Jagex's fixed official endpoint and asynchronous HTTP.
-            future = hiscores.lookupAsync(name, HiscoreEndpoint.IRONMAN);
+            future = hiscores.lookupAsync(request.name, endpoint);
         }
         catch (RuntimeException ex)
         {
-            complete(name, request, requestGeneration, null, ex);
-            return null;
+            finish(request, null, 2);
+            return;
         }
         future.orTimeout(10, TimeUnit.SECONDS).whenComplete((result, error) ->
-            clientThread.invokeLater(() -> complete(name, request, requestGeneration, result, error)));
-        return null;
+            clientThread.invokeLater(() -> complete(request, endpoint, result, error)));
     }
 
-    private void complete(String name, Cached request, int requestGeneration, HiscoreResult result, Throwable error)
+    private void complete(Lookup request, HiscoreEndpoint endpoint, HiscoreResult result, Throwable error)
     {
-        if (!active || requestGeneration != generation) return;
+        if (!current(request)) { finish(request, null, 2); return; }
+        // Only a 404 (null result from HiscoreClient) means absent. Network errors or
+        // malformed responses must not downgrade a Hardcore/Ultimate account to Ironman.
+        if (error != null || result != null && (result.getSkill(HiscoreSkill.OVERALL) == null
+            || result.getSkill(HiscoreSkill.OVERALL).getRank() <= 0
+            || result.getSkill(HiscoreSkill.OVERALL).getExperience() < 0))
+        { finish(request, null, 2); return; }
+        long xp = result == null ? -1 : result.getSkill(HiscoreSkill.OVERALL).getExperience();
+        switch (endpoint)
+        {
+            case IRONMAN:
+                if (xp < 0) { finish(request, null, 5); return; }
+                request.ironXp = xp;
+                fetch(request, HiscoreEndpoint.NORMAL);
+                break;
+            case NORMAL:
+                // An Ironman listing can survive de-ironing. Inconsistent snapshots
+                // also stay blank until a later lookup. Low-level players may be absent here.
+                if (xp >= 0 && xp != request.ironXp)
+                { finish(request, null, xp > request.ironXp ? 5 : 2); return; }
+                fetch(request, HiscoreEndpoint.HARDCORE_IRONMAN);
+                break;
+            case HARDCORE_IRONMAN:
+                if (xp > request.ironXp) { finish(request, null, 2); return; }
+                request.hardcoreXp = xp;
+                fetch(request, HiscoreEndpoint.ULTIMATE_IRONMAN);
+                break;
+            case ULTIMATE_IRONMAN:
+                boolean hardcore = request.hardcoreXp == request.ironXp;
+                boolean ultimate = xp == request.ironXp;
+                if (xp > request.ironXp || hardcore && ultimate)
+                { finish(request, null, 2); return; }
+                // A frozen ranking with equal XP cannot prove current status. Every
+                // inferred helmet carries the estimate tooltip; observed chat replaces it.
+                finish(request, new Badge(hardcore ? 10 : ultimate ? 3 : 2, true), 15);
+                break;
+            default:
+                finish(request, null, 2);
+        }
+    }
+
+    private void finish(Lookup request, Badge badge, int minutes)
+    {
+        if (!active || request.generation != generation) return;
         pending--;
-        if (cache.get(name) != request || !config.playerIronmanBadge() || !config.playerHiscores()) return;
-        boolean ranked = error == null && result != null && result.getSkill(HiscoreSkill.OVERALL) != null
-            && result.getSkill(HiscoreSkill.OVERALL).getRank() > 0;
-        put(name, new Cached(ranked ? new Badge(2, true) : null,
-            clock.getAsLong() + (error != null ? 2 : ranked ? 15 : 5) * MINUTE));
+        if (current(request)) put(request.name, new Cached(badge, clock.getAsLong() + minutes * MINUTE));
     }
 
     private void put(String name, Cached entry)
@@ -146,10 +197,9 @@ class PlayerAccountBadges
         final int icon;
         final boolean hiscores;
         Badge(int icon, boolean hiscores) { this.icon = icon; this.hiscores = hiscores; }
-        String markup() { return "<img=" + icon + ">" + (hiscores ? "<col=aaaaaa>?</col>" : ""); }
+        String markup() { return "<img=" + icon + ">"; }
         String description()
         {
-            if (hiscores) return "Ironman Hiscores listing (?) - current mode unverified";
             String mode;
             switch (icon)
             {
@@ -160,8 +210,19 @@ class PlayerAccountBadges
                 case 43: mode = "Unranked Group Ironman"; break;
                 default: mode = "Ironman";
             }
-            return mode + " - observed in this session's chat";
+            return mode + (hiscores ? " - Hiscores estimate" : " - observed in this session's chat");
         }
+    }
+
+    private static final class Lookup
+    {
+        final String name;
+        final int generation;
+        final Cached entry;
+        long ironXp;
+        long hardcoreXp;
+        Lookup(String name, int generation, Cached entry)
+        { this.name = name; this.generation = generation; this.entry = entry; }
     }
 
     private static final class Cached

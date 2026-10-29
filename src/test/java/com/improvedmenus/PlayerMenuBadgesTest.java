@@ -157,7 +157,7 @@ public class PlayerMenuBadgesTest
         verify(menu, never()).createMenuEntry(anyInt()); badges.clear(); verify(menu, never()).removeMenuEntry(copy);
     }
 
-    @Test public void hiscoresQuestionMarkAndTooltipDoNotAssertCurrentMode()
+    @Test public void inferredHelmetTooltipIdentifiesHiscoresEstimate()
     {
         when(config.playerIronmanBadge()).thenReturn(true);
         when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
@@ -165,8 +165,8 @@ public class PlayerMenuBadgesTest
         when(client.isMenuOpen()).thenReturn(true); when(client.getMenu()).thenReturn(menu);
         when(menu.getMenuWidth()).thenReturn(300); when(menu.getMenuHeight()).thenReturn(40);
         when(client.getMouseCanvasPosition()).thenReturn(new Point(5, 23));
-        badges.decorate(menu); assertTrue(e.getTarget().startsWith("<img=2><col=aaaaaa>?</col><img=100>"));
-        badges.render(null); verify(tooltips).add(any());
+        badges.decorate(menu); assertTrue(e.getTarget().startsWith("<img=2><img=100>"));
+        badges.render(null); verify(tooltips).add(argThat(tooltip -> tooltip.getText().contains("Ironman - Hiscores estimate")));
         badges.shutdown(); badges.render(null); verifyNoMoreInteractions(tooltips);
     }
 
