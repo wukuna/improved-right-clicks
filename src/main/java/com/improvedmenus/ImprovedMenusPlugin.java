@@ -34,6 +34,7 @@ public class ImprovedMenusPlugin extends Plugin
     @Inject private ClientToolbar toolbar;
     @Inject private OverlayManager overlays;
     @Inject private MenuPresentation presentation;
+    @Inject private MenuThemeRenderer menuTheme;
     @Inject private OptionCountOverlay optionCounts;
     @Inject private ItemIcons itemIcons;
     @Inject private LootFiltersCompatibility lootCompatibility;
@@ -127,6 +128,8 @@ public class ImprovedMenusPlugin extends Plugin
     }
     @Subscribe public void onBeforeMenuRender(BeforeMenuRender event)
     { if (active && client.isMenuOpen()) { engine.highlightHovered(client.getMenu()); } }
+    @Subscribe(priority=-100) public void onMenuThemeRender(BeforeMenuRender event)
+    { if (active) menuTheme.render(event); }
     private void updateSidePanel()
     {
         if (!active || config.hideSidePanel())

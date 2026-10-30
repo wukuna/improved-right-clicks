@@ -71,6 +71,8 @@ The editor accepts at most 200 rules per field. Invalid manual configuration edi
 
 ### Ground-menu icons and loot displays
 
+Choose **Presentation > Menu theme > OSRS** for the brown background and square bronze border used by Improved Looting's OSRS cards. **Native** is the default and keeps your existing style. The theme retains native text, icons, colors, scrolling and click positions, and is included in saved profiles and imports. Menus containing submenus, and menus already drawn by another plugin (such as Interface Styles' HD or transparent menus), keep their original appearance.
+
 In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable **Ground loot icons**, and choose **Native**, **Custom**, or **Both** under **Icon source**. All icon, visibility and color options stay in plugin settings. The side panel contains profiles, import/export, undo, a settings shortcut and optional diagnostics.
 
 - **Native** shows the item's own picture and remains the default.

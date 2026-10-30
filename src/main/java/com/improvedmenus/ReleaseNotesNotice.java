@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Improved Looting can now supply resolved menu icons, optional colors and priority. Enable its Connect menu icons switch, then choose the separate loot-display options here. Loot Filters remains a fallback when a compatible provider is available. Friend, ignore, Friends Chat and party badges remain individually toggleable; existing icons, colors and saved settings are preserved.").build());
+            "Improved Right-Clicks: Choose the optional OSRS menu theme in Presentation for brown panels and bronze borders matching the loot cards. Native remains the default; nested menus and other menu renderers keep their appearance. Improved Looting can supply resolved menu icons, optional colors and priority; enable its Connect menu icons switch and choose the separate loot-display options here. Loot Filters remains a fallback with a compatible provider. Player badges remain individually toggleable.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

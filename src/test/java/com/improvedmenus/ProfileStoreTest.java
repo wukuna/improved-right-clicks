@@ -46,6 +46,17 @@ public class ProfileStoreTest
     }
     @Test public void roundTripProfiles()
     { Map<String,String> initial=store.snapshot(); assertEquals(initial,store.previewImport(store.exportSettings(initial))); }
+    @Test public void menuThemeRoundTripsAndUndoLeavesOtherSettingsAlone()
+    {
+        values.put("improvedmenus/colors","*:Take:#00ff00");
+        assertEquals("NATIVE",store.snapshot().get("menuTheme"));
+        store.apply(store.previewImport(store.exportSettings(Collections.singletonMap("menuTheme","OSRS"))));
+        store.save("OSRS"); assertEquals("OSRS",store.load("OSRS").get("menuTheme"));
+        assertTrue(store.undo()); assertEquals("NATIVE",store.snapshot().get("menuTheme"));
+        assertEquals("*:Take:#00ff00",values.get("improvedmenus/colors"));
+        try {store.previewImport("{\"version\":1,\"settings\":{\"menuTheme\":\"UNKNOWN\"}}");fail();}
+        catch (IllegalArgumentException expected) {assertEquals("NATIVE",store.snapshot().get("menuTheme"));}
+    }
     @Test public void hoverAndSidebarSettingsRoundTripAndUndo()
     {
         Map<String,String> settings=new LinkedHashMap<>(); settings.put("hideSidePanel","true"); settings.put("yellowHover","false");

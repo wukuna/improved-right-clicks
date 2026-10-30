@@ -51,6 +51,7 @@ final class SettingsCatalog
         add("report", "Report", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");
         bool("deprioritizeLeftClickOffEntries", "Deprioritize protected buttons", "Buttons", true);
         bool("groundIcons", "Ground loot icons", "Presentation", false);
+        add("menuTheme", "Menu theme", "Presentation", "NATIVE", "NATIVE", "OSRS");
         bool("lootFiltersCompatibility", "Loot Filters compatibility", "Presentation", false);
         bool("useLootFiltersInMenu", "Use Loot Filters in menu", "Presentation", false);
         bool("lootFiltersMenuColors", "Use Loot Filters menu colors", "Colors", false);

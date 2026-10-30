@@ -20,12 +20,22 @@ public interface ImprovedMenusConfig extends Config
     String houseSection = "house";
     @ConfigSection(name="Buttons", description="Interface button protections", position=6, closedByDefault=true)
     String buttonsSection = "buttons";
-    @ConfigSection(name="Presentation", description="Ground icons and hover option counts", position=7, closedByDefault=true)
+    @ConfigSection(name="Presentation", description="Menu theme, ground icons and hover option counts", position=7, closedByDefault=true)
     String presentationSection = "presentation";
     @ConfigSection(name="Player badges", description="Optional badges in opened player menus; hover a row for their meaning", position=8, closedByDefault=true)
     String playersSection = "players";
     @ConfigSection(name="Bank", description="Bank menu protections", position=9, closedByDefault=true)
     String bankSection = "bank";
+
+    enum MenuTheme
+    {
+        NATIVE("Native"), OSRS("OSRS");
+        private final String label;
+        MenuTheme(String label) { this.label=label; }
+        @Override public String toString() { return label; }
+    }
+    @ConfigItem(keyName="menuTheme", name="Menu theme", description="OSRS uses the brown background and bronze border of Improved Looting's OSRS cards. Native keeps your current style. Menus with submenus or another plugin's menu renderer keep their native appearance.", position=0, section=presentationSection)
+    default MenuTheme menuTheme() { return MenuTheme.NATIVE; }
 
     @ConfigItem(keyName="playerFriendBadge", name="Friend badge", description="Green smiley for friends the client identifies as online; does not reveal offline/private friends", position=0, section=playersSection)
     default boolean playerFriendBadge() { return false; }
