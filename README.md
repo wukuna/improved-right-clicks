@@ -1,6 +1,6 @@
 # Improved Right-Clicks
 
-Make right-click menus easier to read and harder to misclick. Choose independent protections for inventory items, banking and interface buttons; hide unwanted options; and make useful actions stand out with colours, ground-item icons and an extra-options indicator. Save profiles for different activities and use a reveal modifier when you need a hidden option. Protection switches start off.
+Make right-click menus easier to read and harder to misclick. Choose independent protections for inventory items, banking and interface buttons; hide unwanted options; and make useful actions stand out with colours, ground-item icons and an extra-options indicator. Add individually selectable friend, ignored-player, Friends Chat and RuneLite party badges, or choose the optional OSRS menu theme. Save profiles for different activities and use a reveal modifier when you need a hidden option. Protection switches start off.
 
 Configure features in the normal plugin settings; use the side panel for profiles, settings import/export and diagnostics. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.
 
@@ -19,12 +19,18 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 - **House:** hide building actions outside building mode, plus unnecessary Mahogany Homes Remove actions. Other furniture actions stay available.
 - **Buttons:** normal, right-click-only or hidden modes for Auto Retaliate, XP Drops, bank placeholders and Report. Right-click-only checks where the click began; it does not merely move the action down the list.
 - **Presentation:** action colors, wildcard mappings, submenu support, a Shift-menu color picker/reset with configurable default color, optional ground-loot icons and additional-option counts. Counts support a minimum threshold, including/excluding Examine, showing/hiding counts on interface widgets, and a configurable text color.
+- **Player badges:** independent green friend, ignored-player, Friends Chat and RuneLite party icons, plus optional Copy name. Existing rank icons are preserved; matching icons are not added twice.
+- **Menu theme:** keep Native styling or choose OSRS brown and bronze. Menus with submenus or another plugin's custom renderer retain their original appearance.
 - **Settings:** configure every feature in RuneLite's normal Improved Right-Clicks settings, grouped into collapsible sections. **Hide options** groups Walk here, Cancel, Set heading, Use on Player, Telegrab NPCs, potion Empty and Examine controls. Bank stays last.
 - **Side panel tools:** a direct Open Plugin Settings shortcut, named profiles, twenty-step undo, validated import/export previews, and collapsible diagnostics showing the before/after entry counts and reasons. Closing a dialog leaves the last operation status unchanged; applying identical settings reports No changes. Settings are not duplicated in the side panel. Undo restores only settings changed by a profile/import/editor operation, leaving later manual changes alone. Operations that change nothing do not consume an undo step; ordinary RuneLite settings use RuneLite's normal controls.
 
 Protection switches start off. Enable the features you want in RuneLite's Improved Right-Clicks settings. Button modes start at Normal. Hold **Ctrl before opening a menu** to reveal options hidden by this plugin. The reveal modifier can be changed to Shift, Alt or None. It does not consume keys or recreate options removed by another plugin.
 
 Enable **Hide side panel** under General to remove the Improved Right-Clicks toolbar button. Menu features and the Shift-menu color editor remain active. Turn it off to access profiles, import/export, undo and diagnostics again.
+
+**Availability:** Install **Improved Right-Clicks** from RuneLite's Plugin Hub. [Update #19763](https://github.com/runelite/plugin-hub/pull/19763) merged on 30 October 2026, including player badges, the OSRS theme and Improved Looting integration.
+
+**More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
 ## Getting started
 
