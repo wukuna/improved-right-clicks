@@ -28,29 +28,35 @@ class PlayerAccountBadges
         ChatMessageType.PUBLICCHAT, ChatMessageType.MODCHAT, ChatMessageType.PRIVATECHAT,
         ChatMessageType.MODPRIVATECHAT, ChatMessageType.FRIENDSCHAT, ChatMessageType.CLAN_CHAT,
         ChatMessageType.CLAN_GUEST_CHAT, ChatMessageType.CLAN_GIM_CHAT);
-    private static final long MINUTE = 60_000_000_000L;
+    private static final long MINUTE = 60_000L;
     private final HiscoreClient hiscores;
     private final ClientThread clientThread;
     private final ImprovedMenusConfig config;
     private final LongSupplier clock;
+    private final PlayerBadgeCache saved;
     private final Map<String, Cached> cache = new LinkedHashMap<>();
     private int generation;
     private int pending;
     private long nextRequest;
     private boolean active;
+    private String waitingName;
+    private boolean waitingExplicit;
+    private long waitingUntil;
+    private long revision;
 
     @Inject
-    PlayerAccountBadges(HiscoreClient hiscores, ClientThread clientThread, ImprovedMenusConfig config)
+    PlayerAccountBadges(HiscoreClient hiscores, ClientThread clientThread, ImprovedMenusConfig config, PlayerBadgeCache saved)
     {
-        this(hiscores, clientThread, config, System::nanoTime);
+        this(hiscores, clientThread, config, System::currentTimeMillis, saved);
     }
 
-    PlayerAccountBadges(HiscoreClient hiscores, ClientThread clientThread, ImprovedMenusConfig config, LongSupplier clock)
+    PlayerAccountBadges(HiscoreClient hiscores, ClientThread clientThread, ImprovedMenusConfig config, LongSupplier clock, PlayerBadgeCache saved)
     {
         this.hiscores = hiscores;
         this.clientThread = clientThread;
         this.config = config;
         this.clock = clock;
+        this.saved = saved;
     }
 
     void reset(boolean enabled)
@@ -59,41 +65,89 @@ class PlayerAccountBadges
         active = enabled;
         cache.clear();
         pending = 0;
+        waitingName = null;
+        waitingExplicit = false;
+        revision++;
+        if (enabled) saved.load(clock.getAsLong()).forEach((name, entry) ->
+            put(name, new Cached(entry.badge(), entry.expires())));
         // Retain the rate limit across settings/profile changes.
     }
 
     void observe(ChatMessage event)
     {
-        if (!active || !config.playerIronmanBadge() || !PLAYER_CHAT.contains(event.getType())) return;
+        if (!active || !saved.currentProfile() || !config.playerIronmanBadge() || !PLAYER_CHAT.contains(event.getType())) return;
         String name = normalized(event.getName());
         if (name.isEmpty()) return;
         int icon = accountIcon(event.getName());
-        // A server chat name without a helmet supersedes any older observation/ranking.
-        put(name, new Cached(icon < 0 ? null : new Badge(icon, false), clock.getAsLong() + 15 * MINUTE));
+        // A missing helmet is not proof of normal mode (e.g. a moderator crown).
+        if (icon < 0) return;
+        Badge badge = new Badge(icon, false);
+        long now = clock.getAsLong();
+        put(name, new Cached(badge, now + PlayerBadgeCache.lifetime(badge)));
+        saved.save(name, badge, now);
+        revision++;
     }
 
     Badge find(String displayName)
     {
-        if (!active || !config.playerIronmanBadge()) return null;
+        if (!active || !saved.currentProfile() || !config.playerIronmanBadge()) return null;
         String name = normalized(displayName);
         if (name.isEmpty()) return null;
         long now = clock.getAsLong();
         Cached known = cache.get(name);
-        if (known != null && known.expires > now) return known.badge;
+        if (known != null && known.expires > now)
+            return known.badge != null && known.badge.hiscores && !config.playerHiscores() ? null : known.badge;
         cache.remove(name);
-        if (!config.playerHiscores() || pending >= 2 || nextRequest != 0 && now < nextRequest) return null;
-        // Up to four sequential requests per name, with no queue of nearby players.
-        nextRequest = now + 12_000_000_000L;
-        pending++;
-        Lookup request = new Lookup(name, generation, new Cached(null, now + MINUTE));
-        put(name, request.entry);
-        fetch(request, HiscoreEndpoint.IRONMAN);
+        if (!config.playerHiscores()) return null;
+        if (waitingExplicit && !name.equals(waitingName) || pending >= 2 || nextRequest != 0 && now < nextRequest)
+        {
+            if (!waitingExplicit) { waitingName = name; waitingUntil = now + MINUTE; }
+            return null;
+        }
+        start(name, now);
         return null;
     }
 
+    private void start(String name, long now)
+    {
+        // Up to four sequential requests per name, with no queue of nearby players.
+        nextRequest = now + 12_000L;
+        pending++;
+        Lookup request = new Lookup(name, generation, new Cached(null, now + MINUTE));
+        request.entry.loading = true;
+        put(name, request.entry);
+        fetch(request, HiscoreEndpoint.IRONMAN);
+    }
+
+    /** A user-selected native Lookup takes priority over the last opened menu. */
+    void selected(String displayName)
+    {
+        if (!active || !saved.currentProfile() || !config.playerIronmanBadge() || !config.playerHiscores()) return;
+        String name = normalized(displayName);
+        if (name.isEmpty()) return;
+        Cached known = cache.get(name);
+        if (known != null && known.expires > clock.getAsLong() && (known.badge != null || known.loading)) return;
+        cache.remove(name);
+        waitingName = name; waitingExplicit = true; waitingUntil = clock.getAsLong() + MINUTE;
+        tick();
+    }
+
+    void tick()
+    {
+        if (waitingName == null) return;
+        long now = clock.getAsLong();
+        if (!active || !config.playerIronmanBadge() || !config.playerHiscores() || now >= waitingUntil)
+        { waitingName = null; waitingExplicit = false; return; }
+        if (pending >= 2 || now < nextRequest) return;
+        String name = waitingName; waitingName = null; waitingExplicit = false;
+        find(name);
+    }
+
+    long revision() { return revision; }
+
     private boolean current(Lookup request)
     {
-        return active && request.generation == generation && cache.get(request.name) == request.entry
+        return active && saved.currentProfile() && request.generation == generation && cache.get(request.name) == request.entry
             && config.playerIronmanBadge() && config.playerHiscores();
     }
 
@@ -121,7 +175,7 @@ class PlayerAccountBadges
         // Only a 404 (null result from HiscoreClient) means absent. Network errors or
         // malformed responses must not downgrade a Hardcore/Ultimate account to Ironman.
         if (error != null || result != null && (result.getSkill(HiscoreSkill.OVERALL) == null
-            || result.getSkill(HiscoreSkill.OVERALL).getRank() <= 0
+            || result.getSkill(HiscoreSkill.OVERALL).getLevel() <= 0
             || result.getSkill(HiscoreSkill.OVERALL).getExperience() < 0))
         { finish(request, null, 2); return; }
         long xp = result == null ? -1 : result.getSkill(HiscoreSkill.OVERALL).getExperience();
@@ -162,7 +216,13 @@ class PlayerAccountBadges
     {
         if (!active || request.generation != generation) return;
         pending--;
-        if (current(request)) put(request.name, new Cached(badge, clock.getAsLong() + minutes * MINUTE));
+        if (current(request))
+        {
+            long now = clock.getAsLong();
+            put(request.name, new Cached(badge, now + (badge == null ? minutes * MINUTE : PlayerBadgeCache.lifetime(badge))));
+            if (badge != null) saved.save(request.name, badge, now);
+            revision++;
+        }
     }
 
     private void put(String name, Cached entry)
@@ -210,7 +270,7 @@ class PlayerAccountBadges
                 case 43: mode = "Unranked Group Ironman"; break;
                 default: mode = "Ironman";
             }
-            return mode + (hiscores ? " - Hiscores estimate" : " - observed in this session's chat");
+            return mode + (hiscores ? " - Hiscores estimate" : " - observed in chat");
         }
     }
 
@@ -229,6 +289,7 @@ class PlayerAccountBadges
     {
         final Badge badge;
         final long expires;
+        boolean loading;
         Cached(Badge badge, long expires) { this.badge = badge; this.expires = expires; }
     }
 }

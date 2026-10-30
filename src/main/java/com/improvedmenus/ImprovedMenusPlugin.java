@@ -48,6 +48,7 @@ public class ImprovedMenusPlugin extends Plugin
     private MenuEntry colorEditorEntry;
     private Menu colorEditorSubmenu;
     private long lootRevision;
+    private long accountRevision;
 
     @Provides ImprovedMenusConfig provideConfig(ConfigManager manager) { return manager.getConfig(ImprovedMenusConfig.class); }
     @Override protected void startUp()
@@ -74,7 +75,23 @@ public class ImprovedMenusPlugin extends Plugin
     @Subscribe(priority=-0.5f) public void onPostMenuSort(PostMenuSort event)
     { if (!client.isMenuOpen()) { engine.apply(client.getMenu()); } }
     @Subscribe(priority=-1) public void onClientTick(ClientTick event)
-    { if (client.getGameState() == GameState.LOGGED_IN && !client.isMenuOpen()) { engine.applyTargetProtections(client.getMenu()); } }
+    {
+        if (!active || client.getGameState() != GameState.LOGGED_IN) return;
+        accountBadges.tick();
+        long revision = accountBadges.revision();
+        if (revision != accountRevision)
+        {
+            accountRevision = revision;
+            if (client.isMenuOpen()) decorateMenu();
+        }
+        if (!client.isMenuOpen()) engine.applyTargetProtections(client.getMenu());
+    }
+    @Subscribe public void onMenuOptionClicked(MenuOptionClicked event)
+    {
+        if (!active || event.getMenuAction() != MenuAction.RUNELITE_PLAYER || !"Lookup".equals(event.getMenuOption())) return;
+        Player player = event.getMenuEntry().getPlayer();
+        if (player != null) accountBadges.selected(player.getName());
+    }
     @Subscribe public void onGameTick(GameTick event)
     {
         if (!active) return;
@@ -97,6 +114,7 @@ public class ImprovedMenusPlugin extends Plugin
     {
         if (ImprovedMenusConfig.GROUP.equals(event.getGroup()))
         {
+            if (PlayerBadgeCache.KEY.equals(event.getKey())) return;
             if(itemIcons.filters!=null && (event.getKey().equals(FilterIcons.KEY) || event.getKey().equals(FilterIcons.BACKUP))) { itemIcons.filters.reload(); }
             clientThread.invokeLater(() -> { if (active) { accountBadges.reset(true); playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });
             if (event.getKey().equals("hideSidePanel")) { SwingUtilities.invokeLater(this::updateSidePanel); }

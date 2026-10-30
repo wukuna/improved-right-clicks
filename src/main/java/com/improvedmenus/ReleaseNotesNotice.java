@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-29-player-badges";
+    static final String RELEASE = "2026-10-29-persistent-player-badges";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: New optional Player badges include a green friend smiley, ignore, Friends Chat, party and Ironman helmets. Hiscores fallback estimates the helmet using XP comparisons; its tooltip says Hiscores estimate. Observed chat icons take priority. Copy name is also available. Enable each in Player badges settings. Saved settings are unchanged.").build());
+            "Improved Right-Clicks: Resolved Ironman helmets now survive logout and restart in your RuneLite profile, with shorter expiry for Hardcore status. Badges refresh in open menus, and selected Lookup requests wait through the cooldown. Chat icons still take priority over Hiscores estimates. Optional friend, ignore, Friends Chat, party badges and Copy name remain individually toggleable.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

@@ -24,12 +24,14 @@ public class PlayerAccountBadgesTest
     private final ClientThread thread = mock(ClientThread.class);
     private final AtomicLong clock = new AtomicLong(1);
     private final Map<String, CompletableFuture<HiscoreResult>> responses = new HashMap<>();
+    private final PlayerBadgeCache saved = mock(PlayerBadgeCache.class);
     private PlayerAccountBadges badges;
     private static final long XP = 1_000_000;
-    private static final long MINUTE = 60_000_000_000L;
+    private static final long MINUTE = 60_000L;
 
     @Before public void setup()
     {
+        when(saved.currentProfile()).thenReturn(true);
         when(config.playerIronmanBadge()).thenReturn(true);
         when(config.playerHiscores()).thenReturn(true);
         doAnswer(i -> { ((Runnable) i.getArgument(0)).run(); return null; }).when(thread).invokeLater(any(Runnable.class));
@@ -38,7 +40,7 @@ public class PlayerAccountBadgesTest
             responses.put(i.getArgument(0) + ":" + i.getArgument(1), future);
             return future;
         });
-        badges = new PlayerAccountBadges(hiscores, thread, config, clock::get);
+        badges = new PlayerAccountBadges(hiscores, thread, config, clock::get, saved);
         badges.reset(true);
     }
 
@@ -57,7 +59,7 @@ public class PlayerAccountBadgesTest
     private void chat(String name)
     { badges.observe(new ChatMessage(null, ChatMessageType.PUBLICCHAT, name, "hi", "", 0)); }
     private void fresh()
-    { badges.reset(true); responses.clear(); clearInvocations(hiscores); clock.addAndGet(13_000_000_000L); }
+    { badges.reset(true); responses.clear(); clearInvocations(hiscores); clock.addAndGet(13_000L); }
 
     @Test public void matchingXpInfersAllThreeModesAndLabelsEveryHelmet()
     {
@@ -151,7 +153,7 @@ public class PlayerAccountBadgesTest
         }
     }
 
-    @Test public void observedVariantsReplaceCachedEstimateAndPlainChatSupersedesOldStatus()
+    @Test public void observedVariantsReplaceCachedEstimateButMissingHelmetDoesNotEraseEvidence()
     {
         begin(); reply(HARDCORE_IRONMAN, XP); reply(ULTIMATE_IRONMAN, -1);
         for (int icon : new int[]{2, 3, 10, 41, 42, 43})
@@ -160,9 +162,9 @@ public class PlayerAccountBadgesTest
             assertEquals(icon, badge.icon); assertFalse(badge.hiscores);
             assertTrue(badge.description().contains("observed")); assertFalse(badge.description().contains("estimate"));
         }
-        chat("Alice"); assertNull(badges.find("Alice")); verify(hiscores, times(4)).lookupAsync(anyString(), any());
-        fresh(); begin(); chat("Alice"); reply(HARDCORE_IRONMAN, XP);
-        assertNull(badges.find("Alice")); verify(hiscores, times(3)).lookupAsync(anyString(), any());
+        chat("Alice"); assertEquals(43, badges.find("Alice").icon); verify(hiscores, times(4)).lookupAsync(anyString(), any());
+        fresh(); begin(); chat("Alice"); reply(HARDCORE_IRONMAN, XP); reply(ULTIMATE_IRONMAN, -1);
+        assertEquals(10, badges.find("Alice").icon); verify(hiscores, times(4)).lookupAsync(anyString(), any());
     }
 
     @Test public void disableAndProfileChangesDiscardInFlightResults()
@@ -210,7 +212,7 @@ public class PlayerAccountBadgesTest
         assertNull(badges.find("Alice"));
         for (int i = 0; i < 257; i++) chat("<img=2>P" + i);
         assertNull(badges.find("P0")); assertNotNull(badges.find("P256"));
-        clock.addAndGet(16 * MINUTE); assertNull(badges.find("P256"));
+        clock.addAndGet(8 * 24 * 60 * MINUTE); assertNull(badges.find("P256"));
     }
 
     @Test public void estimatesExpireAndNameNormalizationReusesTheSameLookup()
@@ -218,7 +220,7 @@ public class PlayerAccountBadgesTest
         begin(); reply(HARDCORE_IRONMAN, -1); reply(ULTIMATE_IRONMAN, XP);
         assertNotNull(badges.find("<col=ffffff> ALICE </col>"));
         verify(hiscores, times(4)).lookupAsync(anyString(), any());
-        clock.addAndGet(16 * MINUTE); assertNull(badges.find("Alice"));
+        clock.addAndGet(25 * 60 * MINUTE); assertNull(badges.find("Alice"));
         verify(hiscores, times(2)).lookupAsync("alice", IRONMAN);
         assertEquals("alice bob", PlayerAccountBadges.normalized("<img=2>Alice_Bob"));
         assertEquals("alice bob", PlayerAccountBadges.normalized("Alice\u00a0Bob"));
@@ -226,10 +228,10 @@ public class PlayerAccountBadgesTest
 
     @Test public void rateAndConcurrencyAreBoundedWithoutBulkQueueAndCompletionFreesASlot()
     {
-        badges.find("Alice"); clock.addAndGet(11_000_000_000L); badges.find("Bob");
+        badges.find("Alice"); clock.addAndGet(11_000L); badges.find("Bob");
         verify(hiscores, times(1)).lookupAsync(anyString(), any());
-        clock.addAndGet(2_000_000_000L); badges.find("Bob");
-        clock.addAndGet(13_000_000_000L); badges.find("Carol");
+        clock.addAndGet(2_000L); badges.find("Bob");
+        clock.addAndGet(13_000L); badges.find("Carol");
         verify(hiscores, times(2)).lookupAsync(anyString(), any());
         reply(IRONMAN, -1); badges.find("Carol"); verify(hiscores, times(3)).lookupAsync(anyString(), any());
     }
@@ -238,14 +240,75 @@ public class PlayerAccountBadgesTest
     {
         badges.find("Alice"); CompletableFuture<HiscoreResult> old = response("alice", IRONMAN);
         badges.reset(true); badges.find("Bob"); verify(hiscores, times(1)).lookupAsync(anyString(), any());
-        clock.addAndGet(13_000_000_000L); badges.find("Bob");
-        clock.addAndGet(13_000_000_000L); badges.find("Carol"); old.complete(null);
-        clock.addAndGet(13_000_000_000L); badges.find("Dave"); verify(hiscores, times(3)).lookupAsync(anyString(), any());
+        clock.addAndGet(13_000L); badges.find("Bob");
+        clock.addAndGet(13_000L); badges.find("Carol"); old.complete(null);
+        clock.addAndGet(13_000L); badges.find("Dave"); verify(hiscores, times(3)).lookupAsync(anyString(), any());
     }
 
     @Test public void cacheEvictionStopsAnInFlightChain()
     {
         badges.find("Alice"); for (int i = 0; i < 257; i++) chat("<img=2>P" + i);
         reply(IRONMAN, XP); verify(hiscores, times(1)).lookupAsync(anyString(), any()); assertNull(badges.find("Alice"));
+    }
+
+    @Test public void unrankedOverallStillProvidesValidXpForComparison()
+    {
+        badges.find("Alice"); reply(IRONMAN, XP);
+        response("alice", NORMAL).complete(new HiscoreResult("Alice",
+            Collections.singletonMap(HiscoreSkill.OVERALL, new Skill(-1, 1200, XP))));
+        reply(HARDCORE_IRONMAN, -1); reply(ULTIMATE_IRONMAN, -1);
+        assertEquals(2, badges.find("Alice").icon);
+    }
+
+    @Test public void latestOpenedPlayerWaitsForCooldownInsteadOfBeingDropped()
+    {
+        badges.find("Alice"); reply(IRONMAN, -1); badges.find("Bob"); badges.find("Carol");
+        badges.tick(); verify(hiscores, times(1)).lookupAsync(anyString(), any());
+        clock.addAndGet(13_000L); badges.tick();
+        verify(hiscores).lookupAsync("carol", IRONMAN); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
+        badges.tick(); verify(hiscores, times(2)).lookupAsync(anyString(), any());
+    }
+
+    @Test public void explicitLookupTakesPriorityWithoutBypassingLimitsOrChat()
+    {
+        badges.find("Alice"); reply(IRONMAN, -1); badges.find("Bob");
+        badges.selected("Alice"); badges.find("Carol"); clock.addAndGet(13_000L); badges.tick();
+        verify(hiscores, times(2)).lookupAsync("alice", IRONMAN);
+        verify(hiscores, never()).lookupAsync("bob", IRONMAN); verify(hiscores, never()).lookupAsync("carol", IRONMAN);
+        chat("<img=3>Alice"); reply(IRONMAN, XP); badges.selected("Alice");
+        assertEquals(3, badges.find("Alice").icon); verify(hiscores, times(2)).lookupAsync(anyString(), any());
+    }
+
+    @Test public void deferredRequestExpiresAndIsCancelledByDisableOrReset()
+    {
+        badges.find("Alice"); reply(IRONMAN, -1); badges.selected("Bob");
+        clock.addAndGet(2 * MINUTE); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
+        badges.find("Carol"); badges.selected("Bob"); badges.reset(true);
+        clock.addAndGet(13_000L); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
+        badges.find("Dave"); badges.selected("Bob"); when(config.playerHiscores()).thenReturn(false);
+        clock.addAndGet(13_000L); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
+    }
+
+    @Test public void restoredBadgesAvoidNetworkAndEstimatedOnesRespectTheirSwitch()
+    {
+        when(saved.load(anyLong())).thenReturn(Collections.singletonMap("alice", new PlayerBadgeCache.Entry("alice", 3, false, 1)));
+        badges.reset(true); assertEquals(3, badges.find("Alice").icon);
+        badges.reset(false); badges.reset(true); assertEquals(3, badges.find("Alice").icon);
+        verifyNoInteractions(hiscores);
+        when(saved.load(anyLong())).thenReturn(Collections.singletonMap("alice", new PlayerBadgeCache.Entry("alice", 10, true, 1)));
+        badges.reset(true); when(config.playerHiscores()).thenReturn(false); assertNull(badges.find("Alice"));
+        when(config.playerHiscores()).thenReturn(true); assertEquals(10, badges.find("Alice").icon);
+        verifyNoInteractions(hiscores);
+    }
+
+    @Test public void onlyResolvedHelmetsAreSavedAndCompletionSignalsMenuRefresh()
+    {
+        long before = badges.revision(); begin(); reply(HARDCORE_IRONMAN, -1); reply(ULTIMATE_IRONMAN, XP);
+        assertTrue(badges.revision() > before);
+        verify(saved).save(eq("alice"), argThat(b -> b.icon == 3 && b.hiscores), anyLong());
+        clearInvocations(saved); fresh(); badges.find("Alice"); reply(IRONMAN, -1);
+        verify(saved, never()).save(anyString(), any(), anyLong());
+        fresh(); begin(); when(saved.currentProfile()).thenReturn(false); reply(HARDCORE_IRONMAN, XP);
+        verify(saved, never()).save(anyString(), any(), anyLong());
     }
 }

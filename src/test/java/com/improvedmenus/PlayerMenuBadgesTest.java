@@ -175,4 +175,59 @@ public class PlayerMenuBadgesTest
         IndexedSprite sprite = mock(IndexedSprite.class); when(sprite.getWidth()).thenReturn(2); when(sprite.getHeight()).thenReturn(1);
         when(sprite.getPixels()).thenReturn(pixels); when(sprite.getPalette()).thenReturn(colors); return sprite;
     }
+
+    @Test public void completedAccountLookupRefreshesAlreadyOpenMenuThroughPluginTick() throws Exception
+    {
+        when(config.playerIronmanBadge()).thenReturn(true); when(config.playerFriendBadge()).thenReturn(false);
+        MenuEntry entry = entry("Alice"); Menu menu = TestMenus.menu(entry);
+        when(client.getMenu()).thenReturn(menu); when(client.isMenuOpen()).thenReturn(true);
+        when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
+        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin();
+        MenuPresentation presentation = new MenuPresentation(); field(presentation, "config", config);
+        LootFiltersMenuPresentation loot = new LootFiltersMenuPresentation(); field(loot, "config", config);
+        field(plugin, "client", client); field(plugin, "active", true); field(plugin, "accountBadges", accounts);
+        field(plugin, "playerBadges", badges); field(plugin, "presentation", presentation); field(plugin, "lootMenu", loot);
+        field(plugin, "lootCompatibility", mock(LootFiltersCompatibility.class));
+        badges.decorate(menu); assertEquals("Alice", entry.getTarget());
+        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
+        when(accounts.revision()).thenReturn(1L);
+        plugin.onClientTick(new net.runelite.api.events.ClientTick());
+        assertEquals("<img=2>Alice", entry.getTarget());
+        plugin.onClientTick(new net.runelite.api.events.ClientTick());
+        assertEquals("<img=2>Alice", entry.getTarget()); verify(accounts, times(2)).find("Alice");
+    }
+
+    @Test public void nativeLookupSelectionRequestsBadgeWithoutConsumingTheAction() throws Exception
+    {
+        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin(); field(plugin, "active", true); field(plugin, "accountBadges", accounts);
+        net.runelite.api.events.MenuOptionClicked event = mock(net.runelite.api.events.MenuOptionClicked.class);
+        when(event.getMenuAction()).thenReturn(MenuAction.RUNELITE_PLAYER); when(event.getMenuOption()).thenReturn("Lookup");
+        MenuEntry lookup = entry("Alice"); when(event.getMenuEntry()).thenReturn(lookup);
+        plugin.onMenuOptionClicked(event); verify(accounts).selected("Alice"); verify(event, never()).consume();
+        when(event.getMenuAction()).thenReturn(MenuAction.RUNELITE); plugin.onMenuOptionClicked(event);
+        verifyNoMoreInteractions(accounts);
+    }
+
+    @Test public void savingBadgeCacheDoesNotResetTheActiveLookup() throws Exception
+    {
+        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin(); field(plugin, "accountBadges", accounts);
+        net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
+        event.setGroup(ImprovedMenusConfig.GROUP); event.setKey(PlayerBadgeCache.KEY);
+        plugin.onConfigChanged(event); verifyNoInteractions(accounts);
+    }
+
+    @Test public void observedHelmetCanReplaceEstimateAfterHoverChangesOptionColor()
+    {
+        when(config.playerIronmanBadge()).thenReturn(true); when(config.playerFriendBadge()).thenReturn(false);
+        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
+        MenuEntry entry = entry("Alice"); entry.setOption("<col=ff0000>Follow</col>"); Menu menu = TestMenus.menu(entry);
+        badges.decorate(menu); entry.setOption("Follow");
+        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(3, false));
+        badges.decorate(menu); assertEquals("<img=3>Alice", entry.getTarget()); assertEquals("Follow", entry.getOption());
+    }
+
+    private static void field(Object object, String name, Object value) throws Exception
+    {
+        java.lang.reflect.Field field = object.getClass().getDeclaredField(name); field.setAccessible(true); field.set(object, value);
+    }
 }

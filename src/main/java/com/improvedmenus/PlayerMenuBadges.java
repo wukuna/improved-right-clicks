@@ -280,7 +280,8 @@ final class PlayerMenuBadges extends Overlay
         }
         boolean matches(MenuEntry entry)
         {
-            return decorated.equals(entry.getTarget()) && option.equals(entry.getOption()) && entry.getType() == type
+            // Our hover colors can change the option while an async lookup completes.
+            return decorated.equals(entry.getTarget()) && MenuRules.plain(option).equals(MenuRules.plain(entry.getOption())) && entry.getType() == type
                 && entry.getIdentifier() == identifier && entry.getParam0() == param0 && entry.getParam1() == param1
                 && entry.getWorldViewId() == worldView;
         }
