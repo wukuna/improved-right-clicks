@@ -32,7 +32,7 @@ Enable **Hide side panel** under General to remove the Improved Right-Clicks too
 2. Use the side panel for profiles, settings import/export, undo and diagnostics.
 3. Hold the configured reveal modifier before opening a menu to temporarily show options this plugin hid.
 
-**Compatibility status:** Automatic icon sharing requires the asynchronous image-provider update proposed in [Loot Filters PR #219](https://github.com/riktenx/loot-filters/pull/219). That update is still under review and is not in the currently released Loot Filters version. Ordinary menu features work without it; diagnostics report when the provider is unavailable.
+**Compatibility status:** Improved Looting can share icons through its **Connect menu icons** option. Automatic sharing from Loot Filters requires the asynchronous image-provider update proposed in [Loot Filters PR #219](https://github.com/riktenx/loot-filters/pull/219). That update is still under review and is not in the currently released Loot Filters version. Ordinary menu features work without it; diagnostics report when the provider is unavailable.
 
 ## Usage
 
@@ -69,7 +69,7 @@ Exact color mappings take precedence over wildcard mappings. Hold Shift when ope
 
 The editor accepts at most 200 rules per field. Invalid manual configuration edits disable that rule field rather than retaining old invisible rules. Profile imports validate every setting before applying changes. Imports cannot modify other plugins' settings. Existing-setting import reads explicitly saved settings from the supported plugins listed below and leaves those originals intact. Missing settings and source-plugin enablement are not inferred.
 
-### Ground-menu icons and Loot Filters
+### Ground-menu icons and loot displays
 
 In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable **Ground loot icons**, and choose **Native**, **Custom**, or **Both** under **Icon source**. All icon, visibility and color options stay in plugin settings. The side panel contains profiles, import/export, undo, a settings shortcut and optional diagnostics.
 
@@ -77,11 +77,11 @@ In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable 
 - **Custom** shows the selected custom icon. Hidden, unassigned or unavailable icons remain absent.
 - **Both** shows custom and native icons together, avoiding duplicate Current Item icons. The native picture remains when no custom icon is available, unless **Both: respect filter visibility** is enabled.
 
-Enable **Loot Filters compatibility** with a compatible Loot Filters version, then choose Custom or Both. Loot Filters supplies its resolved display settings and an asynchronous image provider. Improved Right-Clicks caches independent images without reading Loot Filters' files or evaluating its rules. Existing manual assignments remain explicit overrides; previously imported filter backups remain saved and can supply icons with compatibility off.
+Enable **Loot display compatibility**, then choose Custom or Both. With Improved Looting active and **Connect menu icons** enabled, its resolved settings take priority. Otherwise a compatible Loot Filters provider is used. Improved Right-Clicks caches independent images without reading another plugin's files or evaluating its rules. Existing manual assignments remain explicit overrides; previously imported filter backups remain saved and can supply icons with compatibility off.
 
-This integration requires the upstream image-provider update described above. File, sprite and item images load through Loot Filters; no direct access to its icon directory is used.
+Loot Filters still requires the upstream provider update described above. File, sprite and item images load through the active provider; no direct access to its icon directory is used. Both plugins retain their own settings.
 
-**Use Loot Filters in menu** optionally applies the evaluated Take-row sort priority while preserving existing deprioritization and non-loot rows. **Use Loot Filters menu colors** is a separate opt-in for item-name colors when that menu switch is enabled. Hidden-row colors remain as regular Loot Filters set them. Both switches start off and preserve saved action colors and normal left-click actions.
+**Use loot display in menu** optionally applies evaluated Take-row sort priority while preserving existing deprioritization and non-loot rows. **Use loot display menu colors** is a separate opt-in for item-name colors when that menu switch is enabled. Hidden-row colors retain the native/provider result. Both switches start off and preserve saved action colors and normal left-click actions.
 
 Resolved settings follow the active filter. A `filter-reloaded` message, configuration changes, profile changes and plugin changes clear the image cache. Late results from a previous filter cannot repopulate it. The final `hidden` / `hideOverlay` values are respected; temporary ground-overlay toggles and camera visibility do not hide menu icons. When identical stacks resolve differently, no custom icon is chosen arbitrarily. Submenus retain their original text.
 
@@ -121,7 +121,7 @@ Keep RuneLite's Menu Entry Swapper for swaps and specialist plugins for their re
 
 Menu Entry Swapper's Shift-right-click customization remains available with Examine hiding and menu colors enabled. Improved Right-Clicks keeps its native Examine lookup entries unchanged while building that menu, then applies the configured cleanup after the swap controls have been added.
 
-Optional Loot Filters compatibility uses the supported resolved-display and asynchronous image-provider interface described above. Icons decorate menu entries; they do not change ground labels, beams or sounds.
+Optional Improved Looting / Loot Filters compatibility uses the supported resolved-display and asynchronous image-provider interface described above. Icons decorate menu entries; they do not change ground labels, beams or sounds.
 
 ## Inspiration and recipe
 

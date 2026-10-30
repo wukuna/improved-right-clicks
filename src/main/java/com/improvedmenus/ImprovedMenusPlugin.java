@@ -103,13 +103,13 @@ public class ImprovedMenusPlugin extends Plugin
             clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });
             if (event.getKey().equals("hideSidePanel")) { SwingUtilities.invokeLater(this::updateSidePanel); }
         }
-        else if ("loot-filters".equals(event.getGroup())) refreshLootFilter();
+        else if ("loot-filters".equals(event.getGroup()) || "improvedlooting".equals(event.getGroup())) refreshLootFilter();
     }
     @Subscribe public void onProfileChanged(net.runelite.client.events.ProfileChanged event) { clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); releaseNotes.showIfLoggedIn(); } }); refreshLootFilter(); if(itemIcons.filters!=null) { itemIcons.filters.reload(); } }
     @Subscribe public void onPluginChanged(net.runelite.client.events.PluginChanged event)
-    { if ("Loot Filters".equals(event.getPlugin().getName())) refreshLootFilter(); }
+    { if ("Loot Filters".equals(event.getPlugin().getName()) || "Loot Filters TEST".equals(event.getPlugin().getName()) || "Improved Looting".equals(event.getPlugin().getName()) || "Improved Looting TEST".equals(event.getPlugin().getName())) refreshLootFilter(); }
     @Subscribe public void onPluginMessage(net.runelite.client.events.PluginMessage event)
-    { if ("loot-filters".equals(event.getNamespace()) && "filter-reloaded".equals(event.getName())) refreshLootFilter(); }
+    { if (("loot-filters".equals(event.getNamespace()) || "improved-looting".equals(event.getNamespace())) && "filter-reloaded".equals(event.getName())) refreshLootFilter(); }
     private void refreshLootFilter()
     {
         clientThread.invokeLater(() -> {

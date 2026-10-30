@@ -25,8 +25,9 @@ class LootFiltersCompatibility {
     private final EventBus events;
     private final LootFilterImageCache images;
     private boolean collecting,enabled;
+    private String namespace="loot-filters", providerName="Loot Filters";
     private final Map<Tile,Map<Integer,Result>> menuResults=new IdentityHashMap<>();
-    private volatile String status="Open a Take menu to check Loot Filters compatibility.";
+    private volatile String status="Open a Take menu to check loot display compatibility.";
     @Inject LootFiltersCompatibility(Client client,ClientThread clientThread,ImprovedMenusConfig config,PluginManager plugins,EventBus events) {
         this.client=client;this.config=config;this.plugins=plugins;this.events=events;
         images=new LootFilterImageCache(clientThread::invokeLater);
@@ -52,15 +53,18 @@ class LootFiltersCompatibility {
     long revision() { return images.revision(); }
     void refresh() {
         if(!client.isClientThread()) return;
-        boolean running=false;
-        if(config.lootFiltersCompatibility() || config.useLootFiltersInMenu())
+        boolean running=false;String next="loot-filters",name="Loot Filters";
+        if(config.lootFiltersCompatibility() || config.useLootFiltersInMenu()) {
             for(Plugin plugin:plugins.getPlugins())
-                if("Loot Filters".equals(plugin.getName()) && plugins.isPluginActive(plugin)) { running=true;break; }
-        if(running!=enabled) { images.clear();endMenu();enabled=running; }
-        if(!config.lootFiltersCompatibility() && !config.useLootFiltersInMenu()) status="Loot Filters compatibility is off.";
-        else if(!running) status="Enable Loot Filters to use its resolved display settings.";
+                if(("Loot Filters".equals(plugin.getName()) || "Loot Filters TEST".equals(plugin.getName())) && plugins.isPluginActive(plugin)) { running=true; }
+            for(Plugin plugin:plugins.getPlugins())
+                if(("Improved Looting".equals(plugin.getName()) || "Improved Looting TEST".equals(plugin.getName())) && plugins.isPluginActive(plugin)) { Map<String,Object> capability=new HashMap<>();events.post(new PluginMessage("improved-looting","provider-status-v1",capability));if(Boolean.TRUE.equals(capability.get("enabled"))) {running=true;next="improved-looting";name="Improved Looting";break;} }
+        }
+        if(running!=enabled || !next.equals(namespace)) { images.clear();endMenu();enabled=running;namespace=next;providerName=name; }
+        if(!config.lootFiltersCompatibility() && !config.useLootFiltersInMenu()) status="Loot display compatibility is off.";
+        else if(!running) status="Enable Loot Filters or Improved Looting to use its resolved display settings.";
     }
-    void reset() { endMenu();images.clear();enabled=false;status="Open a Take menu to check Loot Filters compatibility."; }
+    void reset() { endMenu();images.clear();enabled=false;status="Open a Take menu to check loot display compatibility."; }
     void beginMenu() { refresh();menuResults.clear();collecting=true; }
     void endMenu() { menuResults.clear();collecting=false; }
     Result findIcon(MenuEntry entry) { Result result=find(entry);image(result);return result; }
@@ -85,11 +89,11 @@ class LootFiltersCompatibility {
     Result request(WorldView view,int x,int y,int plane,int itemId) {
         Map<String,Object> data=new HashMap<>();
         data.put("worldViewId",view.getId());data.put("x",view.getBaseX()+x);data.put("y",view.getBaseY()+y);data.put("z",plane);data.put("itemId",itemId);
-        events.post(new PluginMessage("loot-filters","resolved-display-request-v1",data));
+        events.post(new PluginMessage(namespace,"resolved-display-request-v1",data));
         Result result=decode(data,itemId);
-        status=result!=null?"Connected to Loot Filters. Icons, menu behavior and colors use their separate settings.":
-            data.containsKey("status")?"Loot Filters has no ready, unambiguous display settings for this item.":
-            "This Loot Filters version does not provide resolved display settings. A compatible provider update is required.";
+        status=result!=null?"Connected to "+providerName+". Icons, menu behavior and colors use their separate settings.":
+            data.containsKey("status")?providerName+" has no ready, unambiguous display settings for this pile.":
+            "This "+providerName+" version does not provide resolved display settings. A compatible provider update is required.";
         return result;
     }
     static Result decode(Map<String,Object> data,int itemId) {

@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-29-persistent-player-badges";
+    static final String RELEASE = "2026-10-30-improved-looting-provider";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Ironman helmets and Hiscores lookups have been removed. Friend, ignore, Friends Chat and party badges remain individually toggleable, alongside Copy name. Older saved profiles still load their remaining settings. Existing player icons and colors are preserved.").build());
+            "Improved Right-Clicks: Improved Looting can now supply resolved menu icons, optional colors and priority. Enable its Connect menu icons switch, then choose the separate loot-display options here. Loot Filters remains a fallback when a compatible provider is available. Friend, ignore, Friends Chat and party badges remain individually toggleable; existing icons, colors and saved settings are preserved.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }
