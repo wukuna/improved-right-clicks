@@ -11,9 +11,11 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.JOptionPane;
@@ -41,7 +43,7 @@ final class PlayerMenuBadges extends Overlay
     private final ImprovedMenusConfig config;
     private final ChatIconManager icons;
     private final PartyService party;
-    private final PlayerAccountBadges accounts;
+    private static final Pattern IMAGE = Pattern.compile("<img=(\\d+)>");
     private final TooltipManager tooltips;
     private final int[] registrations = {-1, -1, -1, -1};
     private final Map<MenuEntry, Edit> edits = new IdentityHashMap<>();
@@ -53,13 +55,12 @@ final class PlayerMenuBadges extends Overlay
 
     @Inject
     PlayerMenuBadges(Client client, ImprovedMenusConfig config, ChatIconManager icons,
-        PartyService party, PlayerAccountBadges accounts, TooltipManager tooltips)
+        PartyService party, TooltipManager tooltips)
     {
         this.client = client;
         this.config = config;
         this.icons = icons;
         this.party = party;
-        this.accounts = accounts;
         this.tooltips = tooltips;
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
@@ -104,17 +105,12 @@ final class PlayerMenuBadges extends Overlay
             Player player = entry.getPlayer();
             if (player == null || player.getName() == null || entry.getTarget() == null) continue;
             String name = MenuRules.plain(player.getName()).replace('\u00a0', ' ');
-            String key = PlayerAccountBadges.normalized(name);
+            String key = normalized(name);
             if (key.isEmpty()) continue;
             players.putIfAbsent(key, name);
             String target = entry.getTarget();
             StringBuilder prefix = new StringBuilder();
             List<String> labels = new ArrayList<>();
-            if (config.playerIronmanBadge() && !hasAccountIcon(target))
-            {
-                PlayerAccountBadges.Badge badge = accounts.find(name);
-                if (badge != null) { prefix.append(badge.markup()); labels.add(badge.description()); }
-            }
             if (config.playerFriendBadge() && player.isFriend()) add(0, "Friend", target, prefix, labels);
             if (config.playerIgnoreBadge() && client.getIgnoreContainer() != null
                 && client.getIgnoreContainer().findByName(name) != null) add(1, "Ignored", target, prefix, labels);
@@ -134,7 +130,7 @@ final class PlayerMenuBadges extends Overlay
             boolean exists = Arrays.stream(entries).anyMatch(e ->
                 ("Copy name".equalsIgnoreCase(MenuRules.plain(e.getOption()))
                     || "Copy player name".equalsIgnoreCase(MenuRules.plain(e.getOption())))
-                    && key.equals(PlayerAccountBadges.normalized(e.getTarget())));
+                    && key.equals(normalized(e.getTarget())));
             if (exists) return;
             MenuEntry copy = menu.createMenuEntry(0).setOption("Copy name").setTarget(name).setType(MenuAction.RUNELITE)
                 .onClick(e -> { if (active && generation == callbackGeneration && config.playerCopyName()) clipboard.accept(name); });
@@ -163,18 +159,17 @@ final class PlayerMenuBadges extends Overlay
         return false;
     }
 
-    private boolean hasAccountIcon(String target)
+    private static String normalized(String value)
     {
-        if (PlayerAccountBadges.accountIcon(target) >= 0) return true;
-        for (int index : new int[]{2, 3, 10, 41, 42, 43})
-            if (containsIcon(target, index)) return true;
-        return false;
+        if (value == null) return "";
+        String name = MenuRules.plain(value).replace('\u00a0', ' ').replace('_', ' ').trim().toLowerCase(Locale.ROOT);
+        return name.matches("[a-z0-9 -]{1,12}") ? name : "";
     }
 
     private boolean containsIcon(String target, int expected)
     {
         IndexedSprite[] sprites = client.getModIcons();
-        Matcher matcher = PlayerAccountBadges.IMAGE.matcher(target);
+        Matcher matcher = IMAGE.matcher(target);
         while (matcher.find())
         {
             if (matcher.group(1).length() > 8) continue;
@@ -280,7 +275,7 @@ final class PlayerMenuBadges extends Overlay
         }
         boolean matches(MenuEntry entry)
         {
-            // Our hover colors can change the option while an async lookup completes.
+            // Our hover colors can change the option before badges are restored or refreshed.
             return decorated.equals(entry.getTarget()) && MenuRules.plain(option).equals(MenuRules.plain(entry.getOption())) && entry.getType() == type
                 && entry.getIdentifier() == identifier && entry.getParam0() == param0 && entry.getParam1() == param1
                 && entry.getWorldViewId() == worldView;

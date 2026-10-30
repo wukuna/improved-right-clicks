@@ -39,7 +39,6 @@ public class ImprovedMenusPlugin extends Plugin
     @Inject private LootFiltersCompatibility lootCompatibility;
     @Inject private LootFiltersMenuPresentation lootMenu;
     @Inject private PlayerMenuBadges playerBadges;
-    @Inject private PlayerAccountBadges accountBadges;
     @Inject private ReleaseNotesNotice releaseNotes;
     private ImprovedMenusPanel panel;
     private NavigationButton navigation;
@@ -48,7 +47,6 @@ public class ImprovedMenusPlugin extends Plugin
     private MenuEntry colorEditorEntry;
     private Menu colorEditorSubmenu;
     private long lootRevision;
-    private long accountRevision;
 
     @Provides ImprovedMenusConfig provideConfig(ConfigManager manager) { return manager.getConfig(ImprovedMenusConfig.class); }
     @Override protected void startUp()
@@ -57,7 +55,7 @@ public class ImprovedMenusPlugin extends Plugin
         presentation.setItemIcons(itemIcons);
         if(itemIcons.filters!=null) { itemIcons.filters.reload(); }
         renameNotice.startUp(); releaseNotes.startUp();
-        clientThread.invokeLater(() -> { if (active) { engine.reload(); lootCompatibility.refresh(); playerBadges.start(); accountBadges.reset(true); } });
+        clientThread.invokeLater(() -> { if (active) { engine.reload(); lootCompatibility.refresh(); playerBadges.start(); } });
         buttons.startUp(); eventBus.register(buttons); overlays.add(presentation); overlays.add(optionCounts); overlays.add(playerBadges); presentation.start();
         SwingUtilities.invokeLater(this::updateSidePanel);
     }
@@ -66,7 +64,7 @@ public class ImprovedMenusPlugin extends Plugin
         active=false;
         renameNotice.shutDown(); releaseNotes.shutDown();
         eventBus.unregister(buttons); buttons.shutDown(); overlays.remove(presentation); overlays.remove(optionCounts); overlays.remove(playerBadges);
-        clientThread.invoke(() -> { removeColorEditor(); playerBadges.shutdown(); accountBadges.reset(false); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); engine.clear(); }); store.clearHistory();
+        clientThread.invoke(() -> { removeColorEditor(); playerBadges.shutdown(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); engine.clear(); }); store.clearHistory();
         SwingUtilities.invokeLater(() -> {
             if (panel != null) { panel.stop(); panel=null; }
             if (navigation != null) { toolbar.removeNavigation(navigation); navigation=null; }
@@ -77,20 +75,7 @@ public class ImprovedMenusPlugin extends Plugin
     @Subscribe(priority=-1) public void onClientTick(ClientTick event)
     {
         if (!active || client.getGameState() != GameState.LOGGED_IN) return;
-        accountBadges.tick();
-        long revision = accountBadges.revision();
-        if (revision != accountRevision)
-        {
-            accountRevision = revision;
-            if (client.isMenuOpen()) decorateMenu();
-        }
         if (!client.isMenuOpen()) engine.applyTargetProtections(client.getMenu());
-    }
-    @Subscribe public void onMenuOptionClicked(MenuOptionClicked event)
-    {
-        if (!active || event.getMenuAction() != MenuAction.RUNELITE_PLAYER || !"Lookup".equals(event.getMenuOption())) return;
-        Player player = event.getMenuEntry().getPlayer();
-        if (player != null) accountBadges.selected(player.getName());
     }
     @Subscribe public void onGameTick(GameTick event)
     {
@@ -114,14 +99,13 @@ public class ImprovedMenusPlugin extends Plugin
     {
         if (ImprovedMenusConfig.GROUP.equals(event.getGroup()))
         {
-            if (PlayerBadgeCache.KEY.equals(event.getKey())) return;
             if(itemIcons.filters!=null && (event.getKey().equals(FilterIcons.KEY) || event.getKey().equals(FilterIcons.BACKUP))) { itemIcons.filters.reload(); }
-            clientThread.invokeLater(() -> { if (active) { accountBadges.reset(true); playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });
+            clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });
             if (event.getKey().equals("hideSidePanel")) { SwingUtilities.invokeLater(this::updateSidePanel); }
         }
         else if ("loot-filters".equals(event.getGroup())) refreshLootFilter();
     }
-    @Subscribe public void onProfileChanged(net.runelite.client.events.ProfileChanged event) { clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); accountBadges.reset(true); releaseNotes.showIfLoggedIn(); } }); refreshLootFilter(); if(itemIcons.filters!=null) { itemIcons.filters.reload(); } }
+    @Subscribe public void onProfileChanged(net.runelite.client.events.ProfileChanged event) { clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); releaseNotes.showIfLoggedIn(); } }); refreshLootFilter(); if(itemIcons.filters!=null) { itemIcons.filters.reload(); } }
     @Subscribe public void onPluginChanged(net.runelite.client.events.PluginChanged event)
     { if ("Loot Filters".equals(event.getPlugin().getName())) refreshLootFilter(); }
     @Subscribe public void onPluginMessage(net.runelite.client.events.PluginMessage event)
@@ -168,12 +152,9 @@ public class ImprovedMenusPlugin extends Plugin
     }
     @Subscribe public void onGameStateChanged(GameStateChanged event)
     {
-        if (event.getGameState() == GameState.LOGIN_SCREEN || event.getGameState() == GameState.HOPPING || event.getGameState() == GameState.CONNECTION_LOST) accountBadges.reset(active);
         if (event.getGameState() != GameState.LOGGED_IN) { playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); buttons.reset(); engine.clear(); }
         else { renameNotice.showIfLoggedIn(); releaseNotes.showIfLoggedIn(); }
     }
-    @Subscribe(priority=100) public void onChatMessage(ChatMessage event)
-    { if (active) accountBadges.observe(event); }
     @Subscribe public void onFocusChanged(FocusChanged event) { if (!event.isFocused()) { clientThread.invoke(buttons::reset); } }
 
     private void addColorEditor(Menu menu)

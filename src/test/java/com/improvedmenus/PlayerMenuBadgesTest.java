@@ -21,7 +21,6 @@ public class PlayerMenuBadgesTest
     private final ImprovedMenusConfig config = mock(ImprovedMenusConfig.class);
     private final ChatIconManager icons = mock(ChatIconManager.class);
     private final PartyService party = mock(PartyService.class);
-    private final PlayerAccountBadges accounts = mock(PlayerAccountBadges.class);
     private final TooltipManager tooltips = mock(TooltipManager.class);
     private PlayerMenuBadges badges;
     private Player player;
@@ -35,7 +34,7 @@ public class PlayerMenuBadgesTest
         player = mock(Player.class); when(player.getName()).thenReturn("Alice");
         when(player.isFriend()).thenReturn(true);
         when(config.playerFriendBadge()).thenReturn(true);
-        badges = new PlayerMenuBadges(client, config, icons, party, accounts, tooltips);
+        badges = new PlayerMenuBadges(client, config, icons, party, tooltips);
         badges.start();
     }
 
@@ -70,12 +69,10 @@ public class PlayerMenuBadgesTest
 
     @Test public void existingHelmetsAndFriendsChatRanksAreNotDuplicated()
     {
-        when(config.playerIronmanBadge()).thenReturn(true);
         when(config.playerFriendsChatBadge()).thenReturn(true); when(player.isFriendsChatMember()).thenReturn(true);
         int rank = icons.getIconNumber(FriendsChatRank.CAPTAIN);
         MenuEntry e = entry("<img=10><img=" + rank + ">Alice"); badges.decorate(TestMenus.menu(e));
         assertEquals("<img=100><img=10><img=" + rank + ">Alice", e.getTarget());
-        verifyNoInteractions(accounts);
     }
 
     @Test public void ignoreAndPartyBadgesHaveIndependentSwitches()
@@ -104,16 +101,6 @@ public class PlayerMenuBadgesTest
         assertFalse(PlayerMenuBadges.sameImage(sprite(new byte[]{0, 0}, new int[]{0}), sprite(new byte[]{0, 0}, new int[]{0})));
     }
 
-    @Test public void existingCustomHelmetPixelsSuppressHiscoresLookup()
-    {
-        when(config.playerIronmanBadge()).thenReturn(true);
-        IndexedSprite[] sprites = new IndexedSprite[150];
-        sprites[10] = sprite(new byte[]{0, 1}, new int[]{0, 0xcc3355}); sprites[140] = sprites[10];
-        when(client.getModIcons()).thenReturn(sprites);
-        MenuEntry e = entry("<img=140>Alice"); badges.decorate(TestMenus.menu(e));
-        assertEquals("<img=100><img=140>Alice", e.getTarget()); verifyNoInteractions(accounts);
-    }
-
     @Test public void thirdPartyChangesAndReusedEntryAreNeverRolledBack()
     {
         MenuEntry e = entry("Alice"); badges.decorate(TestMenus.menu(e));
@@ -124,7 +111,6 @@ public class PlayerMenuBadgesTest
 
     @Test public void unknownOrUnavailableIconsStayBlankAndRegistrationIsReused()
     {
-        when(config.playerIronmanBadge()).thenReturn(true);
         when(icons.chatIconIndex(anyInt())).thenReturn(-1);
         MenuEntry e = entry("Alice"); badges.decorate(TestMenus.menu(e)); assertEquals("Alice", e.getTarget());
         badges.shutdown(); badges.start(); verify(icons, times(4)).registerChatIcon(any());
@@ -157,16 +143,14 @@ public class PlayerMenuBadgesTest
         verify(menu, never()).createMenuEntry(anyInt()); badges.clear(); verify(menu, never()).removeMenuEntry(copy);
     }
 
-    @Test public void inferredHelmetTooltipIdentifiesHiscoresEstimate()
+    @Test public void friendTooltipAndShutdownRemainCorrect()
     {
-        when(config.playerIronmanBadge()).thenReturn(true);
-        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
         MenuEntry e = entry("Alice"); Menu menu = TestMenus.menu(e);
         when(client.isMenuOpen()).thenReturn(true); when(client.getMenu()).thenReturn(menu);
         when(menu.getMenuWidth()).thenReturn(300); when(menu.getMenuHeight()).thenReturn(40);
         when(client.getMouseCanvasPosition()).thenReturn(new Point(5, 23));
-        badges.decorate(menu); assertTrue(e.getTarget().startsWith("<img=2><img=100>"));
-        badges.render(null); verify(tooltips).add(argThat(tooltip -> tooltip.getText().contains("Ironman - Hiscores estimate")));
+        badges.decorate(menu); assertEquals("<img=100>Alice", e.getTarget());
+        badges.render(null); verify(tooltips).add(argThat(tooltip -> tooltip.getText().equals("Friend")));
         badges.shutdown(); badges.render(null); verifyNoMoreInteractions(tooltips);
     }
 
@@ -176,58 +160,11 @@ public class PlayerMenuBadgesTest
         when(sprite.getPixels()).thenReturn(pixels); when(sprite.getPalette()).thenReturn(colors); return sprite;
     }
 
-    @Test public void completedAccountLookupRefreshesAlreadyOpenMenuThroughPluginTick() throws Exception
+    @Test public void friendBadgeRestoresCleanlyAfterHoverChangesOptionColor()
     {
-        when(config.playerIronmanBadge()).thenReturn(true); when(config.playerFriendBadge()).thenReturn(false);
-        MenuEntry entry = entry("Alice"); Menu menu = TestMenus.menu(entry);
-        when(client.getMenu()).thenReturn(menu); when(client.isMenuOpen()).thenReturn(true);
-        when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
-        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin();
-        MenuPresentation presentation = new MenuPresentation(); field(presentation, "config", config);
-        LootFiltersMenuPresentation loot = new LootFiltersMenuPresentation(); field(loot, "config", config);
-        field(plugin, "client", client); field(plugin, "active", true); field(plugin, "accountBadges", accounts);
-        field(plugin, "playerBadges", badges); field(plugin, "presentation", presentation); field(plugin, "lootMenu", loot);
-        field(plugin, "lootCompatibility", mock(LootFiltersCompatibility.class));
-        badges.decorate(menu); assertEquals("Alice", entry.getTarget());
-        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
-        when(accounts.revision()).thenReturn(1L);
-        plugin.onClientTick(new net.runelite.api.events.ClientTick());
-        assertEquals("<img=2>Alice", entry.getTarget());
-        plugin.onClientTick(new net.runelite.api.events.ClientTick());
-        assertEquals("<img=2>Alice", entry.getTarget()); verify(accounts, times(2)).find("Alice");
-    }
-
-    @Test public void nativeLookupSelectionRequestsBadgeWithoutConsumingTheAction() throws Exception
-    {
-        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin(); field(plugin, "active", true); field(plugin, "accountBadges", accounts);
-        net.runelite.api.events.MenuOptionClicked event = mock(net.runelite.api.events.MenuOptionClicked.class);
-        when(event.getMenuAction()).thenReturn(MenuAction.RUNELITE_PLAYER); when(event.getMenuOption()).thenReturn("Lookup");
-        MenuEntry lookup = entry("Alice"); when(event.getMenuEntry()).thenReturn(lookup);
-        plugin.onMenuOptionClicked(event); verify(accounts).selected("Alice"); verify(event, never()).consume();
-        when(event.getMenuAction()).thenReturn(MenuAction.RUNELITE); plugin.onMenuOptionClicked(event);
-        verifyNoMoreInteractions(accounts);
-    }
-
-    @Test public void savingBadgeCacheDoesNotResetTheActiveLookup() throws Exception
-    {
-        ImprovedMenusPlugin plugin = new ImprovedMenusPlugin(); field(plugin, "accountBadges", accounts);
-        net.runelite.client.events.ConfigChanged event = new net.runelite.client.events.ConfigChanged();
-        event.setGroup(ImprovedMenusConfig.GROUP); event.setKey(PlayerBadgeCache.KEY);
-        plugin.onConfigChanged(event); verifyNoInteractions(accounts);
-    }
-
-    @Test public void observedHelmetCanReplaceEstimateAfterHoverChangesOptionColor()
-    {
-        when(config.playerIronmanBadge()).thenReturn(true); when(config.playerFriendBadge()).thenReturn(false);
-        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, true));
         MenuEntry entry = entry("Alice"); entry.setOption("<col=ff0000>Follow</col>"); Menu menu = TestMenus.menu(entry);
         badges.decorate(menu); entry.setOption("Follow");
-        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(3, false));
-        badges.decorate(menu); assertEquals("<img=3>Alice", entry.getTarget()); assertEquals("Follow", entry.getOption());
-    }
-
-    private static void field(Object object, String name, Object value) throws Exception
-    {
-        java.lang.reflect.Field field = object.getClass().getDeclaredField(name); field.setAccessible(true); field.set(object, value);
+        badges.decorate(menu); assertEquals("<img=100>Alice", entry.getTarget());
+        badges.clear(); assertEquals("Alice", entry.getTarget()); assertEquals("Follow", entry.getOption());
     }
 }

@@ -23,13 +23,26 @@ public class ProfileStoreTest
     @Test public void playerBadgeSettingsRoundTripAndUndoIndependently()
     {
         Map<String,String> settings=new LinkedHashMap<>();
-        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerIronmanBadge","playerHiscores","playerCopyName"})
+        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerCopyName"})
         { assertEquals("false",store.snapshot().get(key)); settings.put(key,"true"); }
         store.apply(store.previewImport(store.exportSettings(settings)));
         for (String key : settings.keySet()) assertEquals("true",store.snapshot().get(key));
         store.save("Social"); assertEquals("true",store.load("Social").get("playerFriendBadge"));
         assertTrue(store.undo());
         for (String key : settings.keySet()) assertEquals("false",store.snapshot().get(key));
+    }
+    @Test public void retiredHelmetSettingsDoNotBreakOldFullProfiles()
+    {
+        Map<String,String> old = new LinkedHashMap<>(store.snapshot());
+        old.put("playerIronmanBadge","true"); old.put("playerHiscores","true"); old.put("playerFriendBadge","true");
+        String json = "{\"version\":1,\"settings\":" + new Gson().toJson(old) + "}";
+        values.put("improvedmenus/savedProfiles", new Gson().toJson(Collections.singletonMap("Old",json)));
+        Map<String,String> restored = store.load("Old");
+        assertFalse(restored.containsKey("playerIronmanBadge")); assertFalse(restored.containsKey("playerHiscores"));
+        assertEquals(SettingsCatalog.ALL.size(), restored.size());
+        assertTrue(values.keySet().stream().allMatch(key -> key.equals("improvedmenus/savedProfiles")));
+        store.apply(restored); assertEquals("true", store.snapshot().get("playerFriendBadge"));
+        assertTrue(store.undo()); assertEquals("false", store.snapshot().get("playerFriendBadge"));
     }
     @Test public void roundTripProfiles()
     { Map<String,String> initial=store.snapshot(); assertEquals(initial,store.previewImport(store.exportSettings(initial))); }

@@ -95,6 +95,8 @@ final class ProfileStore
             {
                 if (!entry.getValue().isJsonPrimitive() || !entry.getValue().getAsJsonPrimitive().isString())
                 { throw new IllegalArgumentException("Setting values must be strings"); }
+                // Older profiles may contain the retired account-helmet switches.
+                if ("playerIronmanBadge".equals(entry.getKey()) || "playerHiscores".equals(entry.getKey())) continue;
                 result.put(entry.getKey(),entry.getValue().getAsString());
             }
             validate(result); return result;

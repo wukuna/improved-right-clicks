@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Resolved Ironman helmets now survive logout and restart in your RuneLite profile, with shorter expiry for Hardcore status. Badges refresh in open menus, and selected Lookup requests wait through the cooldown. Chat icons still take priority over Hiscores estimates. Optional friend, ignore, Friends Chat, party badges and Copy name remain individually toggleable.").build());
+            "Improved Right-Clicks: Ironman helmets and Hiscores lookups have been removed. Friend, ignore, Friends Chat and party badges remain individually toggleable, alongside Copy name. Older saved profiles still load their remaining settings. Existing player icons and colors are preserved.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

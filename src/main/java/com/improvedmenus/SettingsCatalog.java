@@ -75,8 +75,6 @@ final class SettingsCatalog
         bool("playerIgnoreBadge", "Ignored badge", "Player badges", false);
         bool("playerFriendsChatBadge", "Friends Chat badge", "Player badges", false);
         bool("playerPartyBadge", "RuneLite party badge", "Player badges", false);
-        bool("playerIronmanBadge", "Ironman badge", "Player badges", false);
-        bool("playerHiscores", "Hiscores fallback", "Player badges", false);
         bool("playerCopyName", "Copy name", "Player badges", false);
         add("playerClanRankInfo", "Clan rank icons (info)", "Player badges", "Player Indicators / Chat Channels");
         bool("bankWield", "Hide Wield", "Bank", false); bool("bankWear", "Hide Wear", "Bank", false);
