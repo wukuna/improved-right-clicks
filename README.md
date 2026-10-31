@@ -21,6 +21,7 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 - **Presentation:** action colors, wildcard mappings, submenu support, a Shift-menu color picker/reset with configurable default color, optional ground-loot icons and additional-option counts. Counts support a minimum threshold, including/excluding Examine, showing/hiding counts on interface widgets, and a configurable text color.
 - **Player badges:** independent green friend, ignored-player, Friends Chat and RuneLite party icons, plus optional Copy name. Existing rank icons are preserved; matching icons are not added twice.
 - **Menu theme:** keep Native styling or choose OSRS brown and bronze. Menus with submenus or another plugin's custom renderer retain their original appearance.
+- **Ground-item grouping:** optionally combine identical ground-item menu actions into one counted row, such as **Take Abyssal ashes (x6)**. Each click still performs one normal pickup.
 - **Settings:** configure every feature in RuneLite's normal Improved Right-Clicks settings, grouped into collapsible sections. **Hide options** groups Walk here, Cancel, Set heading, Use on Player, Telegrab NPCs, potion Empty and Examine controls. Bank stays last.
 - **Side panel tools:** a direct Open Plugin Settings shortcut, named profiles, twenty-step undo, validated import/export previews, and collapsible diagnostics showing the before/after entry counts and reasons. Closing a dialog leaves the last operation status unchanged; applying identical settings reports No changes. Settings are not duplicated in the side panel. Undo restores only settings changed by a profile/import/editor operation, leaving later manual changes alone. Operations that change nothing do not consume an undo step; ordinary RuneLite settings use RuneLite's normal controls.
 
@@ -29,6 +30,8 @@ Protection switches start off. Enable the features you want in RuneLite's Improv
 Enable **Hide side panel** under General to remove the Improved Right-Clicks toolbar button. Menu features and the Shift-menu color editor remain active. Turn it off to access profiles, import/export, undo and diagnostics again.
 
 **Availability:** Install **Improved Right-Clicks** from RuneLite's Plugin Hub. [Update #19763](https://github.com/runelite/plugin-hub/pull/19763) merged on 30 October 2026, including player badges, the OSRS theme and Improved Looting integration.
+
+The optional ground-item grouping described below is prepared for the next Hub update and is included in the latest TEST build.
 
 **More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
@@ -76,6 +79,10 @@ Exact color mappings take precedence over wildcard mappings. Hold Shift when ope
 The editor accepts at most 200 rules per field. Invalid manual configuration edits disable that rule field rather than retaining old invisible rules. Profile imports validate every setting before applying changes. Imports cannot modify other plugins' settings. Existing-setting import reads explicitly saved settings from the supported plugins listed below and leaves those originals intact. Missing settings and source-plugin enablement are not inferred.
 
 ### Ground-menu icons and loot displays
+
+Enable **Presentation > Group duplicate ground items** to combine matching actions for the same item on the same tile. It starts off and works without Ground Items or Improved Looting enabled. Reopen the menu after changing it. Hold your reveal modifier before opening to see separate entries.
+
+The count represents identical menu entries, not a Take-all action. Different tiles, item variants, displayed quantities, colors, priorities and custom callbacks remain separate. Entries already counted by Ground Items are left alone. Existing icons and menu themes continue to work; ground-label/card grouping remains a separate Improved Looting setting. The switch is included in profiles, imports and undo.
 
 Choose **Presentation > Menu theme > OSRS** for the brown background and square bronze border used by Improved Looting's OSRS cards. **Native** is the default and keeps your existing style. The theme retains native text, icons, colors, scrolling and click positions, and is included in saved profiles and imports. Menus containing submenus, and menus already drawn by another plugin (such as Interface Styles' HD or transparent menus), keep their original appearance.
 

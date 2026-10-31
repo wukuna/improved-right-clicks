@@ -93,8 +93,10 @@ public class ImprovedMenusPlugin extends Plugin
     {
         playerBadges.clear(); presentation.stop(); lootMenu.stop();
         engine.applyOpened(client.getMenu());
-        decorateMenu();
+        // Capture plain item names for color rules before adding quantity suffixes.
         if (config.colorPicker() && client.isKeyPressed(KeyCode.KC_SHIFT)) { addColorEditor(client.getMenu()); }
+        engine.groupOpened(client.getMenu());
+        decorateMenu();
     }
     @Subscribe public void onConfigChanged(ConfigChanged event)
     {

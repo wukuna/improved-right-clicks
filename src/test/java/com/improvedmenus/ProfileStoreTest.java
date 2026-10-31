@@ -46,6 +46,15 @@ public class ProfileStoreTest
     }
     @Test public void roundTripProfiles()
     { Map<String,String> initial=store.snapshot(); assertEquals(initial,store.previewImport(store.exportSettings(initial))); }
+    @Test public void groundGroupingRoundTripsAndUndoPreservesOtherSettings()
+    {
+        values.put("improvedmenus/colors", "*:Take:#00ff00");
+        assertEquals("false", store.snapshot().get("groupGroundItems"));
+        store.apply(store.previewImport(store.exportSettings(Collections.singletonMap("groupGroundItems", "true"))));
+        store.save("Grouped loot"); assertEquals("true", store.load("Grouped loot").get("groupGroundItems"));
+        assertTrue(store.undo()); assertEquals("false", store.snapshot().get("groupGroundItems"));
+        assertEquals("*:Take:#00ff00", values.get("improvedmenus/colors"));
+    }
     @Test public void menuThemeRoundTripsAndUndoLeavesOtherSettingsAlone()
     {
         values.put("improvedmenus/colors","*:Take:#00ff00");

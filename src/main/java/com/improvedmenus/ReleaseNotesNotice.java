@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-30-improved-looting-provider";
+    static final String RELEASE = "2026-10-30-ground-menu-grouping";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Choose the optional OSRS menu theme in Presentation for brown panels and bronze borders matching the loot cards. Native remains the default; nested menus and other menu renderers keep their appearance. Improved Looting can supply resolved menu icons, optional colors and priority; enable its Connect menu icons switch and choose the separate loot-display options here. Loot Filters remains a fallback with a compatible provider. Player badges remain individually toggleable.").build());
+            "Improved Right-Clicks: Presentation now offers Group duplicate ground items, combining matching menu rows into counts such as Abyssal ashes (x6); each click still performs one normal pickup. Hold your reveal modifier before opening to keep separate rows. The optional OSRS theme, Improved Looting icons/colors/priority, and individually selectable player badges remain available.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

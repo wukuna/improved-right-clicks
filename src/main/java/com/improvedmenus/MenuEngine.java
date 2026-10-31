@@ -96,6 +96,17 @@ final class MenuEngine
     { apply(menu,true); }
     void applyOpened(Menu menu)
     { apply(menu,false); }
+    void groupOpened(Menu menu)
+    {
+        if (menu == null || !config.groupGroundItems() || reveal.isRevealed()) return;
+        Map<MenuEntry, String> changed = GroundMenuGroups.collapse(menu);
+        changed.forEach((entry, before) -> {
+            ColorEdit edit = ownedColors.get(entry);
+            if (edit != null && edit.after.equals(entry.getOption()) && edit.target.equals(MenuRules.plain(before)))
+                edit.target = MenuRules.plain(entry.getTarget());
+        });
+        if (!changed.isEmpty()) diagnostics += "\nGrouped duplicate ground-item actions in the opened menu.";
+    }
     private void apply(Menu menu,boolean capture)
     {
         if (menu == null || reveal.isRevealed()) { diagnostics = "Reveal is held: filtering paused."; return; }
@@ -329,8 +340,8 @@ final class MenuEngine
     static final class Context { boolean bank, toolsKnown, axe, pick, house, building; }
     private static final class ColorEdit
     {
-        final String before, colored, target;
-        String after;
+        final String before, colored;
+        String after, target;
         final MenuAction type;
         final int identifier;
         ColorEdit(String before,String after,MenuEntry entry)

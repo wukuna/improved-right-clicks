@@ -20,7 +20,7 @@ public interface ImprovedMenusConfig extends Config
     String houseSection = "house";
     @ConfigSection(name="Buttons", description="Interface button protections", position=6, closedByDefault=true)
     String buttonsSection = "buttons";
-    @ConfigSection(name="Presentation", description="Menu theme, ground icons and hover option counts", position=7, closedByDefault=true)
+    @ConfigSection(name="Presentation", description="Menu theme, ground-item grouping, icons and hover option counts", position=7, closedByDefault=true)
     String presentationSection = "presentation";
     @ConfigSection(name="Player badges", description="Optional badges in opened player menus; hover a row for their meaning", position=8, closedByDefault=true)
     String playersSection = "players";
@@ -36,6 +36,9 @@ public interface ImprovedMenusConfig extends Config
     }
     @ConfigItem(keyName="menuTheme", name="Menu theme", description="OSRS uses the brown background and bronze border of Improved Looting's OSRS cards. Native keeps your current style. Menus with submenus or another plugin's menu renderer keep their native appearance.", position=0, section=presentationSection)
     default MenuTheme menuTheme() { return MenuTheme.NATIVE; }
+
+    @ConfigItem(keyName="groupGroundItems", name="Group duplicate ground items", description="Combine identical ground-item actions on the same tile into one row, such as Abyssal ashes (x6). Counts matching menu entries; each click still performs one normal action. Applies when opening a menu. Independent of ground-label grouping.", position=1, section=presentationSection)
+    default boolean groupGroundItems() { return false; }
 
     @ConfigItem(keyName="playerFriendBadge", name="Friend badge", description="Green smiley for friends the client identifies as online; does not reveal offline/private friends", position=0, section=playersSection)
     default boolean playerFriendBadge() { return false; }
