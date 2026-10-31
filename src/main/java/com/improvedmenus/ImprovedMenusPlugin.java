@@ -57,12 +57,14 @@ public class ImprovedMenusPlugin extends Plugin
         if(itemIcons.filters!=null) { itemIcons.filters.reload(); }
         renameNotice.startUp(); releaseNotes.startUp();
         clientThread.invokeLater(() -> { if (active) { engine.reload(); lootCompatibility.refresh(); playerBadges.start(); } });
-        buttons.startUp(); eventBus.register(buttons); overlays.add(presentation); overlays.add(optionCounts); overlays.add(playerBadges); presentation.start();
+        buttons.startUp(); eventBus.register(buttons); eventBus.register(menuTheme);
+        overlays.add(presentation); overlays.add(optionCounts); overlays.add(playerBadges); presentation.start();
         SwingUtilities.invokeLater(this::updateSidePanel);
     }
     @Override protected void shutDown()
     {
         active=false;
+        eventBus.unregister(menuTheme);
         renameNotice.shutDown(); releaseNotes.shutDown();
         eventBus.unregister(buttons); buttons.shutDown(); overlays.remove(presentation); overlays.remove(optionCounts); overlays.remove(playerBadges);
         clientThread.invoke(() -> { removeColorEditor(); playerBadges.shutdown(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); engine.clear(); }); store.clearHistory();
@@ -130,8 +132,6 @@ public class ImprovedMenusPlugin extends Plugin
     }
     @Subscribe public void onBeforeMenuRender(BeforeMenuRender event)
     { if (active && client.isMenuOpen()) { engine.highlightHovered(client.getMenu()); } }
-    @Subscribe(priority=-100) public void onMenuThemeRender(BeforeMenuRender event)
-    { if (active) menuTheme.render(event); }
     private void updateSidePanel()
     {
         if (!active || config.hideSidePanel())

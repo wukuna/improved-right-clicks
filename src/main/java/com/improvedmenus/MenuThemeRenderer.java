@@ -7,6 +7,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Rasterizer;
 import net.runelite.api.events.BeforeMenuRender;
+import net.runelite.client.eventbus.Subscribe;
 
 /** Changes only the surface; RuneLite still draws and handles every menu row. */
 @Singleton
@@ -22,7 +23,8 @@ final class MenuThemeRenderer
         this.config=config;
     }
 
-    void render(BeforeMenuRender event)
+    @Subscribe(priority=-100)
+    public void onBeforeMenuRender(BeforeMenuRender event)
     {
         if (event.isConsumed() || config.menuTheme()!=ImprovedMenusConfig.MenuTheme.OSRS || !client.isMenuOpen()) return;
         Menu menu=client.getMenu();

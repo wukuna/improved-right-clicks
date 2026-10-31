@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-10-30-ground-menu-grouping";
+    static final String RELEASE = "2026-10-31-menu-startup-fix";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Presentation now offers Group duplicate ground items, combining matching menu rows into counts such as Abyssal ashes (x6); each click still performs one normal pickup. Hold your reveal modifier before opening to keep separate rows. The optional OSRS theme, Improved Looting icons/colors/priority, and individually selectable player badges remain available.").build());
+            "Improved Right-Clicks: Fixed a startup error that prevented the plugin from enabling. Presentation offers Group duplicate ground items, combining matching menu rows into counts such as Abyssal ashes (x6); each click still performs one normal pickup. Hold your reveal modifier before opening to keep separate rows. The optional OSRS theme, Improved Looting icons/colors/priority, and individually selectable player badges remain available.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

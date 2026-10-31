@@ -23,7 +23,7 @@ public class PluginLifecycleTest
     @Test public void disableReenableDoesNotLeakListenersOverlaysOrIcons() throws Exception
     {
         Client client=mock(Client.class); ClientThread thread=mock(ClientThread.class); ImprovedMenusConfig config=mock(ImprovedMenusConfig.class);
-        ConfigManager manager=mock(ConfigManager.class); EventBus bus=mock(EventBus.class); MouseManager mouse=mock(MouseManager.class);
+        ConfigManager manager=mock(ConfigManager.class); EventBus bus=spy(new EventBus(error -> { throw new AssertionError(error); })); MouseManager mouse=mock(MouseManager.class);
         ItemIcons library=mock(ItemIcons.class); library.configs=manager; library.filters=mock(FilterIcons.class);
         when(library.filters.status()).thenReturn("No imported filter active");
         when(manager.getConfig(ImprovedMenusConfig.class)).thenReturn(config);
@@ -39,15 +39,20 @@ public class PluginLifecycleTest
             bind(ChatIconManager.class).toInstance(icons); bind(ItemManager.class).toInstance(mock(ItemManager.class)); bind(TooltipManager.class).toInstance(mock(TooltipManager.class));
         } });
         ImprovedMenusPlugin plugin=injector.getInstance(ImprovedMenusPlugin.class);
-        for (int i=0;i<2;i++) { plugin.startUp(); SwingUtilities.invokeAndWait(() -> {}); plugin.shutDown(); SwingUtilities.invokeAndWait(() -> {}); }
+        for (int i=0;i<2;i++) {
+            SwingUtilities.invokeAndWait(() -> { plugin.startUp(); bus.register(plugin); }); SwingUtilities.invokeAndWait(() -> {});
+            bus.post(new net.runelite.api.events.BeforeMenuRender());
+            SwingUtilities.invokeAndWait(() -> { bus.unregister(plugin); plugin.shutDown(); }); SwingUtilities.invokeAndWait(() -> {});
+        }
         verify(mouse,times(2)).registerMouseListener(any()); verify(mouse,times(2)).unregisterMouseListener(any());
         verify(bus,times(2)).register(any(ButtonGuard.class)); verify(bus,times(2)).unregister(any(ButtonGuard.class));
+        verify(bus,times(2)).register(any(MenuThemeRenderer.class)); verify(bus,times(2)).unregister(any(MenuThemeRenderer.class));
         verify(overlays,times(2)).add(any(OptionCountOverlay.class)); verify(overlays,times(2)).remove(any(OptionCountOverlay.class));
         verify(overlays,times(2)).add(any(MenuPresentation.class)); verify(overlays,times(2)).remove(any(MenuPresentation.class));
         verify(toolbar,times(2)).addNavigation(any(NavigationButton.class)); verify(toolbar,times(2)).removeNavigation(any(NavigationButton.class));
         verify(icons,times(5)).registerChatIcon(any());
         when(config.hideSidePanel()).thenReturn(true);
-        plugin.startUp(); SwingUtilities.invokeAndWait(() -> {});
+        SwingUtilities.invokeAndWait(() -> { plugin.startUp(); bus.register(plugin); }); SwingUtilities.invokeAndWait(() -> {});
         verify(toolbar,times(2)).addNavigation(any(NavigationButton.class));
         ConfigChanged changed=new ConfigChanged(); changed.setGroup(ImprovedMenusConfig.GROUP); changed.setKey("hideSidePanel");
         when(config.hideSidePanel()).thenReturn(false);
@@ -59,8 +64,10 @@ public class PluginLifecycleTest
         // Hiding the toolbar must not disable menu guards or presentation.
         verify(bus,times(2)).unregister(any(ButtonGuard.class)); verify(overlays,times(2)).remove(any(MenuPresentation.class));
         when(config.hideSidePanel()).thenReturn(false);
-        plugin.onConfigChanged(changed); plugin.shutDown(); SwingUtilities.invokeAndWait(() -> {});
+        SwingUtilities.invokeAndWait(() -> { plugin.onConfigChanged(changed); bus.unregister(plugin); plugin.shutDown(); });
+        SwingUtilities.invokeAndWait(() -> {});
         verify(toolbar,times(3)).addNavigation(any(NavigationButton.class));
         verify(bus,times(3)).unregister(any(ButtonGuard.class));
+        verify(bus,times(3)).unregister(any(MenuThemeRenderer.class));
     }
 }

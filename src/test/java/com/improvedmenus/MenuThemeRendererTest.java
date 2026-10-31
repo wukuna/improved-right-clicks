@@ -9,6 +9,7 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.Rasterizer;
 import net.runelite.api.events.BeforeMenuRender;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.FontManager;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class MenuThemeRendererTest
 
     @Test public void drawsOnlySurfaceBeforeDelegatingAllRowsToNativeRenderer()
     {
-        BeforeMenuRender event=new BeforeMenuRender();renderer.render(event);assertTrue(event.isConsumed());
+        BeforeMenuRender event=new BeforeMenuRender();renderer.onBeforeMenuRender(event);assertTrue(event.isConsumed());
         InOrder order=inOrder(raster,client);
         order.verify(raster).fillRectangle(20,20,240,82,MenuThemeRenderer.EDGE);
         order.verify(client).drawOriginalMenu(0);
@@ -48,29 +49,52 @@ public class MenuThemeRendererTest
     @Test public void nativeClosedAndInvalidMenusAreUntouched()
     {
         when(config.menuTheme()).thenReturn(ImprovedMenusConfig.MenuTheme.NATIVE);
-        BeforeMenuRender event=new BeforeMenuRender();renderer.render(event);assertFalse(event.isConsumed());
+        BeforeMenuRender event=new BeforeMenuRender();renderer.onBeforeMenuRender(event);assertFalse(event.isConsumed());
         when(config.menuTheme()).thenReturn(ImprovedMenusConfig.MenuTheme.OSRS);
-        when(client.isMenuOpen()).thenReturn(false);renderer.render(event);assertFalse(event.isConsumed());
+        when(client.isMenuOpen()).thenReturn(false);renderer.onBeforeMenuRender(event);assertFalse(event.isConsumed());
         when(client.isMenuOpen()).thenReturn(true);when(menu.getMenuWidth()).thenReturn(0);
-        renderer.render(event);assertFalse(event.isConsumed());
+        renderer.onBeforeMenuRender(event);assertFalse(event.isConsumed());
         verifyNoInteractions(raster);verify(client,never()).drawOriginalMenu(anyInt());
     }
 
     @Test public void nestedAndAlreadyDrawnMenusRetainTheirRenderer()
     {
         when(entry.getSubMenu()).thenReturn(mock(Menu.class));
-        BeforeMenuRender event=new BeforeMenuRender();renderer.render(event);assertFalse(event.isConsumed());
-        when(entry.getSubMenu()).thenReturn(null);event.consume();renderer.render(event);
+        BeforeMenuRender event=new BeforeMenuRender();renderer.onBeforeMenuRender(event);assertFalse(event.isConsumed());
+        when(entry.getSubMenu()).thenReturn(null);event.consume();renderer.onBeforeMenuRender(event);
         verifyNoInteractions(raster);verify(client,never()).drawOriginalMenu(anyInt());
     }
 
     @Test public void changingThemeTakesEffectWithoutLeavingStateToRestore()
     {
-        renderer.render(new BeforeMenuRender());clearInvocations(raster,client);
+        renderer.onBeforeMenuRender(new BeforeMenuRender());clearInvocations(raster,client);
         when(config.menuTheme()).thenReturn(ImprovedMenusConfig.MenuTheme.NATIVE);
-        renderer.render(new BeforeMenuRender());verifyNoInteractions(raster);verify(client,never()).drawOriginalMenu(anyInt());
+        renderer.onBeforeMenuRender(new BeforeMenuRender());verifyNoInteractions(raster);verify(client,never()).drawOriginalMenu(anyInt());
         when(config.menuTheme()).thenReturn(ImprovedMenusConfig.MenuTheme.OSRS);
-        renderer.render(new BeforeMenuRender());verify(client).drawOriginalMenu(0);
+        renderer.onBeforeMenuRender(new BeforeMenuRender());verify(client).drawOriginalMenu(0);
+    }
+
+    @Test public void pluginAndThemeRegisterWithTheRealEventBusAndCanBeRemoved()
+    {
+        EventBus bus=new EventBus(error -> { throw new AssertionError(error); });
+        ImprovedMenusPlugin plugin=new ImprovedMenusPlugin();
+        bus.register(plugin);
+        bus.register(renderer);
+        BeforeMenuRender event=new BeforeMenuRender();bus.post(event);assertTrue(event.isConsumed());
+        bus.unregister(renderer);bus.unregister(plugin);
+        event=new BeforeMenuRender();bus.post(event);assertFalse(event.isConsumed());
+        bus.register(plugin);bus.register(renderer);
+        event=new BeforeMenuRender();bus.post(event);assertTrue(event.isConsumed());
+        verify(client,times(2)).drawOriginalMenu(0);
+    }
+
+    @Test public void otherMenuRenderersGetFirstRefusalOnTheRealEventBus()
+    {
+        EventBus bus=new EventBus(error -> { throw new AssertionError(error); });
+        bus.register(renderer);
+        bus.register(BeforeMenuRender.class,BeforeMenuRender::consume,0);
+        BeforeMenuRender event=new BeforeMenuRender();bus.post(event);
+        assertTrue(event.isConsumed());verifyNoInteractions(raster);verify(client,never()).drawOriginalMenu(anyInt());
     }
 
     @Test public void surfaceMatchesLootCardsAndStaysInsideNativeMenuBounds() throws Exception
@@ -88,7 +112,7 @@ public class MenuThemeRendererTest
             for(int i=0;i<names.length;i++){g.setColor(Color.BLACK);g.drawString(names[i],24,52+15*i);g.setColor(colors[i]);g.drawString(names[i],23,51+15*i);}
             return null;
         }).when(client).drawOriginalMenu(0);
-        renderer.render(new BeforeMenuRender());
+        renderer.onBeforeMenuRender(new BeforeMenuRender());
         assertEquals(new Color(55,44,28).getRGB(),image.getRGB(250,60));
         assertEquals(new Color(155,130,81).getRGB(),image.getRGB(21,21));
         assertEquals(new Color(35,38,32).getRGB(),image.getRGB(19,50));

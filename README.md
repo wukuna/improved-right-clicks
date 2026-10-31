@@ -31,7 +31,7 @@ Enable **Hide side panel** under General to remove the Improved Right-Clicks too
 
 **Availability:** Install **Improved Right-Clicks** from RuneLite's Plugin Hub. [Update #19763](https://github.com/runelite/plugin-hub/pull/19763) merged on 30 October 2026, including player badges, the OSRS theme and Improved Looting integration.
 
-The optional ground-item grouping described below is prepared for the next Hub update and is included in the latest TEST build.
+Optional ground-item grouping merged in [update #19796](https://github.com/runelite/plugin-hub/pull/19796). A subsequent fix for an error preventing the plugin from enabling is included in the latest TEST build and is being submitted as a Hub follow-up. Saved settings are preserved.
 
 **More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
