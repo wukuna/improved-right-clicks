@@ -15,6 +15,11 @@ final class ReleaseNotesNotice
 {
     static final String RELEASE = "2026-11-02-ironman-identification";
     static final String KEY = "recentChangesSeen";
+    private static final String[] UPDATES = {
+        "Added one optional Ironman identification (Beta) setting.",
+        "Identifies nearby players using chat and limited Hiscores checks.",
+        "Remembers results across hops and restarts, with timed expiry.",
+    };
     private final Client client;
     private final ClientThread thread;
     private final ConfigManager config;
@@ -37,7 +42,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "Improved Right-Clicks: Optional Ironman helmets can now identify nearby players through limited background Hiscores lookups, with chat evidence taking priority and expiring results remembered across restarts. Enable Ironman identification (Beta) under Player badges for the complete feature. Simple Menus, Profiles and Tools tabs keep the sidebar compact; expand Diagnostics under Tools when needed. Fixed a startup error that prevented the plugin from enabling. Presentation offers Group duplicate ground items, combining matching menu rows into counts such as Abyssal ashes (x6); each click still performs one normal pickup. Hold your reveal modifier before opening to keep separate rows. The optional OSRS theme, Improved Looting icons/colors/priority, and individually selectable player badges remain available.").build());
+            "[Improved Right-Clicks] Updates:<br>* " + String.join("<br>* ", UPDATES)).build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }
