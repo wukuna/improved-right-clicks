@@ -40,6 +40,13 @@ public interface ImprovedMenusConfig extends Config
     @ConfigItem(keyName="groupGroundItems", name="Group duplicate ground items", description="Combine identical ground-item actions on the same tile into one row, such as Abyssal ashes (x6). Counts matching menu entries; each click still performs one normal action. Applies when opening a menu. Independent of ground-label grouping.", position=1, section=presentationSection)
     default boolean groupGroundItems() { return false; }
 
+    @ConfigItem(keyName="playerIronmanBadge", name="Ironman helmets", description="Remember helmets observed in player chat, including group variants. Hover a menu row for the evidence source. Unavailable in PvP areas and special worlds.", position=6, section=playersSection)
+    default boolean playerIronmanBadge() { return false; }
+    @ConfigItem(keyName="playerHiscores", name="Hiscores estimates", description="With Ironman helmets enabled, send names from opened player menus to Jagex Hiscores to estimate account type. Your IP address is visible to Jagex. Estimates can be outdated; missing results stay unknown.", position=7, section=playersSection)
+    default boolean playerHiscores() { return false; }
+    @ConfigItem(keyName="playerNearbyHiscores", name="Identify nearby players", description="Requires Ironman helmets and Hiscores estimates. Automatically send loaded player names to Jagex Hiscores through a limited background queue. Remembered badges survive leaving, hopping and restarting, until expiry or cache eviction.", position=8, section=playersSection)
+    default boolean playerNearbyHiscores() { return false; }
+
     @ConfigItem(keyName="playerFriendBadge", name="Friend badge", description="Green smiley for friends the client identifies as online; does not reveal offline/private friends", position=0, section=playersSection)
     default boolean playerFriendBadge() { return false; }
     @ConfigItem(keyName="playerIgnoreBadge", name="Ignored badge", description="Red blocked icon for players on your ignore list", position=1, section=playersSection)

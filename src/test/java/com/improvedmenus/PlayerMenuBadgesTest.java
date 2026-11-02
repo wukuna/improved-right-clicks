@@ -22,6 +22,7 @@ public class PlayerMenuBadgesTest
     private final ChatIconManager icons = mock(ChatIconManager.class);
     private final PartyService party = mock(PartyService.class);
     private final TooltipManager tooltips = mock(TooltipManager.class);
+    private final PlayerAccountBadges accounts = mock(PlayerAccountBadges.class);
     private PlayerMenuBadges badges;
     private Player player;
 
@@ -34,7 +35,7 @@ public class PlayerMenuBadgesTest
         player = mock(Player.class); when(player.getName()).thenReturn("Alice");
         when(player.isFriend()).thenReturn(true);
         when(config.playerFriendBadge()).thenReturn(true);
-        badges = new PlayerMenuBadges(client, config, icons, party, tooltips);
+        badges = new PlayerMenuBadges(client, config, icons, party, accounts, tooltips);
         badges.start();
     }
 
@@ -167,4 +168,15 @@ public class PlayerMenuBadgesTest
         badges.decorate(menu); assertEquals("<img=100>Alice", entry.getTarget());
         badges.clear(); assertEquals("Alice", entry.getTarget()); assertEquals("Follow", entry.getOption());
     }
+    @Test public void ironmanHelmetCoexistsWithSocialIconsAndRestoresNativeTarget()
+    {
+        when(config.playerIronmanBadge()).thenReturn(true);
+        when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(10, true));
+        MenuEntry e = entry("<img=77>Alice"); badges.decorate(TestMenus.menu(e));
+        assertTrue(e.getTarget().startsWith("<img=10><img=100><img=77>"));
+        badges.clear(); assertEquals("<img=77>Alice", e.getTarget());
+        e = entry("<img=10>Alice"); badges.decorate(TestMenus.menu(e));
+        assertEquals("<img=100><img=10>Alice", e.getTarget());
+    }
+
 }

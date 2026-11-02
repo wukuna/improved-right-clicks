@@ -19,7 +19,7 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 - **House:** hide building actions outside building mode, plus unnecessary Mahogany Homes Remove actions. Other furniture actions stay available.
 - **Buttons:** normal, right-click-only or hidden modes for Auto Retaliate, XP Drops, bank placeholders and Report. Right-click-only checks where the click began; it does not merely move the action down the list.
 - **Presentation:** action colors, wildcard mappings, submenu support, a Shift-menu color picker/reset with configurable default color, optional ground-loot icons and additional-option counts. Counts support a minimum threshold, including/excluding Examine, showing/hiding counts on interface widgets, and a configurable text color.
-- **Player badges:** independent green friend, ignored-player, Friends Chat and RuneLite party icons, plus optional Copy name. Existing rank icons are preserved; matching icons are not added twice.
+- **Player badges:** independent green friend, ignored-player, Friends Chat and RuneLite party icons, plus optional Copy name and automatically discovered Ironman helmets. Existing rank icons are preserved; matching icons are not added twice.
 - **Menu theme:** keep Native styling or choose OSRS brown and bronze. Menus with submenus or another plugin's custom renderer retain their original appearance.
 - **Ground-item grouping:** optionally combine identical ground-item menu actions into one counted row, such as **Take Abyssal ashes (x6)**. Each click still performs one normal pickup.
 - **Settings:** configure every feature in RuneLite's normal Improved Right-Clicks settings, grouped into collapsible sections. **Hide options** groups Walk here, Cancel, Set heading, Use on Player, Telegrab NPCs, potion Empty and Examine controls. Bank stays last.
@@ -115,6 +115,21 @@ Open **Player badges** in Improved Right-Clicks settings. Each feature starts of
 - **Copy name:** one local menu option per player, copying their plain name to the clipboard.
 
 Badges appear in opened player menus. Hover a decorated row to see their meaning. Existing name colors and rank icons are preserved. Matching icons (including identical images registered under another index) are not added twice. A Friends Chat rank already conveys membership, so it suppresses the extra blue bubble. Other plugins can use different artwork for the same meaning; disable our corresponding toggle if their badge overlaps semantically. Native player actions retain their order and behavior.
+
+**Ironman helmets** remembers account icons observed in player chat, including Group, Hardcore Group and Unranked Group Ironman. **Hiscores estimates** optionally sends names from opened player menus to Jagex's official Hiscores using RuneLite's asynchronous client; Jagex receives the requested name and your IP address. Enable **Identify nearby players** as well to discover loaded players automatically, without opening a menu or selecting Lookup. All three switches start off. Open-menu targets take priority over nearby work, and open menus refresh as results arrive.
+
+Hiscores compares overall XP across the Ironman, Normal, Hardcore and Ultimate tables. Inferred helmets say **Hiscores estimate** on hover; observed chat icons take priority. Missing, contradictory or failed results remain unknown, never a claim that the player is a normal account. Group variants are observed from chat only. Jagex retains Hardcore rankings after death, so equal XP can still give an outdated estimate. No account-type flag for arbitrary nearby players is available through RuneLite's Player API.
+
+Nearby work is limited to 64 queued names, one new player every 12 seconds, two active lookups, and at most four sequential requests per player. Crowded scenes are processed fairly; identification takes time. Departing players are removed from the waiting queue, but requests already underway may finish and save their result. Failures trigger increasing delays, up to five minutes. There is no background polling of players who have left.
+
+Remembered helmets survive leaving, world hopping, plugin toggles and client restarts in the same RuneLite profile. Merely viewing a badge does not renew its evidence. Up to 256 helmets are retained; oldest stored entries can be evicted when full. Expired evidence is hidden and checked again when encountered or requested. These expiry times reduce stale status; they cannot guarantee a live account mode:
+
+| Evidence | Hardcore / Hardcore Group | Other Ironman types |
+|---|---|---|
+| Observed chat helmet | 1 hour | 24 hours |
+| Hiscores estimate | 15 minutes | 6 hours |
+
+The identification feature, including cached helmets, is unavailable in the Wilderness, PvP areas/worlds and special worlds such as Deadman or Leagues. It does not change player actions, priorities or attack options. No player positions, worlds or encounter history are saved or uploaded. Badge evidence is excluded from settings exports.
 
 **Clan rank icons (info)** points to the existing controls: **Player Indicators** controls right-click rank icons, while **Chat Channels** controls chat-message icons. Improved Right-Clicks does not change those settings or add another clan-rank badge.
 

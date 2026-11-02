@@ -43,6 +43,7 @@ final class PlayerMenuBadges extends Overlay
     private final ImprovedMenusConfig config;
     private final ChatIconManager icons;
     private final PartyService party;
+    private final PlayerAccountBadges accounts;
     private static final Pattern IMAGE = Pattern.compile("<img=(\\d+)>");
     private final TooltipManager tooltips;
     private final int[] registrations = {-1, -1, -1, -1};
@@ -55,12 +56,13 @@ final class PlayerMenuBadges extends Overlay
 
     @Inject
     PlayerMenuBadges(Client client, ImprovedMenusConfig config, ChatIconManager icons,
-        PartyService party, TooltipManager tooltips)
+        PartyService party, PlayerAccountBadges accounts, TooltipManager tooltips)
     {
         this.client = client;
         this.config = config;
         this.icons = icons;
         this.party = party;
+        this.accounts = accounts;
         this.tooltips = tooltips;
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.ALWAYS_ON_TOP);
@@ -111,6 +113,11 @@ final class PlayerMenuBadges extends Overlay
             String target = entry.getTarget();
             StringBuilder prefix = new StringBuilder();
             List<String> labels = new ArrayList<>();
+            if (config.playerIronmanBadge() && !hasAccountIcon(target))
+            {
+                PlayerAccountBadges.Badge badge = accounts.find(name);
+                if (badge != null) { prefix.append(badge.markup()); labels.add(badge.description()); }
+            }
             if (config.playerFriendBadge() && player.isFriend()) add(0, "Friend", target, prefix, labels);
             if (config.playerIgnoreBadge() && client.getIgnoreContainer() != null
                 && client.getIgnoreContainer().findByName(name) != null) add(1, "Ignored", target, prefix, labels);
@@ -156,6 +163,14 @@ final class PlayerMenuBadges extends Overlay
                 if (index >= 0 && containsIcon(target, index)) return true;
             }
         }
+        return false;
+    }
+
+    private boolean hasAccountIcon(String target)
+    {
+        if (PlayerAccountBadges.accountIcon(target) >= 0) return true;
+        for (int index : new int[]{2, 3, 10, 41, 42, 43})
+            if (containsIcon(target, index)) return true;
         return false;
     }
 
