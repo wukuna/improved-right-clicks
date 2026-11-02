@@ -32,8 +32,7 @@ public class PlayerAccountBadgesTest
     @Before public void setup()
     {
         when(saved.currentProfile()).thenReturn(true);
-        when(config.playerIronmanBadge()).thenReturn(true);
-        when(config.playerHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         doAnswer(i -> { ((Runnable) i.getArgument(0)).run(); return null; }).when(thread).invokeLater(any(Runnable.class));
         when(hiscores.lookupAsync(anyString(), any())).thenAnswer(i -> {
             CompletableFuture<HiscoreResult> future = new CompletableFuture<>();
@@ -175,12 +174,9 @@ public class PlayerAccountBadgesTest
         assertNull(badges.find("Alice")); verify(hiscores, times(3)).lookupAsync(anyString(), any());
     }
 
-    @Test public void changingEitherSwitchStopsTheNextEndpointWithoutPublishing()
+    @Test public void disablingBetaStopsTheNextEndpointWithoutPublishing()
     {
-        begin(); when(config.playerHiscores()).thenReturn(false); reply(HARDCORE_IRONMAN, XP);
-        assertNull(badges.find("Alice")); verify(hiscores, times(3)).lookupAsync(anyString(), any());
-        when(config.playerHiscores()).thenReturn(true); fresh(); begin();
-        when(config.playerIronmanBadge()).thenReturn(false); reply(HARDCORE_IRONMAN, XP);
+        begin(); when(config.playerIronmanIdentificationBeta()).thenReturn(false); reply(HARDCORE_IRONMAN, XP);
         assertNull(badges.find("Alice")); verify(hiscores, times(3)).lookupAsync(anyString(), any());
     }
 
@@ -196,18 +192,17 @@ public class PlayerAccountBadgesTest
         assertEquals(3, badges.find("Alice").icon); assertFalse(badges.find("Alice").hiscores);
     }
 
-    @Test public void noNetworkWhenEitherSwitchIsOffOrNameInvalid()
+    @Test public void noNetworkWhenBetaIsOffOrNameInvalid()
     {
-        when(config.playerHiscores()).thenReturn(false); assertNull(badges.find("Alice"));
-        when(config.playerHiscores()).thenReturn(true); when(config.playerIronmanBadge()).thenReturn(false);
-        assertNull(badges.find("Alice")); when(config.playerIronmanBadge()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(false); assertNull(badges.find("Alice"));
+        chat("<img=2>Alice"); assertNull(badges.find("Alice"));
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         assertNull(badges.find("name?player=x")); assertNull(badges.find("way too long player"));
         verifyNoInteractions(hiscores);
     }
 
     @Test public void onlyPlayerChatIsObservedAndCacheIsBounded()
     {
-        when(config.playerHiscores()).thenReturn(false);
         badges.observe(new ChatMessage(null, ChatMessageType.CONSOLE, "<img=10>Alice", "", "", 0));
         assertNull(badges.find("Alice"));
         for (int i = 0; i < 257; i++) chat("<img=2>P" + i);
@@ -285,19 +280,19 @@ public class PlayerAccountBadgesTest
         clock.addAndGet(2 * MINUTE); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
         badges.find("Carol"); badges.selected("Bob"); badges.reset(true);
         clock.addAndGet(13_000L); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
-        badges.find("Dave"); badges.selected("Bob"); when(config.playerHiscores()).thenReturn(false);
+        badges.find("Dave"); badges.selected("Bob"); when(config.playerIronmanIdentificationBeta()).thenReturn(false);
         clock.addAndGet(13_000L); badges.tick(); verify(hiscores, never()).lookupAsync("bob", IRONMAN);
     }
 
-    @Test public void restoredBadgesAvoidNetworkAndEstimatedOnesRespectTheirSwitch()
+    @Test public void restoredBadgesAvoidNetworkAndRespectBetaSwitch()
     {
         when(saved.load(anyLong())).thenReturn(Collections.singletonMap("alice", new PlayerBadgeCache.Entry("alice", 3, false, 1)));
         badges.reset(true); assertEquals(3, badges.find("Alice").icon);
         badges.reset(false); badges.reset(true); assertEquals(3, badges.find("Alice").icon);
         verifyNoInteractions(hiscores);
         when(saved.load(anyLong())).thenReturn(Collections.singletonMap("alice", new PlayerBadgeCache.Entry("alice", 10, true, 1)));
-        badges.reset(true); when(config.playerHiscores()).thenReturn(false); assertNull(badges.find("Alice"));
-        when(config.playerHiscores()).thenReturn(true); assertEquals(10, badges.find("Alice").icon);
+        badges.reset(true); when(config.playerIronmanIdentificationBeta()).thenReturn(false); assertNull(badges.find("Alice"));
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true); assertEquals(10, badges.find("Alice").icon);
         verifyNoInteractions(hiscores);
     }
 
@@ -313,7 +308,7 @@ public class PlayerAccountBadgesTest
     }
     @Test public void nearbyLookupNeedsNoMenuAndDepartureOnlyDropsWaitingPlayers()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         badges.nearby(java.util.Arrays.asList("Alice", "Bob", "Carol")); badges.tick();
         reply(IRONMAN, XP); reply(NORMAL, XP); reply(HARDCORE_IRONMAN, -1); reply(ULTIMATE_IRONMAN, -1);
         badges.nearby(Collections.singletonList("Carol")); clock.addAndGet(13_000); badges.tick();
@@ -328,7 +323,7 @@ public class PlayerAccountBadgesTest
 
     @Test public void anAlreadyStartedLookupCanFinishAndBeRememberedAfterPlayerLeaves()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         badges.nearby(Collections.singletonList("Alice")); badges.tick();
         badges.nearby(Collections.emptyList());
         reply(IRONMAN, XP); reply(NORMAL, XP); reply(HARDCORE_IRONMAN, -1); reply(ULTIMATE_IRONMAN, -1);
@@ -338,7 +333,7 @@ public class PlayerAccountBadgesTest
 
     @Test public void repeatedEncountersDoNotRenewEvidenceAndExpiredNearbyBadgesRefresh()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         begin(); reply(HARDCORE_IRONMAN, XP); reply(ULTIMATE_IRONMAN, -1);
         clearInvocations(hiscores, saved);
         clock.addAndGet(14 * MINUTE); badges.nearby(Collections.singletonList("Alice")); badges.tick();
@@ -349,7 +344,7 @@ public class PlayerAccountBadgesTest
 
     @Test public void menuTargetTakesPriorityOverNearbyQueueWithoutBypassingCooldown()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         badges.nearby(java.util.Arrays.asList("Alice", "Bob", "Carol")); badges.tick(); reply(IRONMAN, -1);
         badges.find("Carol"); badges.tick(); verify(hiscores, never()).lookupAsync("carol", IRONMAN);
         clock.addAndGet(13_000); badges.tick(); verify(hiscores).lookupAsync("carol", IRONMAN);
@@ -358,16 +353,17 @@ public class PlayerAccountBadgesTest
 
     @Test public void nearbyIsOptInAndDisableDropsItsQueue()
     {
+        when(config.playerIronmanIdentificationBeta()).thenReturn(false);
         badges.nearby(Collections.singletonList("Alice")); badges.tick(); verifyNoInteractions(hiscores);
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         badges.nearby(java.util.Arrays.asList("Alice", "Bob")); badges.tick(); reply(IRONMAN, -1);
-        when(config.playerNearbyHiscores()).thenReturn(false); clock.addAndGet(13_000); badges.tick();
+        when(config.playerIronmanIdentificationBeta()).thenReturn(false); clock.addAndGet(13_000); badges.tick();
         verify(hiscores, never()).lookupAsync("bob", IRONMAN);
     }
 
     @Test public void failuresSlowTheWholeQueueAndRetryDoesNotBecomeNormalAccountEvidence()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         badges.nearby(java.util.Arrays.asList("Alice", "Bob", "Carol")); badges.tick();
         response("alice", IRONMAN).completeExceptionally(new IllegalStateException("offline"));
         clock.addAndGet(13_000); badges.tick(); verify(hiscores, times(1)).lookupAsync(anyString(), any());
@@ -390,7 +386,7 @@ public class PlayerAccountBadgesTest
 
     @Test public void crowdedSceneQueueEventuallyReachesPlayersBeyondItsCapacity()
     {
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         List<String> names = new ArrayList<>(); for (int i = 0; i < 100; i++) names.add("P" + i);
         for (int i = 0; i < 100; i++)
         {

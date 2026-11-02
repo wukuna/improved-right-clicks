@@ -113,7 +113,7 @@ final class PlayerMenuBadges extends Overlay
             String target = entry.getTarget();
             StringBuilder prefix = new StringBuilder();
             List<String> labels = new ArrayList<>();
-            if (config.playerIronmanBadge() && !hasAccountIcon(target))
+            if (config.playerIronmanIdentificationBeta() && !hasAccountIcon(target))
             {
                 PlayerAccountBadges.Badge badge = accounts.find(name);
                 if (badge != null) { prefix.append(badge.markup()); labels.add(badge.description()); }

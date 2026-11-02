@@ -170,7 +170,7 @@ public class PlayerMenuBadgesTest
     }
     @Test public void ironmanHelmetCoexistsWithSocialIconsAndRestoresNativeTarget()
     {
-        when(config.playerIronmanBadge()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(10, true));
         MenuEntry e = entry("<img=77>Alice"); badges.decorate(TestMenus.menu(e));
         assertTrue(e.getTarget().startsWith("<img=10><img=100><img=77>"));

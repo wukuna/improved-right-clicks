@@ -94,7 +94,7 @@ public class ImprovedMenusPlugin extends Plugin
     {
         if (!active) return;
         List<String> nearby = new ArrayList<>();
-        if (config.playerNearbyHiscores() && PlayerAccountBadges.permitted(client) && client.getTopLevelWorldView() != null)
+        if (config.playerIronmanIdentificationBeta() && PlayerAccountBadges.permitted(client) && client.getTopLevelWorldView() != null)
             for (Player player : client.getTopLevelWorldView().players())
                 if (player != client.getLocalPlayer() && player.getName() != null) nearby.add(player.getName());
         accountBadges.nearby(nearby);
@@ -121,8 +121,7 @@ public class ImprovedMenusPlugin extends Plugin
         if (ImprovedMenusConfig.GROUP.equals(event.getGroup()))
         {
             if (PlayerBadgeCache.KEY.equals(event.getKey())) return;
-            if ("playerIronmanBadge".equals(event.getKey()) || "playerHiscores".equals(event.getKey())
-                || "playerNearbyHiscores".equals(event.getKey()))
+            if ("playerIronmanIdentificationBeta".equals(event.getKey()))
                 clientThread.invokeLater(() -> { if (active) accountBadges.reset(true); });
             if(itemIcons.filters!=null && (event.getKey().equals(FilterIcons.KEY) || event.getKey().equals(FilterIcons.BACKUP))) { itemIcons.filters.reload(); }
             clientThread.invokeLater(() -> { if (active) { playerBadges.clear(); presentation.stop(); lootMenu.stop(); lootCompatibility.reset(); lootCompatibility.refresh(); engine.reload(); if(client.isMenuOpen()) decorateMenu(); } });

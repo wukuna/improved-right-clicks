@@ -107,7 +107,7 @@ class PlayerAccountBadges
 
     void observe(ChatMessage event)
     {
-        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanBadge() || !PLAYER_CHAT.contains(event.getType())) return;
+        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta() || !PLAYER_CHAT.contains(event.getType())) return;
         String name = normalized(event.getName());
         if (name.isEmpty()) return;
         int icon = accountIcon(event.getName());
@@ -122,15 +122,14 @@ class PlayerAccountBadges
 
     Badge find(String displayName)
     {
-        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanBadge()) return null;
+        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta()) return null;
         String name = normalized(displayName);
         if (name.isEmpty()) return null;
         long now = clock.getAsLong();
         Cached known = cache.get(name);
         if (known != null && known.expires > now)
-            return known.badge != null && known.badge.hiscores && !config.playerHiscores() ? null : known.badge;
+            return known.badge;
         cache.remove(name);
-        if (!config.playerHiscores()) return null;
         if (waitingExplicit && !name.equals(waitingName) || pending >= 2 || nextRequest != 0 && now < nextRequest)
         {
             if (!waitingExplicit) { waitingName = name; waitingUntil = now + MINUTE; }
@@ -155,7 +154,7 @@ class PlayerAccountBadges
     /** A user-selected native Lookup takes priority over the last opened menu. */
     void selected(String displayName)
     {
-        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanBadge() || !config.playerHiscores()) return;
+        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta()) return;
         String name = normalized(displayName);
         if (name.isEmpty()) return;
         Cached known = cache.get(name);
@@ -169,7 +168,7 @@ class PlayerAccountBadges
     {
         long now = clock.getAsLong();
         if (cache.entrySet().removeIf(entry -> entry.getValue().expires <= now)) revision++;
-        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanBadge() || !config.playerHiscores())
+        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta())
         { waitingName = null; waitingExplicit = false; nearbyQueue.clear(); return; }
         if (now >= waitingUntil) { waitingName = null; waitingExplicit = false; }
         if (pending >= 2 || now < nextRequest) return;
@@ -179,7 +178,6 @@ class PlayerAccountBadges
             find(name);
             return;
         }
-        if (!config.playerNearbyHiscores()) { nearbyQueue.clear(); return; }
         while (!nearbyQueue.isEmpty())
         {
             String name = nearbyQueue.iterator().next(); nearbyQueue.remove(name);
@@ -193,8 +191,7 @@ class PlayerAccountBadges
     /** Snapshot loaded players once per game tick. Departures remove waiting work, never cached evidence. */
     void nearby(Collection<String> names)
     {
-        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanBadge()
-            || !config.playerHiscores() || !config.playerNearbyHiscores()) { nearbyQueue.clear(); return; }
+        if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta()) { nearbyQueue.clear(); return; }
         LinkedHashSet<String> present = new LinkedHashSet<>();
         for (String raw : names)
         {
@@ -220,7 +217,7 @@ class PlayerAccountBadges
     private boolean current(Lookup request)
     {
         return active && permitted.getAsBoolean() && saved.currentProfile() && request.generation == generation && cache.get(request.name) == request.entry
-            && config.playerIronmanBadge() && config.playerHiscores();
+            && config.playerIronmanIdentificationBeta();
     }
 
     private void fetch(Lookup request, HiscoreEndpoint endpoint)

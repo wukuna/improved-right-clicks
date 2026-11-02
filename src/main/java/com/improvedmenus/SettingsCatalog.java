@@ -73,9 +73,7 @@ final class SettingsCatalog
         add("playerUseItems", "Allow items on players (comma separated)", "Target protection", TargetProtections.DEFAULT_PLAYER_ITEMS);
         bool("noTelegrabNpc", "Don't Telegrab NPCs", "Target protection", false);
         add("telegrabNpcNames", "Allow Telegrab NPC names (comma separated)", "Target protection", "");
-        bool("playerIronmanBadge", "Ironman helmets", "Player badges", false);
-        bool("playerHiscores", "Hiscores estimates", "Player badges", false);
-        bool("playerNearbyHiscores", "Identify nearby players", "Player badges", false);
+        bool("playerIronmanIdentificationBeta", "Ironman identification (Beta)", "Player badges", false);
         bool("playerFriendBadge", "Friend badge", "Player badges", false);
         bool("playerIgnoreBadge", "Ignored badge", "Player badges", false);
         bool("playerFriendsChatBadge", "Friends Chat badge", "Player badges", false);

@@ -95,6 +95,9 @@ final class ProfileStore
             {
                 if (!entry.getValue().isJsonPrimitive() || !entry.getValue().getAsJsonPrimitive().isString())
                 { throw new IllegalArgumentException("Setting values must be strings"); }
+                // Retired partial opt-ins must not silently enable automatic network lookups.
+                if (entry.getKey().equals("playerIronmanBadge") || entry.getKey().equals("playerHiscores")
+                    || entry.getKey().equals("playerNearbyHiscores")) continue;
                 result.put(entry.getKey(),entry.getValue().getAsString());
             }
             validate(result); return result;

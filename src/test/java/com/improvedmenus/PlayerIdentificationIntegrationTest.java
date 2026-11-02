@@ -23,7 +23,7 @@ public class PlayerIdentificationIntegrationTest
         PlayerMenuBadges badges = new PlayerMenuBadges(client, config,
             mock(net.runelite.client.game.ChatIconManager.class), mock(net.runelite.client.party.PartyService.class),
             accounts, mock(net.runelite.client.ui.overlay.tooltip.TooltipManager.class));
-        badges.start(); when(config.playerIronmanBadge()).thenReturn(true);
+        badges.start(); when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         when(accounts.find("Alice")).thenReturn(new PlayerAccountBadges.Badge(2, false));
         WorldView view = mock(WorldView.class, RETURNS_DEEP_STUBS);
         Player self = mock(Player.class), alice = mock(Player.class), bob = mock(Player.class);
@@ -33,7 +33,7 @@ public class PlayerIdentificationIntegrationTest
         when(client.getLocalPlayer()).thenReturn(self); when(client.getTopLevelWorldView()).thenReturn(view);
         when(client.getGameState()).thenReturn(GameState.LOGGED_IN);
         when(client.getWorldType()).thenReturn(EnumSet.of(WorldType.MEMBERS));
-        when(config.playerNearbyHiscores()).thenReturn(true);
+        when(config.playerIronmanIdentificationBeta()).thenReturn(true);
         MenuEntry row = TestMenus.entry("Follow", "Alice", MenuAction.PLAYER_SECOND_OPTION, -1, 0);
         when(row.getPlayer()).thenReturn(alice); Menu menu = TestMenus.menu(row);
         when(client.getMenu()).thenReturn(menu); when(client.isMenuOpen()).thenReturn(true);

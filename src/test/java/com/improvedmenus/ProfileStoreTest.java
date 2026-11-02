@@ -23,7 +23,7 @@ public class ProfileStoreTest
     @Test public void playerBadgeSettingsRoundTripAndUndoIndependently()
     {
         Map<String,String> settings=new LinkedHashMap<>();
-        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerCopyName","playerIronmanBadge","playerHiscores","playerNearbyHiscores"})
+        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerCopyName","playerIronmanIdentificationBeta"})
         { assertEquals("false",store.snapshot().get(key)); settings.put(key,"true"); }
         store.apply(store.previewImport(store.exportSettings(settings)));
         for (String key : settings.keySet()) assertEquals("true",store.snapshot().get(key));
@@ -31,14 +31,15 @@ public class ProfileStoreTest
         assertTrue(store.undo());
         for (String key : settings.keySet()) assertEquals("false",store.snapshot().get(key));
     }
-    @Test public void helmetSettingsRemainCompatibleWithOldFullProfiles()
+    @Test public void legacyHelmetSettingsDoNotEnableAutomaticLookups()
     {
         Map<String,String> old = new LinkedHashMap<>(store.snapshot());
         old.put("playerIronmanBadge","true"); old.put("playerHiscores","true"); old.put("playerFriendBadge","true");
         String json = "{\"version\":1,\"settings\":" + new Gson().toJson(old) + "}";
         values.put("improvedmenus/savedProfiles", new Gson().toJson(Collections.singletonMap("Old",json)));
         Map<String,String> restored = store.load("Old");
-        assertEquals("true",restored.get("playerIronmanBadge")); assertEquals("true",restored.get("playerHiscores"));
+        assertFalse(restored.containsKey("playerIronmanBadge")); assertFalse(restored.containsKey("playerHiscores"));
+        assertEquals("false", restored.get("playerIronmanIdentificationBeta"));
         assertEquals(SettingsCatalog.ALL.size(), restored.size());
         assertTrue(values.keySet().stream().allMatch(key -> key.equals("improvedmenus/savedProfiles")));
         store.apply(restored); assertEquals("true", store.snapshot().get("playerFriendBadge"));
