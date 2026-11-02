@@ -17,36 +17,39 @@ final class ImprovedMenusPanel extends PluginPanel
     {
         super(true);
         this.store=store; this.engine=engine;
-        setLayout(new BorderLayout(0,8));
-        JPanel top = new JPanel(new net.runelite.client.ui.DynamicGridLayout(0,1,0,6));
-        JPanel general=section("Improved Right-Clicks");
-        general.add(help("Customize menus, icons and misclick protection."));
-        button(general,"Open Plugin Settings",openSettings);
-        top.add(general); top.add(Box.createVerticalStrut(10));
-        JPanel actions = section("Settings profiles");
-        button(actions,"Profiles",this::profiles); button(actions,"Import/export",this::imports);
-        JButton undo = new JButton("Undo"); undo.setMargin(new Insets(3,4,3,4));
-        undo.addActionListener(e -> status.setText(store.undo() ? "Undone" : "Nothing to undo")); fullWidth(undo); actions.add(undo);
-        top.add(actions); top.add(status);
-        for (Component child : top.getComponents()) { if (child instanceof JComponent) { ((JComponent)child).setAlignmentX(Component.LEFT_ALIGNMENT); } }
-        add(top,BorderLayout.NORTH);
-        preview.setEditable(false); preview.setLineWrap(true); preview.setWrapStyleWord(true); preview.setText(engine.diagnostics());
-        JPanel bottom = new JPanel(new BorderLayout());
-        bottom.add(new JLabel("<html>Log in and open a game menu<br>to inspect its options.</html>"),BorderLayout.NORTH);
-        bottom.add(new JScrollPane(preview),BorderLayout.CENTER);
-        bottom.setVisible(false);
-        JButton diagnostics = new JButton("Show diagnostics");
-        fullWidth(diagnostics);
-        diagnostics.addActionListener(e -> {
-            boolean show = !bottom.isVisible();
-            bottom.setVisible(show);
-            diagnostics.setText(show ? "Hide diagnostics" : "Show diagnostics");
-            revalidate(); repaint();
-        });
-        top.add(diagnostics);
-        add(bottom,BorderLayout.CENTER);
-        timer = new javax.swing.Timer(500,e -> { if (isShowing()) { if(bottom.isVisible()) { preview.setText(engine.diagnostics()+"\n\n"+compatibilityStatus.get()); } } });
+        setLayout(new BorderLayout(0,10));
+        setBorder(BorderFactory.createEmptyBorder(10,8,10,8));
+        JLabel title=new JLabel("Improved Right-Clicks");title.setFont(title.getFont().deriveFont(Font.BOLD));
+        add(title,BorderLayout.NORTH);
+        JTabbedPane tabs=new JTabbedPane();
+        JPanel menus=section("Menu settings");
+        button(menus,"Open plugin settings…",openSettings);
+        JButton features=new JButton("▶ Menu features…");fullWidth(features);menus.add(features);
+        JLabel details=help("Menu appearance, item icons, hidden options and misclick protection are in plugin settings.");
+        details.setVisible(false);menus.add(details);
+        features.addActionListener(e->{boolean show=!details.isVisible();details.setVisible(show);features.setText((show?"▼ ":"▶ ")+"Menu features…");menus.revalidate();});
+        JPanel profiles=section("Settings profiles");
+        button(profiles,"Saved profiles…",this::profiles);
+        button(profiles,"Import / export…",this::imports);
+        button(profiles,"Undo last change",()->status.setText(store.undo()?"Undone":"Nothing to undo"));
+        JPanel tools=section("Tools");
+        preview.setEditable(false);preview.setLineWrap(true);preview.setWrapStyleWord(true);
+        JPanel diagnostics=new JPanel(new BorderLayout(0,6));
+        diagnostics.add(help("Open a game menu to inspect its options."),BorderLayout.NORTH);
+        diagnostics.add(new JScrollPane(preview),BorderLayout.CENTER);diagnostics.setVisible(false);
+        JButton show=new JButton("▶ Diagnostics…");fullWidth(show);tools.add(show);tools.add(diagnostics);
+        Runnable refresh=()->preview.setText(engine.diagnostics()+"\n\n"+compatibilityStatus.get());
+        show.addActionListener(e->{boolean visible=!diagnostics.isVisible();diagnostics.setVisible(visible);show.setText((visible?"▼ ":"▶ ")+"Diagnostics…");if(visible)refresh.run();tools.revalidate();});
+        tabs.addTab("Menus",scroll(menus));tabs.addTab("Profiles",scroll(profiles));tabs.addTab("Tools",scroll(tools));
+        add(tabs,BorderLayout.CENTER);add(status,BorderLayout.SOUTH);
+        timer=new javax.swing.Timer(500,e->{if(isShowing() && tabs.getSelectedIndex()==2 && diagnostics.isVisible())refresh.run();});
         timer.start();
+    }
+    private static JScrollPane scroll(JPanel contents) {
+        JPanel body=new JPanel(new BorderLayout());body.add(contents,BorderLayout.NORTH);
+        JScrollPane scroll=new JScrollPane(body);scroll.setBorder(null);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);return scroll;
     }
     private static JPanel section(String title)
     {

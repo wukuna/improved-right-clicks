@@ -27,7 +27,7 @@ public class PanelTest
         SwingUtilities.invokeAndWait(() -> {
             Runnable openSettings=mock(Runnable.class);
             ImprovedMenusPanel panel=new ImprovedMenusPanel(injector.getInstance(ProfileStore.class),injector.getInstance(MenuEngine.class),openSettings,() -> "Compatibility is off");
-            components(panel,JButton.class).stream().filter(b -> "Open Plugin Settings".equals(b.getText())).findFirst().get().doClick();
+            components(panel,JButton.class).stream().filter(b -> "Open plugin settings…".equals(b.getText())).findFirst().get().doClick();
             verify(openSettings).run();
             panel.run(() -> {});
             assertFalse(components(panel,JLabel.class).stream().anyMatch(label -> label.getText().contains("Saved")));
@@ -37,7 +37,7 @@ public class PanelTest
             assertEquals(0,components(panel,JCheckBox.class).size());
             assertEquals(0,components(panel,JTextField.class).size());
             assertEquals(0,components(panel,JSpinner.class).size());
-            assertEquals(3,components(panel,JButton.class).stream().filter(b -> java.util.Arrays.asList("Profiles","Import/export","Undo").contains(b.getText())).count());
+            assertEquals(3,components(panel,JButton.class).stream().filter(b -> java.util.Arrays.asList("Saved profiles…","Import / export…","Undo last change").contains(b.getText())).count());
             verifyNoInteractions(manager);
             ProfileStore store=injector.getInstance(ProfileStore.class);
             panel.applySettings(java.util.Collections.singletonMap("potionEmpty","true"));
@@ -45,7 +45,7 @@ public class PanelTest
             panel.run(() -> {});
             assertTrue(components(panel,JLabel.class).stream().anyMatch(label -> "Settings applied".equals(label.getText())));
             clearInvocations(manager);
-            components(panel,JButton.class).stream().filter(b -> "Undo".equals(b.getText())).findFirst().get().doClick();
+            components(panel,JButton.class).stream().filter(b -> "Undo last change".equals(b.getText())).findFirst().get().doClick();
             verify(manager).setConfiguration("improvedmenus","potionEmpty","false");
             assertTrue(components(panel,JLabel.class).stream().anyMatch(label -> "Undone".equals(label.getText())));
             assertFalse(components(panel,JButton.class).stream().anyMatch(b -> b.getText().toLowerCase().contains("icon") || b.getText().toLowerCase().contains("filter")));
@@ -53,7 +53,7 @@ public class PanelTest
             panel.setSize(225,850); layout(panel);
             BufferedImage image=new BufferedImage(225,850,BufferedImage.TYPE_INT_RGB); Graphics2D g=image.createGraphics(); panel.printAll(g); g.dispose();
             try { ImageIO.write(image,"png",new File("build/ui-preview.png")); } catch (java.io.IOException e) { throw new AssertionError(e); }
-            assertEquals(2,panel.getComponentCount()); panel.stop();
+            assertEquals(3,panel.getComponentCount()); panel.stop();
         });
     }
     private static void layout(Container container) { container.doLayout(); for (Component c : container.getComponents()) { if (c instanceof Container) { layout((Container)c); } } }

@@ -2,7 +2,7 @@
 
 Make right-click menus easier to read and harder to misclick. Choose independent protections for inventory items, banking and interface buttons; hide unwanted options; and make useful actions stand out with colours, ground-item icons and an extra-options indicator. Add individually selectable friend, ignored-player, Friends Chat and RuneLite party badges, or choose the optional OSRS menu theme. Save profiles for different activities and use a reveal modifier when you need a hidden option. Protection switches start off.
 
-Configure features in the normal plugin settings; use the side panel for profiles, settings import/export and diagnostics. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.
+The sidebar starts with three simple tabs: **Menus**, **Profiles** and **Tools**. Open plugin settings from Menus, manage saved setups and import/export under Profiles, and expand Diagnostics under Tools when needed. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.
 
 Previously **Menu Workshop**. Your saved settings and profiles keep their existing storage keys.
 
@@ -23,7 +23,7 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 - **Menu theme:** keep Native styling or choose OSRS brown and bronze. Menus with submenus or another plugin's custom renderer retain their original appearance.
 - **Ground-item grouping:** optionally combine identical ground-item menu actions into one counted row, such as **Take Abyssal ashes (x6)**. Each click still performs one normal pickup.
 - **Settings:** configure every feature in RuneLite's normal Improved Right-Clicks settings, grouped into collapsible sections. **Hide options** groups Walk here, Cancel, Set heading, Use on Player, Telegrab NPCs, potion Empty and Examine controls. Bank stays last.
-- **Side panel tools:** a direct Open Plugin Settings shortcut, named profiles, twenty-step undo, validated import/export previews, and collapsible diagnostics showing the before/after entry counts and reasons. Closing a dialog leaves the last operation status unchanged; applying identical settings reports No changes. Settings are not duplicated in the side panel. Undo restores only settings changed by a profile/import/editor operation, leaving later manual changes alone. Operations that change nothing do not consume an undo step; ordinary RuneLite settings use RuneLite's normal controls.
+- **Side panel tools:** Menus, Profiles and Tools tabs with a direct settings shortcut, named profiles, twenty-step undo, validated import/export previews, and collapsible diagnostics showing the before/after entry counts and reasons. Closing a dialog leaves the last operation status unchanged; applying identical settings reports No changes. Settings are not duplicated in the side panel. Undo restores only settings changed by a profile/import/editor operation, leaving later manual changes alone. Operations that change nothing do not consume an undo step; ordinary RuneLite settings use RuneLite's normal controls.
 
 Protection switches start off. Enable the features you want in RuneLite's Improved Right-Clicks settings. Button modes start at Normal. Hold **Ctrl before opening a menu** to reveal options hidden by this plugin. The reveal modifier can be changed to Shift, Alt or None. It does not consume keys or recreate options removed by another plugin.
 
