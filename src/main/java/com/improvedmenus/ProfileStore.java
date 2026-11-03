@@ -50,7 +50,7 @@ final class ProfileStore
         Edit edit = undo.removeLast();
         Map<String,String> restore = new LinkedHashMap<>();
         edit.before.forEach((key,previous) -> {
-            // Preserve subsequent edits made through RuneLite or another plugin.
+
             if (value(SettingsCatalog.ALL.get(key)).equals(edit.after.get(key))) { restore.put(key,previous); }
         });
         write(restore); return true;
@@ -95,7 +95,7 @@ final class ProfileStore
             {
                 if (!entry.getValue().isJsonPrimitive() || !entry.getValue().getAsJsonPrimitive().isString())
                 { throw new IllegalArgumentException("Setting values must be strings"); }
-                // Retired partial opt-ins must not silently enable automatic network lookups.
+
                 if (entry.getKey().equals("playerIronmanBadge") || entry.getKey().equals("playerHiscores")
                     || entry.getKey().equals("playerNearbyHiscores")) continue;
                 result.put(entry.getKey(),entry.getValue().getAsString());

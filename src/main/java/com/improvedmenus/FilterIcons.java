@@ -86,7 +86,7 @@ class FilterIcons {
     .tradeable(c.isTradeable() || note!=null && note.isTradeable()).geTradeable(c.isGeTradeable() || note!=null && note.isGeTradeable())
     .worldPoint(WorldPoint.fromLocalInstance(client,tile.getLocalLocation())).build();
    BufferedImageProvider icon=p.program.find(facts);
-   if(found && !Objects.equals(chosen,icon)) return null; // Menu cannot distinguish ambiguous stacks.
+   if(found && !Objects.equals(chosen,icon)) return null;
    chosen=icon; found=true;
   }
   if(chosen==null) return null;

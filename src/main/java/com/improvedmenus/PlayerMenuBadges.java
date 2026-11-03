@@ -35,7 +35,6 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
-/** Adds cosmetic badges to opened player menus; never changes a native action or its priority. */
 @Singleton
 final class PlayerMenuBadges extends Overlay
 {
@@ -71,7 +70,7 @@ final class PlayerMenuBadges extends Overlay
     void start()
     {
         active = true;
-        // ChatIconManager has no unregister method. Reuse these four registrations after re-enable.
+
         for (int i = 0; i < registrations.length; i++)
             if (registrations[i] == -1) registrations[i] = icons.registerChatIcon(image(i));
     }
@@ -190,7 +189,7 @@ final class PlayerMenuBadges extends Overlay
             if (matcher.group(1).length() > 8) continue;
             int found = Integer.parseInt(matcher.group(1));
             if (found == expected) return true;
-            // Other plugins may register the same image under a different index.
+
             if (sprites != null && found < sprites.length && expected < sprites.length
                 && sameImage(sprites[found], sprites[expected])) return true;
         }
@@ -290,7 +289,7 @@ final class PlayerMenuBadges extends Overlay
         }
         boolean matches(MenuEntry entry)
         {
-            // Our hover colors can change the option before badges are restored or refreshed.
+
             return decorated.equals(entry.getTarget()) && MenuRules.plain(option).equals(MenuRules.plain(entry.getOption())) && entry.getType() == type
                 && entry.getIdentifier() == identifier && entry.getParam0() == param0 && entry.getParam1() == param1
                 && entry.getWorldViewId() == worldView;

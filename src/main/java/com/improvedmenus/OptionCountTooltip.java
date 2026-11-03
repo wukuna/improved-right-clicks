@@ -10,7 +10,6 @@ import net.runelite.client.ui.overlay.components.TooltipComponent;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
-/** Right-align only our row, leaving the shared tooltip stack owned by RuneLite. */
 final class OptionCountTooltip extends TooltipComponent
 {
     private final String text;
@@ -29,8 +28,7 @@ final class OptionCountTooltip extends TooltipComponent
 
     @Override public Dimension render(Graphics2D graphics)
     {
-        // Measure using RuneLite's own text/tag sizing, without painting or rendering
-        // another plugin's component (which could have side effects).
+
         Graphics2D measuring=(Graphics2D)graphics.create();
         Dimension own;
         int width;

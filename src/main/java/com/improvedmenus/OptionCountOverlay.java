@@ -9,7 +9,6 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-/** Queue after dynamic tooltip producers, immediately before the tooltip renderer. */
 @Singleton
 public final class OptionCountOverlay extends Overlay
 {

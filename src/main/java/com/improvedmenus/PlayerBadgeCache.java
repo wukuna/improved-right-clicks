@@ -10,7 +10,6 @@ import javax.inject.Singleton;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.ConfigProfile;
 
-/** Bounded, profile-scoped observations using RuneLite configuration, never direct file access. */
 @Singleton
 class PlayerBadgeCache
 {
@@ -58,7 +57,7 @@ class PlayerBadgeCache
             || !validIcon(badge.icon, badge.hiscores) || now <= 0) return;
         entries.values().removeIf(entry -> entry.expires() <= now);
         Entry previous = entries.get(name);
-        // Busy chat should not rewrite the saved profile for every message.
+
         if (previous != null && previous.icon == badge.icon && previous.hiscores == badge.hiscores
             && now - previous.seenAt < 5 * 60_000L) return;
         entries.remove(name);

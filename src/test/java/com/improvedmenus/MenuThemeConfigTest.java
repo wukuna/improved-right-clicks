@@ -21,7 +21,7 @@ public class MenuThemeConfigTest
         assertEquals(ImprovedMenusConfig.MenuTheme.NATIVE,config.menuTheme());
         for(ImprovedMenusConfig.MenuTheme theme:ImprovedMenusConfig.MenuTheme.values()) {
             doReturn(theme.name()).when(manager).getConfiguration(ImprovedMenusConfig.GROUP,"menuTheme");
-            // Each proxy owns a cache; reload exactly as a fresh profile would.
+
             config=(ImprovedMenusConfig)Proxy.newProxyInstance(ImprovedMenusConfig.class.getClassLoader(),
                 new Class<?>[]{ImprovedMenusConfig.class},(InvocationHandler)constructor.newInstance(manager));
             assertEquals(theme,config.menuTheme());

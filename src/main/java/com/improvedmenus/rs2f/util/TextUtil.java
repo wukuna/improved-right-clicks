@@ -2,19 +2,19 @@
  * Adapted portions from Loot Filters by riktenx.
  *
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2025, riktenx
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-// Adapted from riktenx/loot-filters (BSD-2-Clause); see loot-filters-LICENSE.txt.
+
 package com.improvedmenus.rs2f.util;
 
 import java.io.IOException;
@@ -54,19 +54,19 @@ public class TextUtil {
     }
 
     public static String abbreviate(long value) {
-        if (value >= 1e9) { // > 1b
+        if (value >= 1e9) {
             return String.format("%.2fB", (float)value / 1e9);
-        } else if (value >= 1e8) { // > 100m
+        } else if (value >= 1e8) {
             return String.format("%.0fM", (float)value / 1e6);
-        } else if (value >= 1e7) { // > 10m
+        } else if (value >= 1e7) {
             return String.format("%.1fM", (float)value / 1e6);
-        } else if (value >= 1e6) { // > 1m
+        } else if (value >= 1e6) {
             return String.format("%.2fM", (float)value / 1e6);
-        } else if (value >= 1e5) { // > 100k
+        } else if (value >= 1e5) {
             return String.format("%.0fK", (float)value / 1e3);
-        } else if (value >= 1e4) { // > 10k
+        } else if (value >= 1e4) {
             return String.format("%.1fK", (float)value / 1e3);
-        } else if (value >= 1e3) { // > 1k
+        } else if (value >= 1e3) {
             return String.format("%.2fK", (float)value / 1e3);
         }
         return Long.toString(value);

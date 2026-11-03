@@ -2,19 +2,19 @@
  * Adapted portions from Tool Required by Unmoon.
  *
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2024, Unmoon
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,7 +29,7 @@
 package com.improvedmenus;
 import java.util.Set;
 import net.runelite.api.gameval.ItemID;
-// Catalog adapted from Unmoon/tool-required; see META-INF/licenses/tool-required.txt.
+
 final class ToolCatalog {
     static final Set<Integer> AXES = Set.of(ItemID.IRON_AXE,ItemID.BRONZE_AXE,ItemID.STEEL_AXE,ItemID.MITHRIL_AXE,ItemID.ADAMANT_AXE,ItemID.RUNE_AXE,ItemID.BLACK_AXE,ItemID.DRAGON_AXE,ItemID.ANMA_AXE,ItemID.INFERNAL_AXE,ItemID.INFERNAL_AXE_EMPTY,ItemID._3A_AXE,ItemID.TRAIL_GILDED_AXE,ItemID.CRYSTAL_AXE,ItemID.CRYSTAL_AXE_INACTIVE,ItemID.GAUNTLET_AXE_HM,ItemID.GAUNTLET_AXE,ItemID.TRAILBLAZER_AXE,ItemID.LEAGUE_TRAILBLAZER_AXE,ItemID.TRAILBLAZER_AXE_EMPTY,ItemID.TRAILBLAZER_AXE_NO_INFERNAL,ItemID.BRONZE_AXE_2H,ItemID.IRON_AXE_2H,ItemID.STEEL_AXE_2H,ItemID.BLACK_AXE_2H,ItemID.MITHRIL_AXE_2H,ItemID.ADAMANT_AXE_2H,ItemID.RUNE_AXE_2H,ItemID.DRAGON_AXE_2H,ItemID.CRYSTAL_AXE_2H,ItemID.CRYSTAL_AXE_2H_INACTIVE,ItemID._3A_AXE_2H,ItemID.TRAILBLAZER_RELOADED_AXE,ItemID.TRAILBLAZER_RELOADED_AXE_EMPTY,ItemID.TRAILBLAZER_RELOADED_AXE_NO_INFERNAL);
     static final Set<Integer> PICKS = Set.of(ItemID.BRONZE_PICKAXE,ItemID.IRON_PICKAXE,ItemID.STEEL_PICKAXE,ItemID.ADAMANT_PICKAXE,ItemID.MITHRIL_PICKAXE,ItemID.RUNE_PICKAXE,ItemID.NZONE_RUNE_PICKAXE,ItemID.NZONE_MITHRIL_PICKAXE,ItemID.NZONE_IRON_PICKAXE,ItemID.DRAGON_PICKAXE,ItemID.BLACK_PICKAXE,ItemID.DRAGON_PICKAXE_PRETTY,ItemID.INFERNAL_PICKAXE,ItemID.INFERNAL_PICKAXE_EMPTY,ItemID._3A_PICKAXE,ItemID.TRAIL_GILDED_PICKAXE,ItemID.ZALCANO_PICKAXE,ItemID.CRYSTAL_PICKAXE,ItemID.CRYSTAL_PICKAXE_INACTIVE,ItemID.GAUNTLET_PICKAXE_HM,ItemID.GAUNTLET_PICKAXE,ItemID.TRAILBLAZER_PICKAXE,ItemID.LEAGUE_TRAILBLAZER_PICKAXE,ItemID.TRAILBLAZER_PICKAXE_EMPTY,ItemID.TRAILBLAZER_PICKAXE_NO_INFERNAL,ItemID.TRAILBLAZER_RELOADED_PICKAXE,ItemID.TRAILBLAZER_RELOADED_PICKAXE_EMPTY,ItemID.TRAILBLAZER_RELOADED_PICKAXE_NO_INFERNAL);

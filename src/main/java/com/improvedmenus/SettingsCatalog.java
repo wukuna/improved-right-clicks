@@ -2,7 +2,6 @@ package com.improvedmenus;
 
 import java.util.*;
 
-/** Explicit editable keys. Profiles cannot set unrelated RuneLite configuration. */
 final class SettingsCatalog
 {
     static final class Setting

@@ -50,7 +50,7 @@ public class OptionCountOrderingTest
         TooltipManager manager=injector.getInstance(TooltipManager.class);
         Overlay producer=new Overlay() {
             public Dimension render(Graphics2D graphics) {
-                // MouseHighlightOverlay inserts at the front during its dynamic pass.
+
                 manager.addFront(new Tooltip("<col=00ff00>Take Coins</col>"));
                 return null;
             }

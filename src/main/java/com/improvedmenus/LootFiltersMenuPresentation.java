@@ -10,7 +10,6 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 
-/** Optional presentation of opened Take menus. Never removes entries or changes left-click actions. */
 @Singleton
 final class LootFiltersMenuPresentation {
     @Inject private ImprovedMenusConfig config;
@@ -32,7 +31,7 @@ final class LootFiltersMenuPresentation {
             LootFiltersCompatibility.Result display=compatibility.find(entry);
             if(display==null) continue;
             slots.add(i); rows.add(new Ranked(entry,display));
-            // Hidden-row recoloring belongs to Loot Filters' own preference, not DisplayConfig.
+
             if(config.lootFiltersMenuColors() && !display.hidden && display.menuColor!=null) {
                 String before=entry.getTarget();
                 String after=String.format("<col=%06x>",display.menuColor.getRGB() & 0xffffff)
@@ -42,7 +41,7 @@ final class LootFiltersMenuPresentation {
                 }
             }
         }
-        // RuneLite draws the array in reverse. Keep every non-Take / unresolved row in its original slot.
+
         rows.sort((a,b) -> {
             int priority=Boolean.compare(b.deprioritized,a.deprioritized);
             return priority!=0 ? priority : Integer.compare(a.sort,b.sort);

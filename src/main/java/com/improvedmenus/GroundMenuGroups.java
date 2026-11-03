@@ -12,18 +12,16 @@ import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 
-/** Counts interchangeable native rows in an opened menu; never creates or invokes an action. */
 final class GroundMenuGroups
 {
     private static final Pattern COUNTED = Pattern.compile(".*(?: x [0-9,]+| \\(x[0-9,]+\\))$");
 
-    /** Returns each changed row's original target for the action-color restoration guard. */
     static Map<MenuEntry, String> collapse(Menu menu)
     {
         MenuEntry[] entries = menu.getMenuEntries();
         Map<List<Object>, Group> groups = new HashMap<>();
         List<MenuEntry> kept = new ArrayList<>(entries.length);
-        // The last array entry is the first displayed action. Keep that exact native row.
+
         for (int i = entries.length - 1; i >= 0; i--)
         {
             MenuEntry entry = entries[i];
@@ -52,7 +50,7 @@ final class GroundMenuGroups
             group.entry.setTarget(before + " (x" + group.count + ")");
         }
         Collections.reverse(kept);
-        // One replacement preserves backed entry identities and relative order.
+
         menu.setMenuEntries(kept.toArray(new MenuEntry[0]));
         return changed;
     }

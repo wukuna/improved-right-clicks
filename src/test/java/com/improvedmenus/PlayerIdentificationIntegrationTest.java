@@ -46,7 +46,7 @@ public class PlayerIdentificationIntegrationTest
         EventBus bus = new EventBus(error -> { throw new AssertionError(error); }); bus.register(plugin);
         bus.post(new GameTick()); verify(accounts).nearby(Arrays.asList("Alice", "Bob")); verify(accounts).tick();
         when(accounts.revision()).thenReturn(1L); bus.post(new ClientTick()); verify(accounts).find("Alice");
-        // A completion changes the next rendered menu without reopening it.
+
         when(accounts.revision()).thenReturn(2L); bus.post(new ClientTick()); verify(accounts, times(2)).find("Alice");
         when(client.getVarbitValue(net.runelite.api.gameval.VarbitID.INSIDE_WILDERNESS)).thenReturn(1);
         bus.post(new GameTick()); verify(accounts).nearby(java.util.Collections.emptyList());

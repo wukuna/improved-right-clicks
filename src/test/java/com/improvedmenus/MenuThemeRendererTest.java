@@ -103,7 +103,7 @@ public class MenuThemeRendererTest
         g.setColor(new Color(35,38,32));g.fillRect(0,0,300,145);
         doAnswer(call -> {g.setColor(new Color(call.getArgument(4)));g.fillRect(call.getArgument(0),call.getArgument(1),call.getArgument(2),call.getArgument(3));return null;})
             .when(raster).fillRectangle(anyInt(),anyInt(),anyInt(),anyInt(),anyInt());
-        // Sample text is for the preview only; production delegates to RuneLite.
+
         doAnswer(call -> {
             g.setFont(FontManager.getRunescapeBoldFont());g.setColor(new Color(0x5d5447));g.drawString("Choose Option",23,34);
             g.setFont(FontManager.getRunescapeFont());

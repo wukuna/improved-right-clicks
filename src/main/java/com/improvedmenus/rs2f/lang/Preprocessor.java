@@ -2,19 +2,19 @@
  * Adapted portions from Loot Filters by riktenx.
  *
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2025, riktenx
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-// Adapted from riktenx/loot-filters (BSD-2-Clause); see loot-filters-LICENSE.txt.
+
 package com.improvedmenus.rs2f.lang;
 
 import lombok.AllArgsConstructor;
@@ -41,16 +41,13 @@ import java.util.stream.Collectors;
 import static com.improvedmenus.rs2f.util.CollectionUtil.append;
 import static com.improvedmenus.rs2f.util.TextUtil.quote;
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !! DO NOT add features to the RS2F language without consulting Rikten X first. !!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @RequiredArgsConstructor
 public class Preprocessor {
     private final TokenStream tokens;
     private int expansionSteps;
 
     private final Map<String, Define> defines = new HashMap<>();
-    private final List<Token> preproc = new ArrayList<>(); // pre-expansion w/ all preproc lines removed
+    private final List<Token> preproc = new ArrayList<>();
 
     public TokenStream preprocess() throws PreprocessException {
         while (tokens.isNotEmpty()) {
@@ -119,11 +116,9 @@ public class Preprocessor {
                 } else {
                     var defineTokens = define.value.stream().map(
                                     macroToken -> {
-                                        // the location data for this token is:
-                                        // 1. the location of the original token that will be replaced
-                                        // 2. with the macroSourceLocation for the replacementToken we'll be inserting
+
                                         var newLocation = token.getLocation().withMacroSourceLocation(macroToken.getLocation().withMacroName(define.name));
-                                        // create a copy of the macro location with the updated location
+
                                         return macroToken.withLocation(newLocation);
                                     })
                             .collect(Collectors.toList());

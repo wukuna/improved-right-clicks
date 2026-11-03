@@ -36,7 +36,7 @@ final class MenuEngine
     void reload()
     {
         restoreColors();
-        // Invalid edits fail open instead of leaving invisible stale rules active.
+
         List<String> errors = new ArrayList<>();
         try { itemRules = MenuRules.parseItems(config.itemRules()); }
         catch (IllegalArgumentException e) { itemRules = Collections.emptyList(); errors.add(e.getMessage()); }
@@ -58,8 +58,7 @@ final class MenuEngine
     }
     void highlightHovered(Menu menu)
     {
-        // Release the previous hover before finding this frame's row. Only change
-        // entries whose identity and text still match our own decoration.
+
         ownedColors.forEach((entry,edit) -> {
             if (edit.matches(entry)) { entry.setOption(edit.colored); edit.after=edit.colored; }
         });
@@ -68,7 +67,7 @@ final class MenuEngine
         ColorEdit edit=ownedColors.get(hovered);
         if (edit != null && edit.matches(hovered))
         {
-            // Native rendering supplies yellow. Keep image tags and target colors.
+
             edit.after=edit.colored.replaceAll("</?col(?:=[^>]*)?>", "");
             hovered.setOption(edit.after);
         }
@@ -77,8 +76,7 @@ final class MenuEngine
     {
         if (menu.getMenuWidth() <= 0 || menu.getMenuHeight() <= 0) { return null; }
         MenuEntry[] entries=menu.getMenuEntries();
-        // Public Menu bounds are valid only while open. The API does not expose
-        // which submenu is open, so never use cached child bounds for hit testing.
+
         Point mouse=client.getMouseCanvasPosition();
         int x=mouse.getX(), y=mouse.getY();
         if (x <= menu.getMenuX() || x >= menu.getMenuX()+menu.getMenuWidth()
@@ -156,7 +154,7 @@ final class MenuEngine
             if (!hide) { kept.add(entry); }
             else if (report.length() < 12000) { report.append("\nHide ").append(MenuRules.plain(entry.getOption())).append(" — right-click menu cleanup"); }
         }
-        // Never turn Cancel into a default game action or leave an empty root menu.
+
         if (kept.isEmpty() && cancel != null) { kept.add(cancel); report.append("\nKeep Cancel — empty-menu fallback"); }
         if (kept.size() != entries.length) { menu.setMenuEntries(kept.toArray(new MenuEntry[0])); }
     }
@@ -167,9 +165,7 @@ final class MenuEngine
         List<MenuEntry> kept = new ArrayList<>(entries.length);
         for (MenuEntry entry : entries)
         {
-            // Menu Entry Swapper discovers customization targets from native Examine
-            // entries on MenuOpened. Keep both their identity and exact text until
-            // its handler has run; our lower-priority open handler cleans up after it.
+
             if (preserveSwapAnchors && isSwapAnchor(entry))
             {
                 ColorEdit edit = ownedColors.remove(entry);
@@ -192,7 +188,7 @@ final class MenuEngine
                 String color = color(target, option);
                 if (color != null)
                 {
-                    // Strip only color tags; retain images and other plugins' presentation markers.
+
                     ColorEdit prior = ownedColors.get(entry);
                     String before = prior != null && prior.after.equals(entry.getOption()) ? prior.before : entry.getOption();
                     String after = "<col=" + color + ">" + entry.getOption().replaceAll("</?col(?:=[^>]*)?>", "") + "</col>";
@@ -204,7 +200,7 @@ final class MenuEngine
             }
             kept.add(entry);
         }
-        // Do not remove one entry at a time: backed entry objects can be remapped on removal.
+
         if (kept.size() != entries.length) { menu.setMenuEntries(kept.toArray(new MenuEntry[0])); }
     }
     private static boolean isSwapAnchor(MenuEntry entry)
@@ -257,7 +253,7 @@ final class MenuEngine
             && !(config.keepLoneNpc() && loneExamine(entry, siblings))) { return "NPC Examine"; }
         if (type == MenuAction.EXAMINE_OBJECT && config.examineObject()
             && !(config.keepLoneObject() && loneExamine(entry, siblings))) { return "object Examine"; }
-        // Temple Trekking swamp vines use a knife, and quest cave entrances may start dialogue.
+
         if (type == MenuAction.GAME_OBJECT_FIRST_OPTION && c.toolsKnown)
         {
             if (config.chop() && !c.axe

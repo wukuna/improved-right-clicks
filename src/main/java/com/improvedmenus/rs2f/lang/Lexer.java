@@ -2,19 +2,19 @@
  * Adapted portions from Loot Filters by riktenx.
  *
  * BSD 2-Clause License
- * 
+ *
  * Copyright (c) 2025, riktenx
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
  *    list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,7 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-// Adapted from riktenx/loot-filters (BSD-2-Clause); see loot-filters-LICENSE.txt.
+
 package com.improvedmenus.rs2f.lang;
 
 import lombok.RequiredArgsConstructor;
@@ -39,9 +39,6 @@ import java.util.stream.Collectors;
 import static com.improvedmenus.rs2f.util.TextUtil.isLegalIdent;
 import static com.improvedmenus.rs2f.util.TextUtil.isNumeric;
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !! DO NOT add features to the RS2F language without consulting Rikten X first. !!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @RequiredArgsConstructor
 public class Lexer {
     private static final LinkedHashMap<String, Token.Type> STATICS = new LinkedHashMap<>() {{
@@ -79,7 +76,7 @@ public class Lexer {
     private final String input;
     private final List<Token> tokens = new ArrayList<>();
     private int offset = 0;
-    // 1 indexed cause editors start line and char counts at 1
+
     private int currentLineOffset = 1;
     private int currentLineNumber = 1;
 
@@ -107,7 +104,7 @@ public class Lexer {
             }
         }
 
-        return tokens.stream() // un-map escaped newlines
+        return tokens.stream()
                 .map(it -> it.getValue().equals("\\\n") ? new Token(Token.Type.WHITESPACE, "", it.getLocation()) : it)
                 .collect(Collectors.collectingAndThen(Collectors.toList(), TokenStream::new));
     }
@@ -120,8 +117,7 @@ public class Lexer {
                 tokens.add(new Token(type, value, currentLocation()));
                 currentLineOffset += value.length();
                 offset += value.length();
-                // Checking for \n here captures both escaped and unescaped newlines
-                // allowing us to properly track position within newline-escaped macros
+
                 if (value.endsWith("\n")) {
                     currentLineOffset = 1;
                     currentLineNumber += 1;
@@ -215,7 +211,7 @@ public class Lexer {
         for (int i = offset + 1; i < input.length(); ++i) {
             if (input.charAt(i) == '"') {
                 var literal = input.substring(offset + 1, i);
-                // for quotes, which the captured literal omits
+
                 tokens.add(Token.stringLiteral(literal, currentLocation()));
                 currentLineOffset += literal.length() + 2;
                 offset += literal.length() + 2;
@@ -244,7 +240,7 @@ public class Lexer {
         return new Location(inputName, currentLineNumber, currentLineOffset);
     }
 
-    private static boolean isTokenWhitespace(char c) { // newlines are tokenized separately
+    private static boolean isTokenWhitespace(char c) {
         return c == ' ' || c == '\t';
     }
 }

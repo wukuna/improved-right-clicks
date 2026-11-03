@@ -61,7 +61,7 @@ public class PluginLifecycleTest
         when(config.hideSidePanel()).thenReturn(true);
         plugin.onConfigChanged(changed); SwingUtilities.invokeAndWait(() -> {});
         verify(toolbar,times(3)).removeNavigation(any(NavigationButton.class));
-        // Hiding the toolbar must not disable menu guards or presentation.
+
         verify(bus,times(2)).unregister(any(ButtonGuard.class)); verify(overlays,times(2)).remove(any(MenuPresentation.class));
         when(config.hideSidePanel()).thenReturn(false);
         SwingUtilities.invokeAndWait(() -> { plugin.onConfigChanged(changed); bus.unregister(plugin); plugin.shutDown(); });

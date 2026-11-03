@@ -7,7 +7,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-/** Client-thread-owned cache of independent images supplied asynchronously by Loot Filters. */
 final class LootFilterImageCache {
     private static final int LIMIT=128;
     private final Map<Map<String,Object>,Entry> entries=new LinkedHashMap<>(16,.75f,true);
@@ -36,7 +35,7 @@ final class LootFilterImageCache {
                 if(error==null && image instanceof BufferedImage) {
                     BufferedImage loaded=(BufferedImage)image;
                     if(loaded.getWidth()<=1024 && loaded.getHeight()<=1024) {
-                        // Retain menu-sized pixels, not up to 128 full-size file images.
+
                         if(loaded.getWidth()>17 || loaded.getHeight()>15) {
                             entry.image=new BufferedImage(17,15,BufferedImage.TYPE_INT_ARGB);
                             var graphics=entry.image.createGraphics();

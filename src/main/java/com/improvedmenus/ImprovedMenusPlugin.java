@@ -111,7 +111,7 @@ public class ImprovedMenusPlugin extends Plugin
     {
         playerBadges.clear(); presentation.stop(); lootMenu.stop();
         engine.applyOpened(client.getMenu());
-        // Capture plain item names for color rules before adding quantity suffixes.
+
         if (config.colorPicker() && client.isKeyPressed(KeyCode.KC_SHIFT)) { addColorEditor(client.getMenu()); }
         engine.groupOpened(client.getMenu());
         decorateMenu();
@@ -143,7 +143,7 @@ public class ImprovedMenusPlugin extends Plugin
         });
     }
     private void decorateMenu() {
-        // Unwind in reverse order before reapplying asynchronously refreshed icons/colors.
+
         playerBadges.clear(); presentation.stop(); lootMenu.stop();
         lootCompatibility.beginMenu();
         try { lootMenu.apply(client.getMenu()); presentation.decorate(client.getMenu()); playerBadges.decorate(client.getMenu()); }
@@ -193,7 +193,7 @@ public class ImprovedMenusPlugin extends Plugin
     private void addColorEditor(Menu menu)
     {
         removeColorEditor();
-        // Local UI callbacks only. Game actions are never replayed.
+
         Set<String> seen = new LinkedHashSet<>();
         java.util.List<String[]> choices = new ArrayList<>();
         collect(menu,"",seen,choices,0);

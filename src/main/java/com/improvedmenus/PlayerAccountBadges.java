@@ -28,7 +28,6 @@ import net.runelite.client.hiscore.HiscoreEndpoint;
 import net.runelite.client.hiscore.HiscoreResult;
 import net.runelite.client.hiscore.HiscoreSkill;
 
-/** Client-thread state. XP comparisons estimate account mode; native chat takes precedence. */
 @Singleton
 class PlayerAccountBadges
 {
@@ -79,7 +78,7 @@ class PlayerAccountBadges
 
     static boolean permitted(Client client)
     {
-        // Cosmetic social identification is unavailable in PvP contexts, including cached helmets.
+
         if (client.getGameState() != GameState.LOGGED_IN || client.getVarbitValue(VarbitID.PVP_AREA_CLIENT) != 0
             || client.getVarbitValue(VarbitID.INSIDE_WILDERNESS) != 0 || client.getWorldType() == null) return false;
         for (WorldType type : client.getWorldType())
@@ -102,7 +101,7 @@ class PlayerAccountBadges
         revision++;
         if (enabled) saved.load(clock.getAsLong()).forEach((name, entry) ->
             put(name, new Cached(entry.badge(), entry.expires())));
-        // Retain the rate limit across settings/profile changes.
+
     }
 
     void observe(ChatMessage event)
@@ -111,7 +110,7 @@ class PlayerAccountBadges
         String name = normalized(event.getName());
         if (name.isEmpty()) return;
         int icon = accountIcon(event.getName());
-        // A missing helmet is not proof of normal mode (e.g. a moderator crown).
+
         if (icon < 0) return;
         Badge badge = new Badge(icon, false);
         long now = clock.getAsLong();
@@ -141,7 +140,7 @@ class PlayerAccountBadges
 
     private void start(String name, long now)
     {
-        // One new name per 12 seconds, at most two chains and four sequential requests per name.
+
         nearbyQueue.remove(name);
         nextRequest = now + 12_000L;
         pending++;
@@ -151,7 +150,6 @@ class PlayerAccountBadges
         fetch(request, HiscoreEndpoint.IRONMAN);
     }
 
-    /** A user-selected native Lookup takes priority over the last opened menu. */
     void selected(String displayName)
     {
         if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta()) return;
@@ -188,7 +186,6 @@ class PlayerAccountBadges
         }
     }
 
-    /** Snapshot loaded players once per game tick. Departures remove waiting work, never cached evidence. */
     void nearby(Collection<String> names)
     {
         if (!active || !permitted.getAsBoolean() || !saved.currentProfile() || !config.playerIronmanIdentificationBeta()) { nearbyQueue.clear(); return; }
@@ -204,7 +201,7 @@ class PlayerAccountBadges
         List<String> candidates = new ArrayList<>(present);
         for (int checked = 0; checked < candidates.size() && nearbyQueue.size() < 64; checked++)
         {
-            // Continue where the previous snapshot stopped so crowded scenes do not starve later players.
+
             String name = candidates.get(Math.floorMod(nearbyCursor++, candidates.size()));
             Cached known = cache.get(name);
             if (known != null && known.expires > now) continue;
@@ -226,7 +223,7 @@ class PlayerAccountBadges
         CompletableFuture<HiscoreResult> future;
         try
         {
-            // The injected core client uses Jagex's fixed official endpoint and asynchronous HTTP.
+
             future = hiscores.lookupAsync(request.name, endpoint);
         }
         catch (RuntimeException ex)
@@ -241,8 +238,7 @@ class PlayerAccountBadges
     private void complete(Lookup request, HiscoreEndpoint endpoint, HiscoreResult result, Throwable error)
     {
         if (!current(request)) { finish(request, null, 2); return; }
-        // Only a 404 (null result from HiscoreClient) means absent. Network errors or
-        // malformed responses must not downgrade a Hardcore/Ultimate account to Ironman.
+
         if (error != null || result != null && (result.getSkill(HiscoreSkill.OVERALL) == null
             || result.getSkill(HiscoreSkill.OVERALL).getLevel() <= 0
             || result.getSkill(HiscoreSkill.OVERALL).getExperience() < 0))
@@ -256,8 +252,7 @@ class PlayerAccountBadges
                 fetch(request, HiscoreEndpoint.NORMAL);
                 break;
             case NORMAL:
-                // An Ironman listing can survive de-ironing. Inconsistent snapshots
-                // also stay blank until a later lookup. Low-level players may be absent here.
+
                 if (xp >= 0 && xp != request.ironXp)
                 { finish(request, null, xp > request.ironXp ? 5 : 2); return; }
                 fetch(request, HiscoreEndpoint.HARDCORE_IRONMAN);
@@ -272,8 +267,7 @@ class PlayerAccountBadges
                 boolean ultimate = xp == request.ironXp;
                 if (xp > request.ironXp || hardcore && ultimate)
                 { finish(request, null, 2); return; }
-                // A frozen ranking with equal XP cannot prove current status. Every
-                // inferred helmet carries the estimate tooltip; observed chat replaces it.
+
                 finish(request, new Badge(hardcore ? 10 : ultimate ? 3 : 2, true), 15);
                 break;
             default:

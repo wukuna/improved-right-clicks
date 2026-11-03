@@ -6,7 +6,7 @@ The sidebar starts with three simple tabs: **Menus**, **Profiles** and **Tools**
 
 Previously **Menu Workshop**. Your saved settings and profiles keep their existing storage keys.
 
-[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Development](#development) · [Support](#support) · [License and attribution](#license-and-attribution)
+[Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
 ## Features
 
@@ -28,10 +28,6 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 Protection switches start off. Enable the features you want in RuneLite's Improved Right-Clicks settings. Button modes start at Normal. Hold **Ctrl before opening a menu** to reveal options hidden by this plugin. The reveal modifier can be changed to Shift, Alt or None. It does not consume keys or recreate options removed by another plugin.
 
 Enable **Hide side panel** under General to remove the Improved Right-Clicks toolbar button. Menu features and the Shift-menu color editor remain active. Turn it off to access profiles, import/export, undo and diagnostics again.
-
-**Availability:** Install **Improved Right-Clicks** from RuneLite's Plugin Hub. [Update #19763](https://github.com/runelite/plugin-hub/pull/19763) merged on 30 October 2026, including player badges, the OSRS theme and Improved Looting integration.
-
-Optional ground-item grouping merged in [update #19796](https://github.com/runelite/plugin-hub/pull/19796). A subsequent fix for an error preventing the plugin from enabling is included in the latest TEST build and is being submitted as a Hub follow-up. Saved settings are preserved.
 
 **More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
@@ -100,7 +96,7 @@ Loot Filters still requires the upstream provider update described above. File, 
 
 Resolved settings follow the active filter. A `filter-reloaded` message, configuration changes, profile changes and plugin changes clear the image cache. Late results from a previous filter cannot repopulate it. The final `hidden` / `hideOverlay` values are respected; temporary ground-overlay toggles and camera visibility do not hide menu icons. When identical stacks resolve differently, no custom icon is chosen arbitrarily. Submenus retain their original text.
 
-**Show diagnostics** reports whether a compatible provider responded. No response leaves custom icons absent; Both retains native icons according to its visibility option. See [compatibility details](LOOT-FILTERS-COMPATIBILITY.md).
+**Show diagnostics** reports whether a compatible provider responded. No response leaves custom icons absent; Both retains native icons according to its visibility option.
 
 The retained RS2F parser, rule evaluation helpers and preamble for previously saved imports are adapted from [riktenx/loot-filters at 993fd054](https://github.com/riktenx/loot-filters/tree/993fd054e08d42a77d3415acbb9ac7c2797726ed), under its [BSD 2-Clause license](src/main/resources/com/improvedmenus/loot-filters-LICENSE.txt). This integration changes menu presentation only; it does not render ground overlays or play sounds.
 
@@ -178,16 +174,6 @@ The recipe combines focused menu protections, readable actions and useful visual
 | [Loot Filters / Filterscape](https://github.com/riktenx/loot-filters) | Optional icon provider; adapted RS2F ingredients | Shares resolved icons and optional menu presentation through the provider interface under review. Retained parser components support previously saved imports. The provider update is required for automatic sharing. |
 
 The [Filterscape editor](https://filterscape.xyz/) prepares scripts for Loot Filters. Edit the active filter there and load it in Loot Filters; with its compatible provider, Improved Right-Clicks follows the resolved settings without a second upload. This integration affects menu presentation, not ground labels, beams or sounds. Feature overlap does not imply complete replacement. Full licenses and adaptation details remain in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## Development
-
-Java 11 is used for the build. Run `gradlew.bat test` for automated checks or `gradlew.bat run` to launch the development client. Tests cover filtering boundaries, order/callback preservation, contexts, profiles/import validation, click origin, tooltip ownership, reveal and cosmetic restoration. See the build configuration and third-party notices for dependencies and licensing.
-
-A short live smoke check is still needed for real menu rendering: try a dosed potion and bank item, one protected button through both click paths, a tree with/without an axe, a house menu outside/inside building mode, a colored submenu, and ground loot icons. Disable/re-enable once while a menu is open. Extensive repeated testing is not required, but automated checks do not verify actual in-game rendering.
-
-Ground loot icons decorate the main right-click menu only. Submenus keep their original target text because RuneLite does not expose whether a submenu is open for reliable icon positioning. Reopening a menu and disabling icons restore the target text owned by Improved Right-Clicks.
-
-Tool guards leave the knife-cut Temple Trekking swamp vines and quest Cave entrance interactions available. Ordinary axe and pickaxe protections remain independent.
 
 ## Support
 

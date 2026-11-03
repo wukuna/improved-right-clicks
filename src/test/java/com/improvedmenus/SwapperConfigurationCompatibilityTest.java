@@ -72,7 +72,7 @@ public class SwapperConfigurationCompatibilityTest
             assertArrayEquals(new MenuEntry[]{anchor}, menu.getMenuEntries());
             assertEquals("Examine", anchor.getOption());
             engine.applyOpened(menu);
-            // Worn Examine is classified as an item just like inventory Examine.
+
             assertEquals(0, menu.getMenuEntries().length);
         }
     }

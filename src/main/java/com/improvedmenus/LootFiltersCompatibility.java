@@ -16,7 +16,6 @@ import net.runelite.client.events.PluginMessage;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginManager;
 
-/** Optional resolved-display messages; never reads another plugin's files or implementation classes. */
 @Singleton
 class LootFiltersCompatibility {
     private final Client client;

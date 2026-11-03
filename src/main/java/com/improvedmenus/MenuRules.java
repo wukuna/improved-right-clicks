@@ -3,7 +3,6 @@ package com.improvedmenus;
 import java.util.*;
 import net.runelite.client.util.Text;
 
-/** Bounded, literal name matching; user input is never interpreted as a regular expression. */
 final class MenuRules
 {
     static final int MAX_LENGTH = 16384;
@@ -91,7 +90,7 @@ final class MenuRules
             result.add(new Rule(p[0], p[1], p[2].trim().substring(1).toLowerCase(Locale.ROOT)));
             if (result.size() > MAX_RULES) { throw new IllegalArgumentException("At most 200 colors are allowed"); }
         }
-        // Exact mappings take precedence over wildcard mappings, as in Menu Colorizer.
+
         result.sort(Comparator.comparing(rule -> rule.wildcard));
         return Collections.unmodifiableList(result);
     }
