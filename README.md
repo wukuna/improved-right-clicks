@@ -96,6 +96,8 @@ Enable **Loot display compatibility**, then choose Custom or Both. With Improved
 
 Loot Filters still requires the upstream provider update described above. File, sprite and item images load through the active provider; no direct access to its icon directory is used. Both plugins retain their own settings.
 
+The updated image integration supports the proposed Loot Filters API while retaining Improved Looting compatibility. Icons appear after their images finish loading and are resized for the menu.
+
 **Use loot display in menu** optionally applies evaluated Take-row sort priority while preserving existing deprioritization and non-loot rows. **Use loot display menu colors** is a separate opt-in for item-name colors when that menu switch is enabled. Hidden-row colors retain the native/provider result. Both switches start off and preserve saved action colors and normal left-click actions.
 
 Resolved settings follow the active filter. A `filter-reloaded` message, configuration changes, profile changes and plugin changes clear the image cache. Late results from a previous filter cannot repopulate it. The final `hidden` / `hideOverlay` values are respected; temporary ground-overlay toggles and camera visibility do not hide menu icons. When identical stacks resolve differently, no custom icon is chosen arbitrarily. Submenus retain their original text.

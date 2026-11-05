@@ -26,7 +26,8 @@ public class LootFilterImageProviderTest {
         BufferedImage oldImage=new BufferedImage(2,2,2),newImage=new BufferedImage(2,2,2);
         old.complete(oldImage);fresh.complete(newImage);
         assertEquals(2,client.size());client.forEach(Runnable::run);
-        assertSame(newImage,cache.get(key,()->{throw new AssertionError("Should reuse completed image");}));
+        BufferedImage cached=cache.get(key,()->{throw new AssertionError("Should reuse completed image");});
+        assertNotSame(newImage,cached);assertEquals(newImage.getRGB(0,0),cached.getRGB(0,0));
     }
     @Test public void pendingRequestsAreDeduplicatedAndFailureDoesNotEscape() {
         var cache=new LootFilterImageCache(Runnable::run);AtomicInteger calls=new AtomicInteger();
