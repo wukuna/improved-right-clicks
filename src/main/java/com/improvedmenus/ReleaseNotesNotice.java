@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-05-loot-filter-images";
+    static final String RELEASE = "2026-11-08-ground-examine-order";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "[Improved Right-Clicks] Updates:<br>* Added support for the upcoming Loot Filters image API; its provider update is still required.<br>* Preserved Improved Looting icon compatibility and refreshed icons safely after filter changes.").build());
+            "[Improved Right-Clicks] Updates:<br>* Added optional ground-item Examine grouping at the bottom of right-click menus, just above Cancel.<br>* Works with duplicate grouping on or off and retains Hide ground Examine.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

@@ -40,6 +40,9 @@ public interface ImprovedMenusConfig extends Config
     @ConfigItem(keyName="groupGroundItems", name="Group duplicate ground items", description="Combine identical ground-item actions on the same tile into one row, such as Abyssal ashes (x6). Counts matching menu entries; each click still performs one normal action. Applies when opening a menu. Independent of ground-label grouping.", position=1, section=presentationSection)
     default boolean groupGroundItems() { return false; }
 
+    @ConfigItem(keyName="groundExamineLast", name="Group ground Examine at bottom", description="Put ground-item Examine entries below other actions, just above Cancel. Works with duplicate grouping on or off. Hide ground Examine still removes them.", position=2, section=presentationSection)
+    default boolean groundExamineLast() { return false; }
+
     @ConfigItem(keyName="playerFriendBadge", name="Friend badge", description="Green smiley for friends the client identifies as online; does not reveal offline/private friends", position=0, section=playersSection)
     default boolean playerFriendBadge() { return false; }
     @ConfigItem(keyName="playerIgnoreBadge", name="Ignored badge", description="Red blocked icon for players on your ignore list", position=1, section=playersSection)

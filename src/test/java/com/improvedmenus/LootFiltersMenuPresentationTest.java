@@ -73,6 +73,22 @@ public class LootFiltersMenuPresentationTest {
         for(MenuEntry e:original) { verify(e,never()).setType(any()); verify(e,never()).setDeprioritized(anyBoolean()); }
         presentation.stop(); assertArrayEquals(original,menu.getMenuEntries());
     }
+    @Test public void lootSortingAndAsynchronousRefreshKeepExamineBelowDeprioritizedTakes() {
+        when(config.useLootFiltersInMenu()).thenReturn(true);
+        MenuEntry low=take("Low",1,1,false),high=take("High",2,100,false),hidden=take("Hidden",3,500,true);
+        MenuEntry examine=TestMenus.entry("Examine","High",MenuAction.EXAMINE_ITEM_GROUND,2,0);
+        MenuEntry walk=TestMenus.entry("Walk here","",MenuAction.WALK,-1,0);
+        MenuEntry cancel=TestMenus.entry("Cancel","",MenuAction.CANCEL,-1,0);
+        Menu menu=TestMenus.menu(cancel,hidden,examine,walk,high,low);
+        GroundMenuGroups.examineLast(menu);
+        MenuEntry[] grouped=menu.getMenuEntries().clone();
+        for(int i=0;i<3;i++) {
+            presentation.apply(menu);
+            assertArrayEquals(new MenuEntry[]{cancel,examine,hidden,walk,low,high},menu.getMenuEntries());
+        }
+        presentation.stop();
+        assertArrayEquals(grouped,menu.getMenuEntries());
+    }
     @Test public void colorsAreSeparatelyOptedInAndRestoredWithoutLosingOtherTags() {
         when(config.useLootFiltersInMenu()).thenReturn(true);
         MenuEntry item=take("Shark",385,1,false); item.setTarget("<img=5><col=ff0000>Shark (2)</col>"); Menu menu=TestMenus.menu(item);

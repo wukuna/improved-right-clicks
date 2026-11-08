@@ -53,6 +53,7 @@ final class SettingsCatalog
         bool("groundIcons", "Ground loot icons", "Presentation", false);
         add("menuTheme", "Menu theme", "Presentation", "NATIVE", "NATIVE", "OSRS");
         bool("groupGroundItems", "Group duplicate ground items", "Presentation", false);
+        bool("groundExamineLast", "Group ground Examine at bottom", "Presentation", false);
         bool("lootFiltersCompatibility", "Loot Filters compatibility", "Presentation", false);
         bool("useLootFiltersInMenu", "Use Loot Filters in menu", "Presentation", false);
         bool("lootFiltersMenuColors", "Use Loot Filters menu colors", "Colors", false);

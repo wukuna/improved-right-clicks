@@ -12,7 +12,7 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 
 - **Inventory:** protect potion Empty, hide selected item actions by name, and support item-on-item Use targets.
 - **Bank:** independently hide inventory Wield, Wear, Drink and Eat while the bank is open. Deposit and withdraw actions are preserved.
-- **Examine:** separate inventory, ground-item, NPC and scenery switches, with options to keep Examine when it is the only action.
+- **Examine:** separate inventory, ground-item, NPC and scenery switches, with options to keep Examine when it is the only action. Optionally group ground-item Examine entries at the bottom, just above Cancel.
 - **Menu cleanup:** independently hide Cancel, Walk here and Set heading in opened right-click menus. Normal left-click walking/heading and button-protection fallback remain available. Cancel is retained when hiding it would leave an empty menu.
 - **Target protection:** hide item Use on players, with a configurable allowed-item list; spell casts and other player actions are preserved. Hide Telekinetic Grab on NPCs while preserving ground-item casts, other spells, known useful targets and custom NPC-name exceptions.
 - **Tools:** hide tree Chop/Cut or rock Mine when the required axe or pickaxe is neither carried nor equipped. Unknown inventory state leaves actions available.
@@ -81,6 +81,8 @@ The editor accepts at most 200 rules per field. Invalid manual configuration edi
 ### Ground-menu icons and loot displays
 
 Enable **Presentation > Group duplicate ground items** to combine matching actions for the same item on the same tile. It starts off and works without Ground Items or Improved Looting enabled. Reopen the menu after changing it. Hold your reveal modifier before opening to see separate entries.
+
+**Presentation > Group ground Examine at bottom** puts ground-item Examine entries below all other actions, just above Cancel. It starts off and works with duplicate grouping on or off. Take actions retain their order, including deprioritized loot below Walk here. **Hide ground Examine** continues to remove matching entries. Reopen the menu after changing the option; the reveal modifier bypasses it. It is included in saved profiles, imports and undo.
 
 The count represents identical menu entries, not a Take-all action. Different tiles, item variants, displayed quantities, colors, priorities and custom callbacks remain separate. Entries already counted by Ground Items are left alone. Existing icons and menu themes continue to work; ground-label/card grouping remains a separate Improved Looting setting. The switch is included in profiles, imports and undo.
 

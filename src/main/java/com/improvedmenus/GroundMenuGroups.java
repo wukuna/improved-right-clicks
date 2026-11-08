@@ -57,6 +57,16 @@ final class GroundMenuGroups
         return changed;
     }
 
+    static void examineLast(Menu menu)
+    {
+        MenuEntry[] entries = menu.getMenuEntries();
+        MenuEntry[] ordered = entries.clone();
+        Arrays.sort(ordered, java.util.Comparator.comparingInt(entry ->
+            entry.getType() == MenuAction.CANCEL ? 0 :
+                entry.getType() == MenuAction.EXAMINE_ITEM_GROUND ? 1 : 2));
+        if (!Arrays.equals(entries, ordered)) menu.setMenuEntries(ordered);
+    }
+
     private static boolean eligible(MenuEntry entry)
     {
         if (entry.onClick() != null || entry.getSubMenu() != null

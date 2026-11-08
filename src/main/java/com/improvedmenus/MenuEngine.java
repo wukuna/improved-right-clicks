@@ -98,14 +98,18 @@ final class MenuEngine
     { apply(menu,false); }
     void groupOpened(Menu menu)
     {
-        if (menu == null || !config.groupGroundItems() || reveal.isRevealed()) return;
-        Map<MenuEntry, String> changed = GroundMenuGroups.collapse(menu);
-        changed.forEach((entry, before) -> {
-            ColorEdit edit = ownedColors.get(entry);
-            if (edit != null && edit.after.equals(entry.getOption()) && edit.target.equals(MenuRules.plain(before)))
-                edit.target = MenuRules.plain(entry.getTarget());
-        });
-        if (!changed.isEmpty()) diagnostics += "\nGrouped duplicate ground-item actions in the opened menu.";
+        if (menu == null || reveal.isRevealed()) return;
+        if (config.groupGroundItems())
+        {
+            Map<MenuEntry, String> changed = GroundMenuGroups.collapse(menu);
+            changed.forEach((entry, before) -> {
+                ColorEdit edit = ownedColors.get(entry);
+                if (edit != null && edit.after.equals(entry.getOption()) && edit.target.equals(MenuRules.plain(before)))
+                    edit.target = MenuRules.plain(entry.getTarget());
+            });
+            if (!changed.isEmpty()) diagnostics += "\nGrouped duplicate ground-item actions in the opened menu.";
+        }
+        if (config.groundExamineLast()) GroundMenuGroups.examineLast(menu);
     }
     private void apply(Menu menu,boolean capture)
     {

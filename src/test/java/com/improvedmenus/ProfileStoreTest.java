@@ -55,6 +55,19 @@ public class ProfileStoreTest
         assertTrue(store.undo()); assertEquals("false", store.snapshot().get("groupGroundItems"));
         assertEquals("*:Take:#00ff00", values.get("improvedmenus/colors"));
     }
+    @Test public void groundExamineOrderingRoundTripsIndependentlyOfHidingAndCollapsing()
+    {
+        values.put("improvedmenus/examineGround", "true");
+        values.put("improvedmenus/groupGroundItems", "true");
+        assertEquals("false", store.snapshot().get("groundExamineLast"));
+        store.apply(store.previewImport(store.exportSettings(Collections.singletonMap("groundExamineLast", "true"))));
+        store.save("Examine last");
+        assertEquals("true", store.load("Examine last").get("groundExamineLast"));
+        assertTrue(store.undo());
+        assertEquals("false", store.snapshot().get("groundExamineLast"));
+        assertEquals("true", store.snapshot().get("examineGround"));
+        assertEquals("true", store.snapshot().get("groupGroundItems"));
+    }
     @Test public void menuThemeRoundTripsAndUndoLeavesOtherSettingsAlone()
     {
         values.put("improvedmenus/colors","*:Take:#00ff00");
