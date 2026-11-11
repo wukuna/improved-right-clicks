@@ -20,7 +20,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-@PluginDescriptor(name="Improved Right-Clicks", description = "Tidy right-click menus with optional misclick protection, item rules, action colours, loot icons, player badges, extra-option indicators and saved profiles.", tags={"menu","bank","inventory","misclick","examine","color"})
+@PluginDescriptor(name="Improved Right-Clicks", description = "Tidy right-click menus with misclick protection, item rules, action colors, loot icons, player badges and saved profiles.", tags={"menu","bank","inventory","misclick","examine","color"})
 public class ImprovedMenusPlugin extends Plugin
 {
     @Inject private Client client;
