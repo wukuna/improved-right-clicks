@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-    static final String RELEASE = "2026-11-08-ground-examine-order";
+    static final String RELEASE = "2026-11-13-account-badges-and-icon";
     static final String KEY = "recentChangesSeen";
     private final Client client;
     private final ClientThread thread;
@@ -37,7 +37,7 @@ final class ReleaseNotesNotice
         if (!active || client.getGameState() != GameState.LOGGED_IN
             || RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY))) return;
         chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-            "[Improved Right-Clicks] Updates:<br>* Added optional ground-item Examine grouping at the bottom of right-click menus, just above Cancel.<br>* Works with duplicate grouping on or off and retains Hide ground Examine.").build());
+            "[Improved Right-Clicks] Updates:<br>* Optionally show Ironman and moderator badges in player menus using account icons observed in chat.<br>* Remember last-known badges across logins, profiles and client restarts; newer chat updates them.<br>* New menu-and-cursor sidebar icon with an amber accent.").build());
         config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
     }
 }

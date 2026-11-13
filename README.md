@@ -50,3 +50,9 @@ See the [full guide](docs/guide.md) for rule examples, item exceptions, badges, 
 ## License and attribution
 
 The project uses [BSD 2-Clause](LICENSE). Adapted projects and bundled RS2F components retain their notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the resources. Additional project credits are retained in the [full guide](docs/guide.md#inspiration-and-recipe).
+
+## Account badges from chat
+
+Enable **Account badge from chat** to show last-known Ironman and moderator icons beside player menu entries. Badges come from incoming player chat; the plugin does not query an external service or infer an unseen player's account type. Newer chat updates or clears an older observation.
+
+The local cache remembers up to 10,000 players across logins, RuneLite profiles and client restarts. It retains the newest observations when full and merges updates from multiple local clients. These badges describe the last observed status, which can become outdated when an account changes status or name.

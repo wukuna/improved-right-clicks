@@ -40,6 +40,7 @@ public class ImprovedMenusPlugin extends Plugin
     @Inject private LootFiltersCompatibility lootCompatibility;
     @Inject private LootFiltersMenuPresentation lootMenu;
     @Inject private PlayerMenuBadges playerBadges;
+    @Inject private AccountBadgeStore accountBadgeStore;
     @Inject private ReleaseNotesNotice releaseNotes;
     private ImprovedMenusPanel panel;
     private NavigationButton navigation;
@@ -53,6 +54,7 @@ public class ImprovedMenusPlugin extends Plugin
     @Override protected void startUp()
     {
         active=true;
+        accountBadgeStore.start(playerBadges.accountBadges(), this::getPluginDirectory);
         presentation.setItemIcons(itemIcons);
         if(itemIcons.filters!=null) { itemIcons.filters.reload(); }
         renameNotice.startUp(); releaseNotes.startUp();
@@ -64,6 +66,7 @@ public class ImprovedMenusPlugin extends Plugin
     @Override protected void shutDown()
     {
         active=false;
+        accountBadgeStore.stop();
         eventBus.unregister(menuTheme);
         renameNotice.shutDown(); releaseNotes.shutDown();
         eventBus.unregister(buttons); buttons.shutDown(); overlays.remove(presentation); overlays.remove(optionCounts); overlays.remove(playerBadges);
@@ -72,6 +75,14 @@ public class ImprovedMenusPlugin extends Plugin
             if (panel != null) { panel.stop(); panel=null; }
             if (navigation != null) { toolbar.removeNavigation(navigation); navigation=null; }
         });
+    }
+    @Subscribe public void onClientShutdown(net.runelite.client.events.ClientShutdown event)
+    {
+        event.waitFor(accountBadgeStore.flush());
+    }
+    @Subscribe(priority=100) public void onChatMessage(ChatMessage event)
+    {
+        if (active && client.getGameState() == GameState.LOGGED_IN) playerBadges.observeAccountBadge(event);
     }
     @Subscribe(priority=-0.5f) public void onPostMenuSort(PostMenuSort event)
     { if (!client.isMenuOpen()) { engine.apply(client.getMenu()); } }
@@ -224,8 +235,6 @@ public class ImprovedMenusPlugin extends Plugin
     }
     private static BufferedImage icon()
     {
-        BufferedImage image=new BufferedImage(48,48,BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g=image.createGraphics(); g.setColor(new Color(38,42,49)); g.fillRoundRect(2,2,44,44,10,10);
-        g.setColor(new Color(223,174,65)); for (int y=12;y<40;y+=10) { g.fillRoundRect(10,y,28,4,3,3); } g.dispose(); return image;
+        return net.runelite.client.util.ImageUtil.loadImageResource(ImprovedMenusPlugin.class, "sidebar-icon.png");
     }
 }

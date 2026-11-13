@@ -23,7 +23,7 @@ public class ProfileStoreTest
     @Test public void playerBadgeSettingsRoundTripAndUndoIndependently()
     {
         Map<String,String> settings=new LinkedHashMap<>();
-        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerCopyName"})
+        for (String key : new String[]{"playerFriendBadge","playerIgnoreBadge","playerFriendsChatBadge","playerPartyBadge","playerCopyName","playerAccountBadge"})
         { assertEquals("false",store.snapshot().get(key)); settings.put(key,"true"); }
         store.apply(store.previewImport(store.exportSettings(settings)));
         for (String key : settings.keySet()) assertEquals("true",store.snapshot().get(key));

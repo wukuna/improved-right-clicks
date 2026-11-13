@@ -47,6 +47,7 @@ final class PlayerMenuBadges extends Overlay
     private final TooltipManager tooltips;
     private final int[] registrations = {-1, -1, -1, -1};
     private final Map<MenuEntry, Edit> edits = new IdentityHashMap<>();
+    private final ObservedAccountBadges accountBadges = new ObservedAccountBadges();
     private final Map<MenuEntry, String> copies = new IdentityHashMap<>();
     private Menu copyMenu;
     private boolean active;
@@ -75,6 +76,13 @@ final class PlayerMenuBadges extends Overlay
     }
 
     void shutdown() { active = false; clear(); }
+
+    ObservedAccountBadges accountBadges() { return accountBadges; }
+
+    void observeAccountBadge(net.runelite.api.events.ChatMessage event)
+    {
+        if (active && config.playerAccountBadge()) accountBadges.observe(event.getType(), event.getName());
+    }
 
     void clear()
     {
@@ -111,6 +119,7 @@ final class PlayerMenuBadges extends Overlay
             String target = entry.getTarget();
             StringBuilder prefix = new StringBuilder();
             List<String> labels = new ArrayList<>();
+            if (config.playerAccountBadge()) addAccountBadge(name, target, prefix, labels);
             if (config.playerFriendBadge() && player.isFriend()) add(0, "Friend", target, prefix, labels);
             if (config.playerIgnoreBadge() && client.getIgnoreContainer() != null
                 && client.getIgnoreContainer().findByName(name) != null) add(1, "Ignored", target, prefix, labels);
@@ -136,6 +145,17 @@ final class PlayerMenuBadges extends Overlay
                 .onClick(e -> { if (active && generation == callbackGeneration && config.playerCopyName()) clipboard.accept(name); });
             copies.put(copy, name);
         });
+    }
+
+    private void addAccountBadge(String name, String target, StringBuilder prefix, List<String> labels)
+    {
+        ObservedAccountBadges.Badge badge = accountBadges.find(name);
+        if (badge == null || ObservedAccountBadges.fromName(target) != null) return;
+        int index = badge.icon.getIndex();
+        IndexedSprite[] sprites = client.getModIcons();
+        if (sprites == null || index >= sprites.length || sprites[index] == null || containsIcon(target, index)) return;
+        prefix.append(badge.icon);
+        labels.add(badge.label + " (last observed in chat)");
     }
 
     private void add(int kind, String label, String target, StringBuilder prefix, List<String> labels)

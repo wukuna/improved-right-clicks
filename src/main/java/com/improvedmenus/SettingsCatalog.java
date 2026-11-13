@@ -79,6 +79,7 @@ final class SettingsCatalog
         bool("playerFriendsChatBadge", "Friends Chat badge", "Player badges", false);
         bool("playerPartyBadge", "RuneLite party badge", "Player badges", false);
         bool("playerCopyName", "Copy name", "Player badges", false);
+        bool("playerAccountBadge", "Account badge from chat", "Player badges", false);
         add("playerClanRankInfo", "Clan rank icons (info)", "Player badges", "Player Indicators / Chat Channels");
         bool("bankWield", "Hide Wield", "Bank", false); bool("bankWear", "Hide Wear", "Bank", false);
         bool("bankDrink", "Hide Drink", "Bank", false); bool("bankEat", "Hide Eat", "Bank", false);

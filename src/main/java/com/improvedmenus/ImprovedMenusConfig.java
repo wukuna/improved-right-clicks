@@ -53,6 +53,8 @@ public interface ImprovedMenusConfig extends Config
     default boolean playerPartyBadge() { return false; }
     @ConfigItem(keyName="playerCopyName", name="Copy name", description="Add a local Copy name option to opened player menus. Copies the plain player name to your clipboard.", position=4, section=playersSection)
     default boolean playerCopyName() { return false; }
+    @ConfigItem(keyName="playerAccountBadge", name="Account badge from chat", description="Show last-known Ironman and moderator badges observed in incoming chat. Remembers up to 10,000 players locally across profiles and restarts; newer chat updates their status.", position=6, section=playersSection)
+    default boolean playerAccountBadge() { return false; }
     @ConfigItem(keyName="playerClanRankInfo", name="Clan rank icons (info)", description="Enable or disable right-click rank icons in Player Indicators. Enable or disable chat-message icons in Chat Channels. This text is informational and does not change either plugin.", position=5, section=playersSection)
     default String playerClanRankInfo() { return "Player Indicators / Chat Channels"; }
 
