@@ -49,8 +49,13 @@ public class ButtonGuardTest
     }
     private void press(boolean open)
     {
+        press(open, false);
+    }
+    private void press(boolean open, boolean shift)
+    {
         when(client.isMenuOpen()).thenReturn(open);
-        listener.get().mousePressed(new MouseEvent(new Canvas(),MouseEvent.MOUSE_PRESSED,1,0,1,1,1,false,MouseEvent.BUTTON1));
+        listener.get().mousePressed(new MouseEvent(new Canvas(),MouseEvent.MOUSE_PRESSED,1,
+                shift ? MouseEvent.SHIFT_DOWN_MASK : 0,1,1,1,false,MouseEvent.BUTTON1));
     }
     @Test public void rightClickOnlyBlocksDirectLeftClick()
     { when(config.autoRetaliate()).thenReturn(ClickMode.LEFT_CLICK_OFF); press(false); verify(click(button("Auto Retaliate",InterfaceID.COMBAT_INTERFACE))).consume(); }
@@ -100,6 +105,82 @@ public class ButtonGuardTest
     @Test public void nonWidgetActionsNeverMatch()
     {
         MenuEntry e=button("Auto Retaliate",InterfaceID.COMBAT_INTERFACE); when(e.getType()).thenReturn(MenuAction.NPC_FIRST_OPTION); assertNull(GuardedAction.find(e));
+    }
+    @Test public void shiftRequirementBlocksBothDirectAndMenuClicksWithoutShift()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        for (boolean open : new boolean[]{false, true})
+        {
+            press(open, false);
+            verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+        }
+    }
+    @Test public void shiftAtPhysicalClickAllowsNativeActionEvenIfReleasedBeforeDispatch()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        when(client.isKeyPressed(KeyCode.KC_SHIFT)).thenReturn(false);
+        for (boolean open : new boolean[]{false, true})
+        {
+            press(open, true);
+            MenuEntry entry = button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE);
+            verify(click(entry), never()).consume();
+            verify(entry, never()).setOption(anyString());
+            verify(entry, never()).setType(any(MenuAction.class));
+        }
+    }
+    @Test public void pressingShiftAfterTheClickDoesNotUnlockIt()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        press(false, false);
+        when(client.isKeyPressed(KeyCode.KC_SHIFT)).thenReturn(true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+    }
+    @Test public void shiftDoesNotOverrideHiddenOrRightClickOnlyProtection()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        when(config.autoRetaliate()).thenReturn(ClickMode.DISABLED);
+        press(true, true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+        when(config.autoRetaliate()).thenReturn(ClickMode.LEFT_CLICK_OFF);
+        press(false, true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+        press(true, true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE)), never()).consume();
+    }
+    @Test public void shiftProtectionDoesNotApplyToOtherButtonsOrWidgets()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        press(false, false);
+        verify(click(button("Show XP drops", InterfaceID.ORBS)), never()).consume();
+        press(false, false);
+        verify(click(button("Auto Retaliate", InterfaceID.INVENTORY)), never()).consume();
+    }
+    @Test public void shiftSnapshotIsConsumedOnceAndClearedByReset()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        press(false, true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE)), never()).consume();
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+        press(false, true);
+        guard.reset();
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+    }
+    @Test public void revealKeyDoesNotBypassExplicitShiftRequirement()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        Canvas canvas = mock(Canvas.class);
+        when(canvas.hasFocus()).thenReturn(true);
+        when(client.getCanvas()).thenReturn(canvas);
+        when(config.revealKey()).thenReturn(ImprovedMenusConfig.RevealKey.CONTROL);
+        when(client.isKeyPressed(KeyCode.KC_CONTROL)).thenReturn(true);
+        press(false, false);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE))).consume();
+    }
+    @Test public void noObservedMousePressUsesCurrentShiftState()
+    {
+        when(config.autoRetaliateRequireShift()).thenReturn(true);
+        when(client.isKeyPressed(KeyCode.KC_SHIFT)).thenReturn(true);
+        verify(click(button("Auto Retaliate", InterfaceID.COMBAT_INTERFACE)), never()).consume();
     }
     @Test public void auditAllButtonModesWithCleanupAndClickOrigins()
     {

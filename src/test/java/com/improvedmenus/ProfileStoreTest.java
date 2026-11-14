@@ -46,6 +46,18 @@ public class ProfileStoreTest
     }
     @Test public void roundTripProfiles()
     { Map<String,String> initial=store.snapshot(); assertEquals(initial,store.previewImport(store.exportSettings(initial))); }
+    @Test public void autoRetaliateShiftRequirementPersistsWithoutChangingExistingProtection()
+    {
+        values.put("improvedmenus/autoRetaliate", "LEFT_CLICK_OFF");
+        assertEquals("false", store.snapshot().get("autoRetaliateRequireShift"));
+        store.apply(store.previewImport(store.exportSettings(Collections.singletonMap("autoRetaliateRequireShift", "true"))));
+        store.save("Shift protected");
+        assertEquals("true", store.load("Shift protected").get("autoRetaliateRequireShift"));
+        assertEquals("LEFT_CLICK_OFF", store.snapshot().get("autoRetaliate"));
+        assertTrue(store.undo());
+        assertEquals("false", store.snapshot().get("autoRetaliateRequireShift"));
+        assertEquals("LEFT_CLICK_OFF", store.snapshot().get("autoRetaliate"));
+    }
     @Test public void groundGroupingRoundTripsAndUndoPreservesOtherSettings()
     {
         values.put("improvedmenus/colors", "*:Take:#00ff00");

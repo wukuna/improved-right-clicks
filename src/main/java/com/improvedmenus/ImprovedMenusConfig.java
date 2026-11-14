@@ -26,6 +26,8 @@ public interface ImprovedMenusConfig extends Config
     String playersSection = "players";
     @ConfigSection(name="Bank", description="Bank menu protections", position=9, closedByDefault=true)
     String bankSection = "bank";
+    @ConfigSection(name="Beta features", description="Optional features under testing", position=10, closedByDefault=true)
+    String betaSection = "beta";
 
     enum MenuTheme
     {
@@ -107,7 +109,9 @@ public interface ImprovedMenusConfig extends Config
     default boolean mahogany() { return false; }
     @ConfigItem(keyName="autoRetaliate", name="Auto Retaliate protection", description="Normal, right-click only or hidden", position=21, section=buttonsSection)
     default ClickMode autoRetaliate() { return ClickMode.NORMAL; }
-    @ConfigItem(keyName="xpDrops", name="XP Drops protection", description="Normal, right-click only or hidden", position=22, section=buttonsSection)
+    @ConfigItem(keyName="autoRetaliateRequireShift", name="Require Shift for Auto Retaliate", description="Hold Shift when clicking Auto Retaliate, including in its right-click menu. Other protection settings still apply.", position=0, section=betaSection)
+    default boolean autoRetaliateRequireShift() { return false; }
+    @ConfigItem(keyName="xpDrops", name="XP Drops protection", description="Normal, right-click only or hidden", position=23, section=buttonsSection)
     default ClickMode xpDrops() { return ClickMode.NORMAL; }
     @ConfigItem(keyName="alwaysSetPlaceholders", name="Bank placeholders protection", description="Normal, right-click only or hidden", position=23, section=bankSection)
     default ClickMode alwaysSetPlaceholders() { return ClickMode.NORMAL; }

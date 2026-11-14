@@ -7,6 +7,7 @@ Make right-click menus easier to read and harder to misclick. Enable the protect
 - **Avoid item misclicks:** protect potion Empty and selected inventory actions, with separate bank protections.
 - **Clean up menus:** control Examine, Cancel, Walk here and other supported entries, with exceptions and a reveal modifier.
 - **Protect buttons:** choose normal, right-click-only or hidden modes for supported controls.
+- **Protect Auto Retaliate with Shift (Beta):** enable **Beta features → Require Shift for Auto Retaliate** to require Shift when clicking its button or menu entry. Existing button protection still applies.
 - **Make actions readable:** customize action colors, extra-option counts, loot icons and Native/OSRS menu styling.
 - **Group ground loot:** combine matching ground-item entries into counted rows. Each click still performs one normal pickup.
 - **Show player relationships:** add friend, ignore-list, Friends Chat and RuneLite party badges, plus an optional Copy name entry.

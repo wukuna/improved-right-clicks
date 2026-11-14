@@ -46,6 +46,7 @@ final class SettingsCatalog
         bool("chop", "Require axe", "Tools", false); bool("mine", "Require pickaxe", "Tools", false);
         bool("house", "House menu cleanup", "House", false); bool("mahogany", "Mahogany Homes cleanup", "House", false);
         add("autoRetaliate", "Auto Retaliate", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");
+        bool("autoRetaliateRequireShift", "Require Shift for Auto Retaliate", "Beta features", false);
         add("xpDrops", "XP Drops", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");
         add("alwaysSetPlaceholders", "Bank placeholders", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");
         add("report", "Report", "Buttons", "NORMAL", "NORMAL", "LEFT_CLICK_OFF", "DISABLED");

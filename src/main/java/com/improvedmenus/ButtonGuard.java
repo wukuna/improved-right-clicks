@@ -29,10 +29,11 @@
 package com.improvedmenus;
 
 import java.awt.event.MouseEvent;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
+import net.runelite.api.KeyCode;
 import net.runelite.api.Menu;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
@@ -60,7 +61,7 @@ public class ButtonGuard
 	private MouseManager mouseManager;
 	@Inject private ClientThread clientThread;
 
-	private final AtomicBoolean leftPressStartedInMenu = new AtomicBoolean();
+	private final AtomicReference<ClickOrigin> leftPress = new AtomicReference<>();
 	private boolean autoRetaliateTooltipHiddenByPlugin;
 	private Widget ownedTooltip;
 	@Inject private RevealState reveal;
@@ -73,7 +74,7 @@ public class ButtonGuard
 		{
 			if (SwingUtilities.isLeftMouseButton(event))
 			{
-				leftPressStartedInMenu.set(client.isMenuOpen());
+				leftPress.set(new ClickOrigin(client.isMenuOpen(), event.isShiftDown()));
 			}
 			return event;
 		}
@@ -88,14 +89,14 @@ public class ButtonGuard
 	public void shutDown()
 	{
 		mouseManager.unregisterMouseListener(mouseListener);
-		leftPressStartedInMenu.set(false);
+		leftPress.set(null);
 		clientThread.invoke(this::reset);
 	}
 
 	void reset()
 	{
 		restoreAutoRetaliateTooltip();
-		leftPressStartedInMenu.set(false);
+		leftPress.set(null);
 	}
 
 	@Subscribe
@@ -143,11 +144,19 @@ public class ButtonGuard
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		boolean selectedFromOpenMenu = leftPressStartedInMenu.getAndSet(false);
+		ClickOrigin origin = leftPress.getAndSet(null);
+		boolean selectedFromOpenMenu = origin != null && origin.fromMenu;
 
 		GuardedAction action = GuardedAction.find(event.getMenuEntry());
 		if (action == null)
 		{
+			return;
+		}
+
+		if (action == GuardedAction.AUTO_RETALIATE && config.autoRetaliateRequireShift()
+			&& !(origin == null ? client.isKeyPressed(KeyCode.KC_SHIFT) : origin.shift))
+		{
+			event.consume();
 			return;
 		}
 
@@ -330,5 +339,17 @@ public class ButtonGuard
 	{
 		GuardedAction action = GuardedAction.find(entry);
 		return action != null && mode(action).removesMenuEntry();
+	}
+
+	private static final class ClickOrigin
+	{
+		private final boolean fromMenu;
+		private final boolean shift;
+
+		private ClickOrigin(boolean fromMenu, boolean shift)
+		{
+			this.fromMenu = fromMenu;
+			this.shift = shift;
+		}
 	}
 }
