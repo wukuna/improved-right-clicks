@@ -1,5 +1,7 @@
 # Improved Right-Clicks
 
+> This guide describes [Plugin Hub PR #20743](https://github.com/runelite/plugin-hub/pull/20743). Features from that update may not be in your installed Hub version yet.
+
 Make right-click menus easier to read and harder to misclick. Enable the protections you want, hide unwanted item options, color useful actions and add loot icons or player relationship badges. Save different setups for different activities.
 
 ## What you can do
@@ -7,6 +9,7 @@ Make right-click menus easier to read and harder to misclick. Enable the protect
 - **Avoid item misclicks:** protect potion Empty and selected inventory actions, with separate bank protections.
 - **Clean up menus:** control Examine, Cancel, Walk here and other supported entries, with exceptions and a reveal modifier.
 - **Protect buttons:** choose normal, right-click-only or hidden modes for supported controls.
+- **Protect Auto Retaliate with Shift (Beta):** enable **Beta features → Require Shift for Auto Retaliate** to require Shift when clicking its button or menu entry. Existing button protection still applies.
 - **Make actions readable:** customize action colors, extra-option counts, loot icons and Native/OSRS menu styling.
 - **Group ground loot:** combine matching ground-item entries into counted rows. Each click still performs one normal pickup.
 - **Show player relationships:** add friend, ignore-list, Friends Chat and RuneLite party badges, plus an optional Copy name entry.
@@ -27,7 +30,7 @@ Use one `action,item name` rule per line. Matching ignores case; `*` matches any
 
 Hold **Shift while opening a menu** for the local menu-color editor. Exact color mappings override wildcard mappings. Native rank icons and existing name colors are preserved when player badges are added.
 
-In the Hub version, **Presentation → Group ground Examine at bottom** optionally moves ground-item Examine just above Cancel without changing Take order. It works independently of duplicate grouping.
+**Presentation → Group ground Examine at bottom** optionally moves ground-item Examine just above Cancel without changing Take order. It works independently of duplicate grouping.
 
 ## Loot icons and other menu plugins
 
@@ -41,15 +44,11 @@ Automatic Loot Filters sharing needs its [provider update](https://github.com/ri
 
 Keep Menu Entry Swapper for swaps and specialist plugins for features you still use. Disable overlapping filters or color rules when comparing results. The reveal modifier cannot restore an entry removed by another plugin.
 
-## Account badges in development
+## Account badges across sessions
 
-![Local test example of an account badge alongside existing player icons and a combat level](docs/media/player-account-menu-local.png)
+Ironman and moderator badges are learned from icons observed in chat, then cached locally across logins, profiles and client restarts. Concurrent clients merge their observations. This is an observed cache, not an account-status lookup service: players not yet observed may have no badge, and later observations can correct an older entry. The cache is bounded to 10,000 names and discards the oldest entries as needed.
 
-Local test example. Account identification is development functionality and is not included in the currently Hub-pinned version.
-
-The default branch includes an optional **Ironman identification (Beta)** preview that is not in the currently Hub-pinned version. It combines observed chat icons with Hiscores estimates. It starts off; enabling Hiscores requests sends the requested name and your IP address to Jagex.
-
-Observed icons take priority. Hiscores results are labeled estimates and can be stale; unknown or contradictory results stay unknown. Group variants come from chat observations. The preview uses a bounded, expiring profile cache and disables identification in PvP/Wilderness and special worlds. See the [full explanation and expiry table](docs/guide.md#development-preview-ironman-identification) before enabling it.
+**Beta features → Require Shift for Auto Retaliate** helps prevent accidental toggles without changing the native button's action.
 
 ## Saving and support
 
@@ -60,3 +59,9 @@ See the [full guide](docs/guide.md) for rule examples, item exceptions, badges, 
 ## License and attribution
 
 The project uses [BSD 2-Clause](LICENSE). Adapted projects and bundled RS2F components retain their notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the resources. Additional project credits are retained in the [full guide](docs/guide.md#inspiration-and-recipe).
+
+## Account badges from chat
+
+Enable **Account badge from chat** to show last-known Ironman and moderator icons beside player menu entries. Badges come from incoming player chat; the plugin does not query an external service or infer an unseen player's account type. Newer chat updates or clears an older observation.
+
+The local cache remembers up to 10,000 players across logins, RuneLite profiles and client restarts. It retains the newest observations when full and merges updates from multiple local clients. These badges describe the last observed status, which can become outdated when an account changes status or name.
