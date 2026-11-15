@@ -1,5 +1,7 @@
 # Improved Right-Clicks
 
+For current account-badge persistence and Beta Auto Retaliate protection, start with the [README](../README.md).
+
 Make right-click menus easier to read and harder to misclick. Enable only the protections you want, color useful actions, add ground-item icons and player relationship badges, and save setups for different activities. Hold the reveal modifier before opening a menu to temporarily recover options hidden by this plugin. Protection switches start off.
 
 The sidebar starts with three simple tabs: **Menus**, **Profiles** and **Tools**. Open plugin settings from Menus, manage saved setups and import/export under Profiles, and expand Diagnostics under Tools when needed. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.

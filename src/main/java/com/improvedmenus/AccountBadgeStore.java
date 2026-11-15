@@ -37,6 +37,8 @@ final class AccountBadgeStore
     private Filepath root;
     private ScheduledFuture<?> task;
     private boolean warned;
+    private String previousText;
+    private Map<String, ObservedAccountBadges.Observation> previousRecords;
 
     interface Directory { Filepath get() throws IOException; }
 
@@ -125,7 +127,9 @@ final class AccountBadgeStore
                 text.append(buffer, 0, count);
             }
         }
-        JsonObject document = gson.fromJson(text.toString(), JsonObject.class);
+        String contents = text.toString();
+        if (contents.equals(previousText)) return new LinkedHashMap<>(previousRecords);
+        JsonObject document = gson.fromJson(contents, JsonObject.class);
         if (document == null || !document.has("version") || !document.get("version").isJsonPrimitive()
             || !document.getAsJsonPrimitive("version").isNumber()
             || document.get("version").getAsBigDecimal().compareTo(java.math.BigDecimal.ONE) != 0
@@ -152,6 +156,8 @@ final class AccountBadgeStore
             }
             catch (IllegalArgumentException | ArithmeticException ignored) { }
         }
+        previousRecords = new LinkedHashMap<>(result);
+        previousText = contents;
         return result;
     }
 

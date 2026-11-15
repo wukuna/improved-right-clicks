@@ -211,4 +211,19 @@ public class AccountBadgeStoreTest
         assertEquals(ObservedAccountBadges.CAPACITY, first.size());
         assertFalse(first.containsKey("player0")); assertTrue(first.containsKey("newest"));
     }
+    @Test public void unchangedReadsCanRehydrateMemoryAndSameSizeExternalEditsAreDetected() throws Exception {
+        ObservedAccountBadges cache=new ObservedAccountBadges();AccountBadgeStore first=store(cache);
+        observe(cache,"<img=2>Alice");assertTrue(first.synchronize());
+        cache.clear();assertTrue(first.synchronize());
+        assertSame(ObservedAccountBadges.Badge.IRONMAN,cache.find("Alice"));
+        java.nio.file.Path file=temporary.getRoot().toPath().resolve(AccountBadgeStore.FILE_NAME);
+        java.nio.file.attribute.FileTime modified=Files.getLastModifiedTime(file);
+        String edited=Files.readString(file).replace("alice","carol");
+        Files.writeString(file,edited);Files.setLastModifiedTime(file,modified);
+        assertTrue(first.synchronize());assertSame(ObservedAccountBadges.Badge.IRONMAN,cache.find("Carol"));
+        observe(cache,"<img=3>Bob");assertTrue(first.synchronize());
+        ObservedAccountBadges other=new ObservedAccountBadges();assertTrue(store(other).synchronize());
+        assertSame(ObservedAccountBadges.Badge.IRONMAN,other.find("Carol"));
+        assertSame(ObservedAccountBadges.Badge.ULTIMATE_IRONMAN,other.find("Bob"));
+    }
 }

@@ -42,6 +42,12 @@ Automatic Loot Filters sharing needs its [provider update](https://github.com/ri
 
 Keep Menu Entry Swapper for swaps and specialist plugins for features you still use. Disable overlapping filters or color rules when comparing results. The reveal modifier cannot restore an entry removed by another plugin.
 
+## Account badges across sessions
+
+Ironman and moderator badges are learned from icons observed in chat, then cached locally across logins, profiles and client restarts. Concurrent clients merge their observations. This is an observed cache, not an account-status lookup service: players not yet observed may have no badge, and later observations can correct an older entry. The cache is bounded to 10,000 names and discards the oldest entries as needed.
+
+**Beta features → Require Shift for Auto Retaliate** helps prevent accidental toggles without changing the native button's action.
+
 ## Saving and support
 
 Existing settings from **Menu Workshop** are retained. Saved profiles and validated imports apply this plugin’s settings; Undo restores the changes made by the relevant operation without overwriting unrelated later edits.
