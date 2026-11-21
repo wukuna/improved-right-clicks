@@ -172,6 +172,7 @@ public class AccountBadgeMenuTest
 		field(plugin, "config", f.config);
 		field(plugin, "playerBadges", f.badges);
 		field(plugin, "active", true);
+		field(plugin, "menuStyle", new MenuStyle());
 		field(plugin, "presentation", new MenuPresentation());
 		field(plugin, "lootMenu", new LootFiltersMenuPresentation());
 		field(plugin, "lootCompatibility", mock(LootFiltersCompatibility.class));
@@ -199,6 +200,7 @@ public class AccountBadgeMenuTest
 		{
 			throw new AssertionError(error);
 		});
+		field(plugin, "eventBus", bus);
 		bus.register(plugin);
 		for (GameState state : new GameState[] { GameState.HOPPING, GameState.LOGIN_SCREEN, GameState.CONNECTION_LOST })
 		{

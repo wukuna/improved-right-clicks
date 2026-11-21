@@ -12,7 +12,7 @@ public interface ImprovedMenusConfig extends Config
 	String hideOptionsSection = "hideOptions";
 	@ConfigSection(name = "Item rules", description = "Item actions and name exceptions", position = 2, closedByDefault = true)
 	String rulesSection = "rules";
-	@ConfigSection(name = "Colors", description = "Menu colors and the color editor", position = 3, closedByDefault = true)
+	@ConfigSection(name = "Appearance", description = "Saved colours and optional Right Click Styler integration", position = 3, closedByDefault = true)
 	String colorsSection = "colors";
 	@ConfigSection(name = "Tools", description = "Tool requirements", position = 4, closedByDefault = true)
 	String toolsSection = "tools";
@@ -47,7 +47,7 @@ public interface ImprovedMenusConfig extends Config
 		}
 	}
 
-	@ConfigItem(keyName = "menuTheme", name = "Menu theme", description = "OSRS uses the brown background and bronze border of Improved Looting's OSRS cards. Native keeps your current style. Menus with submenus or another plugin's menu renderer keep their native appearance.", position = 0, section = presentationSection)
+	@ConfigItem(keyName = "menuTheme", hidden = true, name = "Menu theme", description = "OSRS uses the brown background and bronze border of Improved Looting's OSRS cards. Native keeps your current style. Menus with submenus or another plugin's menu renderer keep their native appearance.", position = 0, section = presentationSection)
 	default MenuTheme menuTheme()
 	{
 		return MenuTheme.NATIVE;
@@ -202,25 +202,31 @@ public interface ImprovedMenusConfig extends Config
 		return "";
 	}
 
-	@ConfigItem(keyName = "colors", name = "Menu colors", description = "target:action:#RRGGBB separated by semicolons. * wildcard. Cosmetic only", position = 14, section = colorsSection)
+	@ConfigItem(keyName = "followMenuStyle", name = "+N options: follow Right Click Styler", description = "Use the active style supplied by a compatible Right Click Styler version. Otherwise keep your saved appearance. This does not copy or overwrite settings.", position = 13, section = colorsSection)
+	default boolean followMenuStyle()
+	{
+		return false;
+	}
+
+	@ConfigItem(keyName = "colors", hidden = true, name = "Menu colors", description = "target:action:#RRGGBB separated by semicolons. * wildcard. Cosmetic only", position = 14, section = colorsSection)
 	default String colors()
 	{
 		return "";
 	}
 
-	@ConfigItem(keyName = "enableColors", name = "Enable colors", description = "Color supported menu options, including submenus", position = 15, section = colorsSection)
+	@ConfigItem(keyName = "enableColors", name = "Use saved action colours", description = "Apply your retained colour rules. Turn off to let Right Click Styler control action colours. Your saved rules are not deleted.", position = 15, section = colorsSection)
 	default boolean enableColors()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "yellowHover", name = "Yellow hover highlight", description = "Use the native yellow highlight when hovering over a colored menu option", position = 17, section = colorsSection)
+	@ConfigItem(keyName = "yellowHover", hidden = true, name = "Yellow hover highlight", description = "Use the native yellow highlight when hovering over a colored menu option", position = 17, section = colorsSection)
 	default boolean yellowHover()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "colorPicker", name = "Shift menu color editor", description = "Hold Shift and open a menu to add local color controls", position = 16, section = colorsSection)
+	@ConfigItem(keyName = "colorPicker", hidden = true, name = "Shift menu color editor", description = "Hold Shift and open a menu to add local color controls", position = 16, section = colorsSection)
 	default boolean colorPicker()
 	{
 		return true;
@@ -322,7 +328,7 @@ public interface ImprovedMenusConfig extends Config
 		return false;
 	}
 
-	@ConfigItem(keyName = "lootFiltersMenuColors", name = "Use loot display menu colors", description = "With Use loot display in menu enabled, use its item-name colors in opened Take menus. Does not change your saved action colors or icon source.", position = 18, section = colorsSection)
+	@ConfigItem(keyName = "lootFiltersMenuColors", name = "Use loot display menu colors", description = "With Use loot display in menu enabled, use its item-name colors in opened Take menus. Works independently of saved action colours and Right Click Styler.", position = 18, section = presentationSection)
 	default boolean lootFiltersMenuColors()
 	{
 		return false;
@@ -430,13 +436,13 @@ public interface ImprovedMenusConfig extends Config
 		return CountAnchor.BELOW_LEFT;
 	}
 
-	@ConfigItem(keyName = "optionCountColor", name = "Option count text color", description = "Color in #RRGGBB format", position = 42, section = presentationSection)
+	@ConfigItem(keyName = "optionCountColor", hidden = true, name = "Option count text color", description = "Color in #RRGGBB format", position = 42, section = presentationSection)
 	default String optionCountColor()
 	{
 		return "#ffffff";
 	}
 
-	@ConfigItem(keyName = "defaultPickerColor", name = "Default picker color", description = "Initial color for entries with no matching color rule, in #RRGGBB format", position = 43, section = colorsSection)
+	@ConfigItem(keyName = "defaultPickerColor", hidden = true, name = "Default picker color", description = "Initial color for entries with no matching color rule, in #RRGGBB format", position = 43, section = colorsSection)
 	default String defaultPickerColor()
 	{
 		return "#00ff00";

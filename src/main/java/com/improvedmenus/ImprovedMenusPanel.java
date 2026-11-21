@@ -27,6 +27,10 @@ final class ImprovedMenusPanel extends PluginPanel
 		JTabbedPane tabs = new JTabbedPane();
 		JPanel menus = section("Menu settings");
 		button(menus, "Open plugin settings…", openSettings);
+		menus.add(help("For editable menu colours and themes, use Right Click Styler. Your saved colours are retained."));
+		button(menus, "Right Click Styler…", () -> net.runelite.client.util.LinkBrowser.browse(
+				"https://runelite.net/plugin-hub/show/right-click-styler"));
+		button(menus, "Export saved action colours…", this::exportColours);
 		JButton features = new JButton("▶ Menu features…");
 		fullWidth(features);
 		menus.add(features);
@@ -147,6 +151,26 @@ final class ImprovedMenusPanel extends PluginPanel
 		}
 	}
 
+	private void exportColours()
+	{
+		SavedColourExport export = new SavedColourExport(store.value(SettingsCatalog.ALL.get("colors")));
+		JPanel contents = new JPanel(new BorderLayout(0, 8));
+		contents.add(help("Copy these into Right Click Styler's action highlights. Review its existing rules before pasting. Your saved colours stay unchanged."), BorderLayout.NORTH);
+		JTextArea rules = new JTextArea(export.rules, 8, 24);
+		rules.setEditable(false);
+		contents.add(new JScrollPane(rules), BorderLayout.CENTER);
+		if (!export.retained.isEmpty())
+		{
+			JPanel retained = new JPanel(new BorderLayout());
+			retained.add(help("Not exported (target/wildcard rules, conflicting colours, or Styler limits). These remain saved:"), BorderLayout.NORTH);
+			JTextArea skipped = new JTextArea(export.retained, 5, 24);
+			skipped.setEditable(false);
+			retained.add(new JScrollPane(skipped), BorderLayout.CENTER);
+			contents.add(retained, BorderLayout.SOUTH);
+		}
+		JOptionPane.showMessageDialog(this, contents, "Export saved colours", JOptionPane.PLAIN_MESSAGE);
+	}
+
 	private void profiles()
 	{
 		JPanel contents = new JPanel(new GridLayout(0, 1, 4, 4));
@@ -189,7 +213,7 @@ final class ImprovedMenusPanel extends PluginPanel
 		contents.add(new JScrollPane(json), BorderLayout.CENTER);
 		JPanel controls = new JPanel(new GridLayout(0, 1, 4, 4));
 		JComboBox<String> source = new JComboBox<>(new String[] { "No Examine", "No Misclicks In Bank",
-				"Item Option Hider", "Menu Colorizer", "Tool Required", "Misclick Guard", "No Use Player",
+				"Item Option Hider", "Tool Required", "Misclick Guard", "No Use Player",
 				"Don't Telegrab NPCs", "Mouseover Options+" });
 		controls.add(source);
 		button(controls, "Read existing settings", () ->

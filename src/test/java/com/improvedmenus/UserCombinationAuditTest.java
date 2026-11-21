@@ -191,7 +191,7 @@ public class UserCombinationAuditTest
 		ImprovedMenusConfig config = mock(ImprovedMenusConfig.class);
 		when(config.groundIcons()).thenReturn(true);
 		ChatIconManager icons = mock(ChatIconManager.class);
-		when(icons.registerChatIcon(any())).thenReturn(2);
+		when(icons.reserveChatIcon()).thenReturn(2);
 		when(icons.chatIconIndex(2)).thenReturn(4);
 		MenuPresentation p = Guice.createInjector(new AbstractModule()
 		{
@@ -227,7 +227,7 @@ public class UserCombinationAuditTest
 		when(config.groundIcons()).thenReturn(true);
 		when(client.isMenuOpen()).thenReturn(true);
 		ChatIconManager icons = mock(ChatIconManager.class);
-		when(icons.registerChatIcon(any())).thenReturn(2);
+		when(icons.reserveChatIcon()).thenReturn(2);
 		when(icons.chatIconIndex(2)).thenReturn(4);
 		ItemManager items = mock(ItemManager.class);
 		MenuPresentation p = Guice.createInjector(new AbstractModule()
@@ -266,7 +266,7 @@ public class UserCombinationAuditTest
 		java.awt.Graphics2D g = image.createGraphics();
 		try
 		{
-			p.render(g);
+			p.refreshIcons();
 		}
 		finally
 		{
@@ -282,7 +282,7 @@ public class UserCombinationAuditTest
 		ImprovedMenusConfig config = mock(ImprovedMenusConfig.class);
 		when(config.groundIcons()).thenReturn(true);
 		ChatIconManager icons = mock(ChatIconManager.class);
-		when(icons.registerChatIcon(any())).thenReturn(2);
+		when(icons.reserveChatIcon()).thenReturn(2);
 		when(icons.chatIconIndex(2)).thenReturn(4);
 		MenuPresentation p = Guice.createInjector(new AbstractModule()
 		{

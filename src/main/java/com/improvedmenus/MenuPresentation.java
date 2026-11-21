@@ -28,9 +28,6 @@
  */
 package com.improvedmenus;
 
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import javax.inject.Inject;
@@ -38,14 +35,12 @@ import javax.inject.Singleton;
 import net.runelite.api.*;
 import net.runelite.client.game.ChatIconManager;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.overlay.*;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 
 /** Icon row geometry adapted from Fiffers/ground-loot-icons; see bundled license. */
 @Singleton
-final class MenuPresentation extends Overlay
+final class MenuPresentation
 {
 	private static final Set<MenuAction> GROUND = EnumSet.of(MenuAction.GROUND_ITEM_FIRST_OPTION,
 			MenuAction.GROUND_ITEM_SECOND_OPTION, MenuAction.GROUND_ITEM_THIRD_OPTION,
@@ -64,7 +59,9 @@ final class MenuPresentation extends Overlay
 	private LootFiltersCompatibility lootCompatibility;
 	@Inject
 	private net.runelite.client.config.RuneLiteConfig runeLiteConfig;
-	private int placeholder = -1;
+	@Inject
+	private MenuStyle menuStyle;
+	private InlineMenuIcons inlineIcons;
 	private ItemIcons itemIcons;
 
 	void setItemIcons(ItemIcons library)
@@ -73,21 +70,17 @@ final class MenuPresentation extends Overlay
 	}
 
 	private final IdentityHashMap<MenuEntry, TargetEdit> ownedTargets = new IdentityHashMap<>();
-	private String marker = "";
-
-	MenuPresentation()
-	{
-		setPosition(OverlayPosition.DYNAMIC);
-		setLayer(OverlayLayer.ALWAYS_ON_TOP);
-	}
 
 	void start()
 	{
+		if (inlineIcons == null)
+			inlineIcons = new InlineMenuIcons(client, icons);
+	}
 
-		if (placeholder == -1)
-		{
-			placeholder = icons.registerChatIcon(new BufferedImage(17, 15, BufferedImage.TYPE_INT_ARGB));
-		}
+	void refreshIcons()
+	{
+		if (inlineIcons != null)
+			inlineIcons.refresh();
 	}
 
 	void stop()
@@ -101,6 +94,8 @@ final class MenuPresentation extends Overlay
 			}
 		});
 		ownedTargets.clear();
+		if (inlineIcons != null)
+			inlineIcons.clear();
 	}
 
 	void decorate(Menu menu)
@@ -110,12 +105,6 @@ final class MenuPresentation extends Overlay
 		{
 			return;
 		}
-		int index = icons.chatIconIndex(placeholder);
-		if (index == -1)
-		{
-			return;
-		}
-		marker = "<img=" + index + ">";
 
 		if (menu == null)
 		{
@@ -153,14 +142,18 @@ final class MenuPresentation extends Overlay
 						&& custom.kind != ItemIcons.Kind.CURRENT_ITEM
 						&& !(custom.kind == ItemIcons.Kind.ITEM && custom.iconId == entry.getIdentifier());
 				both |= source == ImprovedMenusConfig.GroundIconSource.BOTH && linked != null && !linked.itemIcon;
-				String decorated = marker + (both ? marker : "") + original;
-				TargetEdit edit = new TargetEdit(entry, original, decorated);
+				TargetEdit edit = new TargetEdit(entry, original);
 				edit.nativeAllowed = source != ImprovedMenusConfig.GroundIconSource.CUSTOM
 						&& !(source == ImprovedMenusConfig.GroundIconSource.BOTH
 								&& config.bothRespectFilterVisibility());
 				edit.custom = custom;
 				edit.linked = linked;
-				edit.both = both;
+				String decorated = inlineIcons.add(() -> firstIcon(edit));
+				if (both)
+					decorated += inlineIcons.add(() -> customIcon(edit) == null ? null
+							: items.getImage(edit.identifier, Integer.MAX_VALUE, false));
+				decorated += original;
+				edit.decorated = decorated;
 				if (decorated.equals(original))
 				{
 					continue;
@@ -169,19 +162,6 @@ final class MenuPresentation extends Overlay
 				entry.setTarget(decorated);
 			}
 		}
-	}
-
-	@Override
-	public Dimension render(Graphics2D graphics)
-	{
-		if (client.isMenuOpen())
-		{
-			if (config.groundIcons())
-			{
-				draw(graphics, client.getMenu());
-			}
-		}
-		return null;
 	}
 
 	void queueOptionCount()
@@ -195,11 +175,12 @@ final class MenuPresentation extends Overlay
 				java.awt.Color color = SettingsCatalog.colorOrDefault(config.optionCountColor(), java.awt.Color.WHITE);
 				String text = String.format("<col=%06x>+%d options</col>", color.getRGB() & 0xffffff, count);
 				ImprovedMenusConfig.CountAnchor anchor = config.countAnchor();
-				Tooltip tooltip = anchor == ImprovedMenusConfig.CountAnchor.BELOW_RIGHT
-						|| anchor == ImprovedMenusConfig.CountAnchor.ABOVE_RIGHT
-								? new Tooltip(new OptionCountTooltip(text, tooltips, client,
-										runeLiteConfig.overlayBackgroundColor()))
-								: new Tooltip(text);
+				boolean right = anchor == ImprovedMenusConfig.CountAnchor.BELOW_RIGHT
+						|| anchor == ImprovedMenusConfig.CountAnchor.ABOVE_RIGHT;
+				MenuStyle.Style style = config.followMenuStyle() ? menuStyle.current() : null;
+				Tooltip tooltip = right || style != null
+						? new Tooltip(new OptionCountTooltip(text, tooltips, client,
+								runeLiteConfig.overlayBackgroundColor(), style, right)) : new Tooltip(text);
 				if (anchor == ImprovedMenusConfig.CountAnchor.ABOVE_LEFT
 						|| anchor == ImprovedMenusConfig.CountAnchor.ABOVE_RIGHT)
 				{
@@ -302,61 +283,33 @@ final class MenuPresentation extends Overlay
 				|| type == MenuAction.ITEM_USE_ON_GAME_OBJECT || type == MenuAction.WIDGET_TARGET_ON_GAME_OBJECT;
 	}
 
-	private void draw(Graphics2D g, Menu menu)
+	private BufferedImage customIcon(TargetEdit edit)
 	{
-		if (menu == null || menu.getMenuWidth() <= 0 || menu.getMenuHeight() <= 0)
-		{
-			return;
-		}
-		MenuEntry[] entries = menu.getMenuEntries();
-		int scroll = client.isMenuScrollable() ? client.getMenuScroll() : 0;
-		FontMetrics metrics = g.getFontMetrics(FontManager.getRunescapeFont());
-		for (int i = 0; i < entries.length; i++)
-		{
-			MenuEntry entry = entries[i];
-			TargetEdit edit = ownedTargets.get(entry);
-			if (edit == null || !edit.matches(entry) || !entry.getTarget().startsWith(marker))
-			{
-				continue;
-			}
-			int y = menu.getMenuY() + 19 + (entries.length - 1 - i - scroll) * 15;
-			if (y < menu.getMenuY() + 19 || y + 15 > menu.getMenuY() + menu.getMenuHeight())
-			{
-				continue;
-			}
-			int x = menu.getMenuX() + 8 + metrics.stringWidth(MenuRules.plain(entry.getOption()) + " ");
-			BufferedImage custom = edit.linked != null
-					? (edit.linked.image != null ? edit.linked.image : lootCompatibility.image(edit.linked))
-					: edit.custom == null || itemIcons == null ? null
-							: itemIcons.image(edit.custom, entry.getIdentifier());
-			if (custom != null)
-			{
-				g.drawImage(custom, x, y, 17, 15, null);
-			}
-			else if (edit.nativeAllowed)
-			{
-				g.drawImage(items.getImage(entry.getIdentifier(), Integer.MAX_VALUE, false), x, y, 17, 15, null);
-			}
-			if (edit.both && custom != null)
-			{
-				g.drawImage(items.getImage(entry.getIdentifier(), Integer.MAX_VALUE, false), x + 17, y, 17, 15, null);
-			}
-		}
+		return edit.linked != null
+				? (edit.linked.image != null ? edit.linked.image : lootCompatibility.image(edit.linked))
+				: edit.custom == null || itemIcons == null ? null : itemIcons.image(edit.custom, edit.identifier);
+	}
+
+	private BufferedImage firstIcon(TargetEdit edit)
+	{
+		BufferedImage custom = customIcon(edit);
+		return custom != null ? custom : edit.nativeAllowed
+				? items.getImage(edit.identifier, Integer.MAX_VALUE, false) : null;
 	}
 
 	private static final class TargetEdit
 	{
 		ItemIcons.Assignment custom;
 		LootFiltersCompatibility.Result linked;
-		boolean both, nativeAllowed;
-		final String original, decorated;
+		boolean nativeAllowed;
+		final String original;
+		String decorated;
 		final MenuAction type;
 		final int identifier, param0, param1, worldView;
 
-		TargetEdit(MenuEntry entry, String original, String decorated)
+		TargetEdit(MenuEntry entry, String original)
 		{
 			this.original = original;
-			this.decorated = decorated;
 			type = entry.getType();
 			identifier = entry.getIdentifier();
 			param0 = entry.getParam0();

@@ -248,7 +248,7 @@ public class GroundMenuGroupsTest
 			ImprovedMenusConfig config = mock(ImprovedMenusConfig.class, CALLS_REAL_METHODS);
 			when(config.groundIcons()).thenReturn(true);
 			net.runelite.client.game.ChatIconManager icons = mock(net.runelite.client.game.ChatIconManager.class);
-			when(icons.registerChatIcon(any())).thenReturn(2);
+			when(icons.reserveChatIcon()).thenReturn(2);
 			when(icons.chatIconIndex(2)).thenReturn(9);
 			presentation = Guice.createInjector(new AbstractModule()
 			{

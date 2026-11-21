@@ -112,11 +112,10 @@ public class PluginLifecycleTest
 		verify(bus, times(2)).unregister(any(MenuThemeRenderer.class));
 		verify(overlays, times(2)).add(any(OptionCountOverlay.class));
 		verify(overlays, times(2)).remove(any(OptionCountOverlay.class));
-		verify(overlays, times(2)).add(any(MenuPresentation.class));
-		verify(overlays, times(2)).remove(any(MenuPresentation.class));
 		verify(toolbar, times(2)).addNavigation(any(NavigationButton.class));
 		verify(toolbar, times(2)).removeNavigation(any(NavigationButton.class));
-		verify(icons, times(5)).registerChatIcon(any());
+		verify(icons, times(4)).registerChatIcon(any());
+		verify(icons, never()).reserveChatIcon();
 		when(config.hideSidePanel()).thenReturn(true);
 		SwingUtilities.invokeAndWait(() ->
 		{
@@ -145,7 +144,6 @@ public class PluginLifecycleTest
 		verify(toolbar, times(3)).removeNavigation(any(NavigationButton.class));
 
 		verify(bus, times(2)).unregister(any(ButtonGuard.class));
-		verify(overlays, times(2)).remove(any(MenuPresentation.class));
 		when(config.hideSidePanel()).thenReturn(false);
 		SwingUtilities.invokeAndWait(() ->
 		{

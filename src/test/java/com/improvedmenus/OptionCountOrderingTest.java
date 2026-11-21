@@ -72,6 +72,10 @@ public class OptionCountOrderingTest
 		overlays.sort((Comparator<Overlay>) comparator.get(null));
 		assertEquals(Arrays.asList(producer, count, renderer), overlays);
 		assertEquals(renderer.getLayer(), count.getLayer());
+		for (boolean follow : new boolean[]{false, true})
+		{
+		when(config.followMenuStyle()).thenReturn(follow);
+		injector.getInstance(MenuStyle.class).accept(new net.runelite.client.events.PluginMessage(MenuStyle.NAMESPACE, "style", MenuStyleTest.style(Color.RED)));
 		for (ImprovedMenusConfig.CountAnchor anchor : ImprovedMenusConfig.CountAnchor.values())
 		{
 			when(config.countAnchor()).thenReturn(anchor);
@@ -98,6 +102,7 @@ public class OptionCountOrderingTest
 				assertEquals(anchor.toString(), above, countY < actionY);
 				assertTrue("No stale tooltip in the next frame", manager.getTooltips().isEmpty());
 			}
+		}
 		}
 	}
 

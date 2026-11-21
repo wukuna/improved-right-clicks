@@ -1,6 +1,6 @@
 # Improved Right-Clicks
 
-Make right-click menus easier to read and harder to misclick. Enable the protections you want, hide unwanted item options, color useful actions and add loot icons or player relationship badges. Save different setups for different activities.
+Make right-click menus easier to read and harder to misclick. Enable the protections you want, hide unwanted item options, retain saved action colours and add loot icons or player relationship badges. Save different setups for different activities.
 
 ## What you can do
 
@@ -8,7 +8,7 @@ Make right-click menus easier to read and harder to misclick. Enable the protect
 - **Clean up menus:** control Examine, Cancel, Walk here and other supported entries, with exceptions and a reveal modifier.
 - **Protect buttons:** choose normal, right-click-only or hidden modes for supported controls.
 - **Protect Auto Retaliate with Shift (Beta):** enable **Beta features → Require Shift for Auto Retaliate** to require Shift when clicking its button or menu entry. Existing button protection still applies.
-- **Make actions readable:** customize action colors, extra-option counts, loot icons and Native/OSRS menu styling.
+- **Make actions readable:** keep saved action colours, show extra-option counts and add loot icons. Use Right Click Styler for new colour and theme changes.
 - **Group ground loot:** combine matching ground-item entries into counted rows. Each click still performs one normal pickup.
 - **Show player relationships:** add friend, ignore-list, Friends Chat and RuneLite party badges, plus an optional Copy name entry.
 - **Save setups:** named profiles, import/export previews and Undo are available in the side panel.
@@ -26,7 +26,7 @@ Make right-click menus easier to read and harder to misclick. Enable the protect
 
 Use one `action,item name` rule per line. Matching ignores case; `*` matches any text. Optional `[inventory]`, `[bank]`, `[ground]` and `[all]` prefixes limit the context. Allowed-item exceptions retain supported actions that would otherwise be hidden.
 
-Hold **Shift while opening a menu** for the local menu-color editor. Exact color mappings override wildcard mappings. Native rank icons and existing name colors are preserved when player badges are added.
+Existing action colours and menu themes stay saved; their editors have been retired. **Appearance → Use saved action colours** controls whether the retained action rules apply. Native rank icons and existing name colors are preserved when player badges are added.
 
 **Presentation → Group ground Examine at bottom** optionally moves ground-item Examine just above Cancel without changing Take order. It works independently of duplicate grouping.
 
@@ -38,9 +38,18 @@ Under **Presentation**, enable **Ground loot icons** and select **Native**, **Cu
 
 Item icons and action colors in an opened menu. The cards above the menu come from Improved Looting.
 
-Automatic Loot Filters sharing needs its [provider update](https://github.com/riktenx/loot-filters/pull/219), which remains under review. Improved Right-Clicks does not read another plugin’s private icon files.
+Automatic Loot Filters sharing uses its [merged provider update](https://github.com/riktenx/loot-filters/pull/219). Enable **Loot display compatibility** and use **Custom** or **Both** icons. If Improved Looting is also active, turn off its **Connect menu icons** option to use Loot Filters instead. Improved Right-Clicks does not read another plugin’s private icon files.
 
 Keep Menu Entry Swapper for swaps and specialist plugins for features you still use. Disable overlapping filters or color rules when comparing results. The reveal modifier cannot restore an entry removed by another plugin.
+
+## Right Click Styler compatibility
+
+Item icons use inline menu images, so a compatible menu renderer positions and draws them with its text. Native menus continue to work. A companion fix for Right Click Styler refreshes reused icon slots and submenu images; that fix is prepared separately and is not yet in its Plugin Hub release.
+
+- Keep **Use saved action colours** enabled to retain your existing rules, or disable it to let Styler control action colours. Saved rules are never deleted.
+- **Use loot display menu colors** remains separate. To preserve filter colours in Styler, use its game-provided target colours instead of overriding item colours.
+- **+N options: follow Right Click Styler** is optional and off by default. It follows text colour, font, background and border through the proposed style-sharing update. Without a compatible active provider, it uses your saved appearance. This feature requires the companion update; the current Hub release does not publish styles.
+- **Menus → Export saved action colours…** prepares compatible action highlights for manual copying into Styler. It lists rules that cannot be translated safely, including target-specific/wildcard rules, conflicting colours and rules beyond Styler's limits. Review Styler's existing highlights before pasting. Neither plugin's saved settings are changed by exporting.
 
 ## Account badges across sessions
 

@@ -161,7 +161,7 @@ public class ItemIconsTest
 				java.awt.Graphics2D graphics = new java.awt.image.BufferedImage(300, 100, 2).createGraphics();
 				try
 				{
-					p.render(graphics);
+					p.refreshIcons();
 				}
 				finally
 				{
@@ -278,7 +278,7 @@ public class ItemIconsTest
 		when(config.lootFiltersCompatibility()).thenReturn(linked);
 		when(config.bothRespectFilterVisibility()).thenReturn(respect);
 		net.runelite.client.game.ChatIconManager icons = mock(net.runelite.client.game.ChatIconManager.class);
-		when(icons.registerChatIcon(any())).thenReturn(2);
+		when(icons.reserveChatIcon()).thenReturn(2);
 		when(icons.chatIconIndex(2)).thenReturn(4);
 		MenuPresentation p = com.google.inject.Guice.createInjector(new com.google.inject.AbstractModule()
 		{

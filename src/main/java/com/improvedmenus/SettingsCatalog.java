@@ -84,7 +84,8 @@ final class SettingsCatalog
 		add("exceptions", "Always keep names (one per line)", "Rules", "");
 		add("itemRules", "Item rules: action,item name", "Rules", "");
 		add("colors", "Colors: target:action:#RRGGBB;", "Colors", "");
-		bool("enableColors", "Enable colors", "Colors", true);
+		bool("enableColors", "Use saved action colours", "Appearance", true);
+		bool("followMenuStyle", "+N options: follow Right Click Styler", "Appearance", false);
 		bool("colorPicker", "Shift menu color editor", "Colors", true);
 		bool("yellowHover", "Yellow hover highlight", "Colors", true);
 		add("defaultPickerColor", "Default picker color", "Colors", "#00ff00");

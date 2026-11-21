@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-	static final String RELEASE = "2026-11-14-badge-cache-performance";
+	static final String RELEASE = "2026-11-21-styler-compatibility";
 	static final String KEY = "recentChangesSeen";
 	private final Client client;
 	private final ClientThread thread;
@@ -54,7 +54,7 @@ final class ReleaseNotesNotice
 				|| RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY)))
 			return;
 		chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-				"[Improved Right-Clicks] Updates:<br>* Reduced repeated account-badge cache work while retaining cross-client and profile persistence.<br>* Beta features can require Shift when clicking Auto Retaliate to prevent accidental toggles.")
+				"[Improved Right-Clicks] Updates:<br>* Loot icons now draw with menu text.<br>* Existing colours are saved. Use Right Click Styler for new colour and theme changes.<br>* +N options can optionally follow a compatible Styler version.")
 				.build());
 		config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
 	}

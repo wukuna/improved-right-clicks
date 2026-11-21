@@ -1,7 +1,6 @@
 package com.improvedmenus;
 
 import com.google.inject.Provides;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -20,7 +19,7 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 
-@PluginDescriptor(name = "Improved Right-Clicks", description = "Customize right-click menus with misclick protection, action colors, loot icons and persistent observed account badges.", tags = {
+@PluginDescriptor(name = "Improved Right-Clicks", description = "Customize right-click menus with misclick protection, loot icons and persistent observed account badges.", tags = {
 		"menu", "bank", "inventory", "misclick", "examine", "color" })
 public class ImprovedMenusPlugin extends Plugin
 {
@@ -49,6 +48,8 @@ public class ImprovedMenusPlugin extends Plugin
 	@Inject
 	private MenuThemeRenderer menuTheme;
 	@Inject
+	private MenuStyle menuStyle;
+	@Inject
 	private OptionCountOverlay optionCounts;
 	@Inject
 	private ItemIcons itemIcons;
@@ -65,9 +66,6 @@ public class ImprovedMenusPlugin extends Plugin
 	private ImprovedMenusPanel panel;
 	private NavigationButton navigation;
 	private volatile boolean active;
-	private Menu colorEditorMenu;
-	private MenuEntry colorEditorEntry;
-	private Menu colorEditorSubmenu;
 	private long lootRevision;
 
 	@Provides
@@ -95,12 +93,12 @@ public class ImprovedMenusPlugin extends Plugin
 				engine.reload();
 				lootCompatibility.refresh();
 				playerBadges.start();
+				requestMenuStyle();
 			}
 		});
 		buttons.startUp();
 		eventBus.register(buttons);
 		eventBus.register(menuTheme);
-		overlays.add(presentation);
 		overlays.add(optionCounts);
 		overlays.add(playerBadges);
 		presentation.start();
@@ -111,18 +109,17 @@ public class ImprovedMenusPlugin extends Plugin
 	protected void shutDown()
 	{
 		active = false;
+		menuStyle.clear();
 		accountBadgeStore.stop();
 		eventBus.unregister(menuTheme);
 		renameNotice.shutDown();
 		releaseNotes.shutDown();
 		eventBus.unregister(buttons);
 		buttons.shutDown();
-		overlays.remove(presentation);
 		overlays.remove(optionCounts);
 		overlays.remove(playerBadges);
 		clientThread.invoke(() ->
 		{
-			removeColorEditor();
 			playerBadges.shutdown();
 			presentation.stop();
 			lootMenu.stop();
@@ -199,10 +196,6 @@ public class ImprovedMenusPlugin extends Plugin
 		lootMenu.stop();
 		engine.applyOpened(client.getMenu());
 
-		if (config.colorPicker() && client.isKeyPressed(KeyCode.KC_SHIFT))
-		{
-			addColorEditor(client.getMenu());
-		}
 		engine.groupOpened(client.getMenu());
 		decorateMenu();
 	}
@@ -243,12 +236,14 @@ public class ImprovedMenusPlugin extends Plugin
 	@Subscribe
 	public void onProfileChanged(net.runelite.client.events.ProfileChanged event)
 	{
+		menuStyle.clear();
 		clientThread.invokeLater(() ->
 		{
 			if (active)
 			{
 				playerBadges.clear();
 				releaseNotes.showIfLoggedIn();
+				requestMenuStyle();
 			}
 		});
 		refreshLootFilter();
@@ -261,6 +256,15 @@ public class ImprovedMenusPlugin extends Plugin
 	@Subscribe
 	public void onPluginChanged(net.runelite.client.events.PluginChanged event)
 	{
+		if ("Right Click Styler".equals(event.getPlugin().getName()))
+		{
+			menuStyle.clear();
+			clientThread.invokeLater(() ->
+			{
+				if (active)
+					requestMenuStyle();
+			});
+		}
 		if ("Loot Filters".equals(event.getPlugin().getName())
 				|| "Loot Filters TEST".equals(event.getPlugin().getName())
 				|| "Improved Looting".equals(event.getPlugin().getName())
@@ -271,9 +275,16 @@ public class ImprovedMenusPlugin extends Plugin
 	@Subscribe
 	public void onPluginMessage(net.runelite.client.events.PluginMessage event)
 	{
+		if (active)
+			menuStyle.accept(event);
 		if (("loot-filters".equals(event.getNamespace()) || "improved-looting".equals(event.getNamespace()))
 				&& "filter-reloaded".equals(event.getName()))
 			refreshLootFilter();
+	}
+
+	private void requestMenuStyle()
+	{
+		eventBus.post(new net.runelite.client.events.PluginMessage(MenuStyle.NAMESPACE, "style-request"));
 	}
 
 	private void refreshLootFilter()
@@ -311,11 +322,12 @@ public class ImprovedMenusPlugin extends Plugin
 		}
 	}
 
-	@Subscribe
+	@Subscribe(priority = 1)
 	public void onBeforeMenuRender(BeforeMenuRender event)
 	{
 		if (active && client.isMenuOpen())
 		{
+			presentation.refreshIcons();
 			engine.highlightHovered(client.getMenu());
 		}
 	}
@@ -388,121 +400,6 @@ public class ImprovedMenusPlugin extends Plugin
 		}
 	}
 
-	private void addColorEditor(Menu menu)
-	{
-		removeColorEditor();
-
-		Set<String> seen = new LinkedHashSet<>();
-		java.util.List<String[]> choices = new ArrayList<>();
-		collect(menu, "", seen, choices, 0);
-		if (choices.isEmpty())
-		{
-			return;
-		}
-		colorEditorMenu = menu;
-		colorEditorEntry = menu.createMenuEntry(0).setOption("Menu colors").setTarget("").setType(MenuAction.RUNELITE);
-		Menu sub = colorEditorEntry.createSubMenu();
-		colorEditorSubmenu = sub;
-		for (String[] choice : choices)
-		{
-			String target = choice[0], option = choice[1];
-			sub.createMenuEntry(-1).setOption(option).setTarget(target).setType(MenuAction.RUNELITE).onClick(e ->
-			{
-				SwingUtilities.invokeLater(() ->
-				{
-					if (!active)
-					{
-						return;
-					}
-					String old = engine.color(target, option);
-					Color color = JColorChooser.showDialog(panel, "Color " + option + " " + target,
-							old == null ? SettingsCatalog.colorOrDefault(config.defaultPickerColor(), Color.GREEN)
-									: new Color(Integer.parseInt(old, 16)));
-					if (color != null && active)
-					{
-						saveColor(target, option, String.format("#%06x", color.getRGB() & 0xffffff));
-					}
-				});
-			});
-			sub.createMenuEntry(-1).setOption("Reset " + option).setTarget(target).setType(MenuAction.RUNELITE)
-					.onClick(e -> saveColor(target, option, null));
-		}
-	}
-
-	private void removeColorEditor()
-	{
-		if (colorEditorMenu != null && colorEditorEntry != null && colorEditorEntry.getSubMenu() == colorEditorSubmenu
-				&& colorEditorEntry.getType() == MenuAction.RUNELITE
-				&& colorEditorEntry.getOption().equals("Menu colors"))
-		{
-			MenuEntry[] entries = colorEditorMenu.getMenuEntries();
-			MenuEntry[] kept = Arrays.stream(entries).filter(e -> e != colorEditorEntry).toArray(MenuEntry[]::new);
-			if (kept.length != entries.length)
-			{
-				colorEditorMenu.setMenuEntries(kept);
-			}
-		}
-		colorEditorMenu = null;
-		colorEditorEntry = null;
-		colorEditorSubmenu = null;
-	}
-
-	private void collect(Menu menu, String inherited, Set<String> seen, java.util.List<String[]> choices, int depth)
-	{
-		if (depth > 8)
-		{
-			return;
-		}
-		for (MenuEntry entry : menu.getMenuEntries())
-		{
-			String target = MenuRules.plain(entry.getTarget());
-			if (target.isEmpty())
-			{
-				target = inherited;
-			}
-			String option = MenuRules.plain(entry.getOption());
-			if (entry.getSubMenu() != null)
-			{
-				collect(entry.getSubMenu(), target, seen, choices, depth + 1);
-			}
-			else if (!target.isEmpty() && !target.contains(":") && !target.contains(";") && !target.contains("*")
-					&& !option.contains(":") && !option.contains(";") && !option.contains("*")
-					&& entry.getType() != MenuAction.CANCEL && choices.size() < 40 && seen.add(target + "\n" + option))
-			{
-				choices.add(new String[] { target, option });
-			}
-		}
-	}
-
-	private void saveColor(String target, String option, String color)
-	{
-		if (!active)
-		{
-			return;
-		}
-		String prefix = target + ":" + option + ":";
-		java.util.List<String> values = new ArrayList<>();
-		for (String raw : config.colors().split(";"))
-		{
-			if (!raw.trim().isEmpty() && !raw.trim().regionMatches(true, 0, prefix, 0, prefix.length()))
-			{
-				values.add(raw.trim());
-			}
-		}
-		if (color != null)
-		{
-			values.add(prefix + color);
-		}
-		try
-		{
-			store.apply(Collections.singletonMap("colors", String.join(";", values)));
-		}
-		catch (IllegalArgumentException e)
-		{
-			SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(panel, e.getMessage(), "Menu colors",
-					JOptionPane.ERROR_MESSAGE));
-		}
-	}
 
 	private static BufferedImage icon()
 	{

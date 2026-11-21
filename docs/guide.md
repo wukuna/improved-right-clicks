@@ -2,7 +2,7 @@
 
 For current account-badge persistence and Beta Auto Retaliate protection, start with the [README](../README.md).
 
-Make right-click menus easier to read and harder to misclick. Enable only the protections you want, color useful actions, add ground-item icons and player relationship badges, and save setups for different activities. Hold the reveal modifier before opening a menu to temporarily recover options hidden by this plugin. Protection switches start off.
+Make right-click menus easier to read and harder to misclick. Enable only the protections you want, retain saved action colours, add ground-item icons and player relationship badges, and save setups for different activities. Hold the reveal modifier before opening a menu to temporarily recover options hidden by this plugin. Protection switches start off.
 
 The sidebar starts with three simple tabs: **Menus**, **Profiles** and **Tools**. Open plugin settings from Menus, manage saved setups and import/export under Profiles, and expand Diagnostics under Tools when needed. Hold the configured reveal modifier before opening a menu to reveal options hidden by this plugin.
 
@@ -20,16 +20,16 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 - **Tools:** hide tree Chop/Cut or rock Mine when the required axe or pickaxe is neither carried nor equipped. Unknown inventory state leaves actions available.
 - **House:** hide building actions outside building mode, plus unnecessary Mahogany Homes Remove actions. Other furniture actions stay available.
 - **Buttons:** normal, right-click-only or hidden modes for Auto Retaliate, XP Drops, bank placeholders and Report. Right-click-only checks where the click began; it does not merely move the action down the list.
-- **Presentation:** action colors, wildcard mappings, submenu support, a Shift-menu color picker/reset with configurable default color, optional ground-loot icons and additional-option counts. Counts support a minimum threshold, including/excluding Examine, showing/hiding counts on interface widgets, and a configurable text color.
+- **Presentation:** saved action colours, ground-loot icons and additional-option counts. Counts support a minimum threshold, including/excluding Examine and showing/hiding counts on interface widgets. Optional Styler following uses a compatible provider's appearance.
 - **Player badges:** independent friend, ignored-player, Friends Chat and RuneLite party icons, plus optional Copy name. Existing rank icons are preserved.
-- **Menu theme:** keep Native styling or choose OSRS brown and bronze. Menus with submenus or another plugin's custom renderer retain their original appearance.
+- **Menu theme:** existing Native/OSRS settings remain saved. Use Right Click Styler for editable themes.
 - **Ground-item grouping:** optionally combine identical ground-item menu actions into one counted row, such as **Take Abyssal ashes (x6)**. Each click still performs one normal pickup.
 - **Settings:** configure every feature in RuneLite's normal Improved Right-Clicks settings, grouped into collapsible sections. **Hide options** groups Walk here, Cancel, Set heading, Use on Player, Telegrab NPCs, potion Empty and Examine controls. Bank stays last.
 - **Side panel tools:** Menus, Profiles and Tools tabs with a direct settings shortcut, named profiles, twenty-step undo, validated import/export previews, and collapsible diagnostics showing the before/after entry counts and reasons. Closing a dialog leaves the last operation status unchanged; applying identical settings reports No changes. Settings are not duplicated in the side panel. Undo restores only settings changed by a profile/import/editor operation, leaving later manual changes alone. Operations that change nothing do not consume an undo step; ordinary RuneLite settings use RuneLite's normal controls.
 
 Protection switches start off. Enable the features you want in RuneLite's Improved Right-Clicks settings. Button modes start at Normal. Hold **Ctrl before opening a menu** to reveal options hidden by this plugin. The reveal modifier can be changed to Shift, Alt or None. It does not consume keys or recreate options removed by another plugin.
 
-Enable **Hide side panel** under General to remove the Improved Right-Clicks toolbar button. Menu features and the Shift-menu color editor remain active. Turn it off to access profiles, import/export, undo and diagnostics again.
+Enable **Hide side panel** under General to remove the Improved Right-Clicks toolbar button. Menu features remain active. Turn it off to access profiles, import/export, undo and diagnostics again.
 
 **More plugins:** [Banking, Looting, Right-Clicks, Interface Layout and Chat](https://github.com/wukuna#runelite-plugins).
 
@@ -39,7 +39,7 @@ Enable **Hide side panel** under General to remove the Improved Right-Clicks too
 2. Use the side panel for profiles, settings import/export, undo and diagnostics.
 3. Hold the configured reveal modifier before opening a menu to temporarily show options this plugin hid.
 
-**Compatibility status:** Improved Looting can share icons through its **Connect menu icons** option. Automatic sharing from Loot Filters requires the asynchronous image-provider update proposed in [Loot Filters PR #219](https://github.com/riktenx/loot-filters/pull/219). That update is still under review and is not in the currently released Loot Filters version. Ordinary menu features work without it; diagnostics report when the provider is unavailable.
+**Compatibility status:** Improved Looting can share icons through its **Connect menu icons** option. Loot Filters supports sharing through its [merged image-provider update](https://github.com/riktenx/loot-filters/pull/219). Select **Custom** or **Both** icons and enable **Loot display compatibility**. If both providers are active, Improved Looting takes priority while **Connect menu icons** is on; turn it off to use Loot Filters instead. The compatibility status identifies the provider after opening a Take menu.
 
 ## Usage
 
@@ -62,21 +62,13 @@ Exceptions use one name per line, with the same optional contexts and wildcard m
 
 **No Use on Player** allows common quest, Barbarian Assault and cooperation items by default. Edit **Allow items on players** with exact item names separated by commas. **Don't Telegrab NPCs** always permits the Maze Guardian, King's Ransom Guard, Wyrmscraig hunter goats, Sailing creature corpses and lost Sailing crates. Add other exact names under **Allow Telegrab NPC names**. These controls do not support arbitrary actor/combat filtering. Missing selection or target information leaves the option available. The shared reveal modifier bypasses both protections.
 
-Menu colors use `target:action:#RRGGBB`, separated by semicolons:
+Existing colour mappings, hover highlighting, extra-option text colour and Native/OSRS theme settings are retained. The colour and theme editors, including the Shift-menu editor, have been removed. **Appearance → Use saved action colours** applies retained action rules without exposing an editor. Target-specific mappings still take precedence over wildcard mappings.
 
-```text
-*:Take:#88cc88;Coins:Take:#ffcc33
-```
+Use **Right Click Styler** for editable colours/themes. The sidebar links to its Hub page and offers a manual export of compatible saved action highlights. Target-specific or wildcard rules, overlapping different colours, and entries exceeding Styler's 50-rule/64-character limits are listed as not exported. All original rules remain saved. Export never writes Styler's configuration.
 
-Exact color mappings take precedence over wildcard mappings. Hold Shift when opening a menu to use the local color editor. Reset removes that entry's exact mapping; a broader wildcard can still apply.
+**Appearance → +N options: follow Right Click Styler** is off by default. With the proposed companion style-sharing update, the count follows its live text colour, font, background, border and shadow. With the option off, or no compatible active provider, the old saved appearance is used. The ordinary Hub release does not currently publish that style information.
 
-**Yellow hover highlight** is enabled by default: a colored main-menu option uses the native yellow highlight while hovered, then returns to its configured color. Submenu entries retain their configured colors because RuneLite does not expose which submenu is open for reliable hover detection. Disable it to retain the configured color on hover. Item/name colors and image tags are preserved.
-
-**Default picker color** applies when an entry has no matching color mapping. **Option count text color** changes the hover count. Both colors use `#RRGGBB` in RuneLite settings. The Shift menu color editor provides an interactive picker for menu entries. **Minimum extra options** accepts 1–500. Counts exclude Cancel, Walk here and local editor actions; **Count Examine** and **Show count on interface widgets** control the remaining categories. These settings are included in profiles, undo and imports.
-
-The editor accepts at most 200 rules per field. Invalid manual configuration edits disable that rule field rather than retaining old invisible rules. Profile imports validate every setting before applying changes. Imports cannot modify other plugins' settings. Existing-setting import reads explicitly saved settings from the supported plugins listed below and leaves those originals intact. Missing settings and source-plugin enablement are not inferred.
-
-### Ground-menu icons and loot displays
+**Minimum extra options** accepts 1–500. Counts exclude Cancel, Walk here and local controls; **Count Examine** and **Show count on interface widgets** control the remaining categories. Count positioning and counting rules are unchanged.
 
 ![Ground-item menu showing item icons and colored Take entries](media/ground-item-menu.png)
 
@@ -88,9 +80,9 @@ Enable **Presentation > Group duplicate ground items** to combine matching actio
 
 The count represents identical menu entries, not a Take-all action. Different tiles, item variants, displayed quantities, colors, priorities and custom callbacks remain separate. Entries already counted by Ground Items are left alone. Existing icons and menu themes continue to work; ground-label/card grouping remains a separate Improved Looting setting. The switch is included in profiles, imports and undo.
 
-Choose **Presentation > Menu theme > OSRS** for the brown background and square bronze border used by Improved Looting's OSRS cards. **Native** is the default and keeps your existing style. The theme retains native text, icons, colors, scrolling and click positions, and is included in saved profiles and imports. Menus containing submenus, and menus already drawn by another plugin (such as Interface Styles' HD or transparent menus), keep their original appearance.
+Saved OSRS theme settings still draw the brown background and bronze border when supported. Menus with submenus or another plugin's renderer retain that renderer's appearance. Inline item icons are drawn as part of menu text; the companion Styler cache fix is needed to refresh reused icon slots correctly. That fix is not yet published.
 
-In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable **Ground loot icons**, and choose **Native**, **Custom**, or **Both** under **Icon source**. All icon, visibility and color options stay in plugin settings. The side panel contains profiles, import/export, undo, a settings shortcut and optional diagnostics.
+In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable **Ground loot icons**, and choose **Native**, **Custom**, or **Both** under **Icon source**. Icon, visibility and loot-display colour switches stay in plugin settings. Saved action-colour editors are retired. The side panel contains profiles, import/export, undo, a settings shortcut and optional diagnostics.
 
 - **Native** shows the item's own picture and remains the default.
 - **Custom** shows the selected custom icon. Hidden, unassigned or unavailable icons remain absent.
@@ -166,7 +158,7 @@ The recipe combines focused menu protections, readable actions and useful visual
 | [Custom Menu Swaps](https://github.com/geheur/More-menu-entry-swaps) | Specialist companion or alternative | Text-based swaps, hiding and hotkeys. Avoid duplicate hide rules; our reveal modifier cannot recover options another plugin removes. |
 | [Menu Swapper Extended](https://github.com/raiyni/menu-swapper-extended) | Specialist companion | Additional targeted swaps. Review its rules alongside any overlapping menu protections. |
 | [Ground Items (built in)](https://github.com/runelite/runelite/tree/master/runelite-client/src/main/java/net/runelite/client/plugins/grounditems) | Optional ground-label tool | Ground labels, values and highlighting; menu icons and action colours are a separate presentation layer. |
-| [Loot Filters / Filterscape](https://github.com/riktenx/loot-filters) | Optional icon provider; adapted RS2F ingredients | Shares resolved icons and optional menu presentation through the provider interface under review. Retained parser components support previously saved imports. The provider update is required for automatic sharing. |
+| [Loot Filters / Filterscape](https://github.com/riktenx/loot-filters) | Optional icon provider; adapted RS2F ingredients | Shares resolved icons and optional menu presentation through its published provider interface. Retained parser components support previously saved imports. An updated Loot Filters release is required for automatic sharing. |
 
 The [Filterscape editor](https://filterscape.xyz/) prepares scripts for Loot Filters. Edit the active filter there and load it in Loot Filters; with its compatible provider, Improved Right-Clicks follows the resolved settings without a second upload. This integration affects menu presentation, not ground labels, beams or sounds. Feature overlap does not imply complete replacement. Full licenses and adaptation details remain in [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md).
 
