@@ -36,15 +36,18 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class NotCondition extends Condition {
-    private final Condition inner;
+public class NotCondition extends Condition
+{
+	private final Condition inner;
 
-    public NotCondition(Condition inner) {
-        this.inner = inner;
-    }
+	public NotCondition(Condition inner)
+	{
+		this.inner = inner;
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return !inner.test(plugin, item);
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return !inner.test(plugin, item);
+	}
 }

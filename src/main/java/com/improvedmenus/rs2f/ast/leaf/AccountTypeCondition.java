@@ -34,15 +34,18 @@ import com.improvedmenus.rs2f.ast.LeafCondition;
 import com.improvedmenus.rs2f.model.ItemFacts;
 import net.runelite.api.gameval.VarbitID;
 
-public class AccountTypeCondition extends LeafCondition {
-    private final int type;
+public class AccountTypeCondition extends LeafCondition
+{
+	private final int type;
 
-    public AccountTypeCondition(int type) {
-        this.type = type;
-    }
+	public AccountTypeCondition(int type)
+	{
+		this.type = type;
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return item.getAccountType() == type;
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return item.getAccountType() == type;
+	}
 }

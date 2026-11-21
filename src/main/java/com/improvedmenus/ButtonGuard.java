@@ -59,12 +59,14 @@ public class ButtonGuard
 
 	@Inject
 	private MouseManager mouseManager;
-	@Inject private ClientThread clientThread;
+	@Inject
+	private ClientThread clientThread;
 
 	private final AtomicReference<ClickOrigin> leftPress = new AtomicReference<>();
 	private boolean autoRetaliateTooltipHiddenByPlugin;
 	private Widget ownedTooltip;
-	@Inject private RevealState reveal;
+	@Inject
+	private RevealState reveal;
 	private boolean autoRetaliateTooltipWasHidden;
 
 	private final MouseAdapter mouseListener = new MouseAdapter()
@@ -79,7 +81,6 @@ public class ButtonGuard
 			return event;
 		}
 	};
-
 
 	public void startUp()
 	{
@@ -110,8 +111,7 @@ public class ButtonGuard
 		}
 
 		ClickMode clickMode = mode(action);
-		if (config.deprioritizeLeftClickOffEntries()
-			&& clickMode.blocksLeftClick() && !clickMode.removesMenuEntry())
+		if (config.deprioritizeLeftClickOffEntries() && clickMode.blocksLeftClick() && !clickMode.removesMenuEntry())
 		{
 			entry.setDeprioritized(true);
 		}
@@ -154,15 +154,14 @@ public class ButtonGuard
 		}
 
 		if (action == GuardedAction.AUTO_RETALIATE && config.autoRetaliateRequireShift()
-			&& !(origin == null ? client.isKeyPressed(KeyCode.KC_SHIFT) : origin.shift))
+				&& !(origin == null ? client.isKeyPressed(KeyCode.KC_SHIFT) : origin.shift))
 		{
 			event.consume();
 			return;
 		}
 
 		ClickMode clickMode = mode(action);
-		if (clickMode.removesMenuEntry()
-			|| clickMode.blocksLeftClick() && !selectedFromOpenMenu)
+		if (clickMode.removesMenuEntry() || clickMode.blocksLeftClick() && !selectedFromOpenMenu)
 		{
 			event.consume();
 		}
@@ -179,7 +178,7 @@ public class ButtonGuard
 
 			ClickMode clickMode = mode(GuardedAction.AUTO_RETALIATE);
 			return clickMode.removesMenuEntry()
-				|| config.deprioritizeLeftClickOffEntries() && clickMode.blocksLeftClick();
+					|| config.deprioritizeLeftClickOffEntries() && clickMode.blocksLeftClick();
 		}
 		return false;
 	}
@@ -252,8 +251,7 @@ public class ButtonGuard
 		}
 
 		ClickMode clickMode = mode(action);
-		if (!topEntry.isDeprioritized()
-			|| !clickMode.blocksLeftClick() || clickMode.removesMenuEntry())
+		if (!topEntry.isDeprioritized() || !clickMode.blocksLeftClick() || clickMode.removesMenuEntry())
 		{
 			return;
 		}
@@ -271,10 +269,7 @@ public class ButtonGuard
 			}
 		}
 
-		menu.createMenuEntry(-1)
-			.setOption("")
-			.setTarget("")
-			.setType(MenuAction.CANCEL);
+		menu.createMenuEntry(-1).setOption("").setTarget("").setType(MenuAction.CANCEL);
 	}
 
 	private void restoreCancelForOpenMenu()

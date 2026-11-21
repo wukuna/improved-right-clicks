@@ -37,13 +37,16 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
-public class ItemQuantityCondition extends ComparatorCondition {
-    public ItemQuantityCondition(int value, Comparator cmp) {
-        super(value, cmp);
-    }
+public class ItemQuantityCondition extends ComparatorCondition
+{
+	public ItemQuantityCondition(int value, Comparator cmp)
+	{
+		super(value, cmp);
+	}
 
-    @Override
-    public long getLhs(FilterContext plugin, ItemFacts item) {
-        return item.getQuantity();
-    }
+	@Override
+	public long getLhs(FilterContext plugin, ItemFacts item)
+	{
+		return item.getQuantity();
+	}
 }

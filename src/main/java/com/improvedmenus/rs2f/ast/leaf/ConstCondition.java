@@ -39,15 +39,18 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class ConstCondition extends LeafCondition {
-    private final boolean target;
+public class ConstCondition extends LeafCondition
+{
+	private final boolean target;
 
-    public ConstCondition(boolean target) {
-        this.target = target;
-    }
+	public ConstCondition(boolean target)
+	{
+		this.target = target;
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return target;
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return target;
+	}
 }

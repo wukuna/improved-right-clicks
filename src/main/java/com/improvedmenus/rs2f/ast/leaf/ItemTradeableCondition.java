@@ -37,15 +37,18 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class ItemTradeableCondition extends LeafCondition {
-    private final boolean target;
+public class ItemTradeableCondition extends LeafCondition
+{
+	private final boolean target;
 
-    public ItemTradeableCondition(boolean target) {
-        this.target = target;
-    }
+	public ItemTradeableCondition(boolean target)
+	{
+		this.target = target;
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return item.isMoney() ? target : item.isTradeable() == target;
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return item.isMoney() ? target : item.isTradeable() == target;
+	}
 }

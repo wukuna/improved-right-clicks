@@ -38,24 +38,32 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString(callSuper = true)
-public class ItemValueCondition extends ComparatorCondition {
-    private final ValueType valueType;
+public class ItemValueCondition extends ComparatorCondition
+{
+	private final ValueType valueType;
 
-    public ItemValueCondition(int value, Comparator cmp, ValueType valueType) {
-       super(value, cmp);
-       this.valueType = valueType;
-    }
+	public ItemValueCondition(int value, Comparator cmp, ValueType valueType)
+	{
+		super(value, cmp);
+		this.valueType = valueType;
+	}
 
-    @Override
-    public long getLhs(FilterContext plugin, ItemFacts item) {
-        return getValue(item) * item.getQuantity();
-    }
+	@Override
+	public long getLhs(FilterContext plugin, ItemFacts item)
+	{
+		return getValue(item) * item.getQuantity();
+	}
 
-    private long getValue(ItemFacts item) {
-        switch (valueType) {
-            case HIGHEST: return Math.max(item.getGePrice(), item.getHaPrice());
-            case GE: return item.getGePrice();
-            default: return item.getHaPrice();
-        }
-    }
+	private long getValue(ItemFacts item)
+	{
+		switch (valueType)
+		{
+			case HIGHEST:
+				return Math.max(item.getGePrice(), item.getHaPrice());
+			case GE:
+				return item.getGePrice();
+			default:
+				return item.getHaPrice();
+		}
+	}
 }

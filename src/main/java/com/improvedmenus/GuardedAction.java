@@ -39,71 +39,33 @@ import net.runelite.api.widgets.WidgetUtil;
 
 enum GuardedAction
 {
-	AUTO_RETALIATE(
-		ImprovedMenusConfig::autoRetaliate,
-		WidgetGroup.COMBAT,
-		MenuPattern.option("auto retaliate"),
-		MenuPattern.target("auto retaliate")
-	),
-	HIDE_XP_DROPS(
-		ImprovedMenusConfig::xpDrops,
-		WidgetGroup.XP_DROPS,
-		MenuPattern.option("hide xp drops"),
-		MenuPattern.optionAndTarget("hide", "xp drops")
-	),
-	SHOW_XP_DROPS(
-		ImprovedMenusConfig::xpDrops,
-		WidgetGroup.XP_DROPS,
-		MenuPattern.option("show xp drops"),
-		MenuPattern.optionAndTarget("show", "xp drops")
-	),
-	SETUP_XP_DROPS(
-		ImprovedMenusConfig::xpDrops,
-		WidgetGroup.XP_DROPS,
-		MenuPattern.option("setup xp drops"),
-		MenuPattern.optionAndTarget("setup", "xp drops")
-	),
-	ALWAYS_SET_PLACEHOLDERS(
-		ImprovedMenusConfig::alwaysSetPlaceholders,
-		WidgetGroup.BANK,
-		MenuPattern.option("always set placeholders"),
-		MenuPattern.target("always set placeholders")
-	),
-	REPORT_ABUSE(
-		ImprovedMenusConfig::report,
-		WidgetGroup.REPORT,
-		MenuPattern.option("report abuse"),
-		MenuPattern.optionAndTarget("report", "abuse")
-	),
-	REPORT_GAME_BUG(
-		ImprovedMenusConfig::report,
-		WidgetGroup.REPORT,
-		MenuPattern.option("report game bug"),
-		MenuPattern.optionAndTarget("report", "game bug")
-	);
+	AUTO_RETALIATE(ImprovedMenusConfig::autoRetaliate, WidgetGroup.COMBAT, MenuPattern.option("auto retaliate"),
+			MenuPattern.target("auto retaliate")),
+	HIDE_XP_DROPS(ImprovedMenusConfig::xpDrops, WidgetGroup.XP_DROPS, MenuPattern.option("hide xp drops"),
+			MenuPattern.optionAndTarget("hide", "xp drops")),
+	SHOW_XP_DROPS(ImprovedMenusConfig::xpDrops, WidgetGroup.XP_DROPS, MenuPattern.option("show xp drops"),
+			MenuPattern.optionAndTarget("show", "xp drops")),
+	SETUP_XP_DROPS(ImprovedMenusConfig::xpDrops, WidgetGroup.XP_DROPS, MenuPattern.option("setup xp drops"),
+			MenuPattern.optionAndTarget("setup", "xp drops")),
+	ALWAYS_SET_PLACEHOLDERS(ImprovedMenusConfig::alwaysSetPlaceholders, WidgetGroup.BANK,
+			MenuPattern.option("always set placeholders"), MenuPattern.target("always set placeholders")),
+	REPORT_ABUSE(ImprovedMenusConfig::report, WidgetGroup.REPORT, MenuPattern.option("report abuse"),
+			MenuPattern.optionAndTarget("report", "abuse")),
+	REPORT_GAME_BUG(ImprovedMenusConfig::report, WidgetGroup.REPORT, MenuPattern.option("report game bug"),
+			MenuPattern.optionAndTarget("report", "game bug"));
 
 	private static final GuardedAction[] ACTIONS = values();
-	private static final EnumSet<MenuAction> WIDGET_ACTIONS = EnumSet.of(
-		MenuAction.CC_OP,
-		MenuAction.CC_OP_LOW_PRIORITY,
-		MenuAction.WIDGET_TYPE_1,
-		MenuAction.WIDGET_TYPE_4,
-		MenuAction.WIDGET_TYPE_5,
-		MenuAction.WIDGET_FIRST_OPTION,
-		MenuAction.WIDGET_SECOND_OPTION,
-		MenuAction.WIDGET_THIRD_OPTION,
-		MenuAction.WIDGET_FOURTH_OPTION,
-		MenuAction.WIDGET_FIFTH_OPTION
-	);
+	private static final EnumSet<MenuAction> WIDGET_ACTIONS = EnumSet.of(MenuAction.CC_OP,
+			MenuAction.CC_OP_LOW_PRIORITY, MenuAction.WIDGET_TYPE_1, MenuAction.WIDGET_TYPE_4, MenuAction.WIDGET_TYPE_5,
+			MenuAction.WIDGET_FIRST_OPTION, MenuAction.WIDGET_SECOND_OPTION, MenuAction.WIDGET_THIRD_OPTION,
+			MenuAction.WIDGET_FOURTH_OPTION, MenuAction.WIDGET_FIFTH_OPTION);
 
 	private final Function<ImprovedMenusConfig, ClickMode> clickMode;
 	private final WidgetGroup widgetGroup;
 	private final MenuPattern[] menuPatterns;
 
-	GuardedAction(
-		Function<ImprovedMenusConfig, ClickMode> clickMode,
-		WidgetGroup widgetGroup,
-		MenuPattern... menuPatterns)
+	GuardedAction(Function<ImprovedMenusConfig, ClickMode> clickMode, WidgetGroup widgetGroup,
+			MenuPattern... menuPatterns)
 	{
 		this.clickMode = clickMode;
 		this.widgetGroup = widgetGroup;
@@ -176,7 +138,7 @@ enum GuardedAction
 				continue;
 			}
 			if (expectedIndex >= expected.length()
-				|| Character.toLowerCase(current) != expected.charAt(expectedIndex++))
+					|| Character.toLowerCase(current) != expected.charAt(expectedIndex++))
 			{
 				return false;
 			}
@@ -187,14 +149,8 @@ enum GuardedAction
 	private enum WidgetGroup
 	{
 		COMBAT(InterfaceID.COMBAT_INTERFACE),
-		XP_DROPS(
-			InterfaceID.ORBS,
-			InterfaceID.ORBS_NOMAP,
-			InterfaceID.ORBS_OSM,
-			InterfaceID.ORBS_OSM_NOMAP
-		),
-		BANK(InterfaceID.BANKMAIN),
-		REPORT(InterfaceID.CHATBOX);
+		XP_DROPS(InterfaceID.ORBS, InterfaceID.ORBS_NOMAP, InterfaceID.ORBS_OSM, InterfaceID.ORBS_OSM_NOMAP),
+		BANK(InterfaceID.BANKMAIN), REPORT(InterfaceID.CHATBOX);
 
 		private final int[] interfaceIds;
 
@@ -254,7 +210,7 @@ enum GuardedAction
 		private boolean matches(MenuEntry entry)
 		{
 			return (option == null || labelEquals(entry.getOption(), option))
-				&& (target == null || labelEquals(entry.getTarget(), target));
+					&& (target == null || labelEquals(entry.getTarget(), target));
 		}
 	}
 }

@@ -32,6 +32,7 @@ package com.improvedmenus.rs2f.ast;
 import com.improvedmenus.rs2f.FilterContext;
 import com.improvedmenus.rs2f.model.ItemFacts;
 
-public abstract class Condition {
-    public abstract boolean test(FilterContext plugin, ItemFacts item);
+public abstract class Condition
+{
+	public abstract boolean test(FilterContext plugin, ItemFacts item);
 }

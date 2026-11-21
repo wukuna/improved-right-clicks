@@ -40,15 +40,18 @@ import lombok.ToString;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class ItemOwnershipCondition extends LeafCondition {
-    private final Ownership ownership;
+public class ItemOwnershipCondition extends LeafCondition
+{
+	private final Ownership ownership;
 
-    public ItemOwnershipCondition(int ownership) {
-        this.ownership = Ownership.fromOrdinal(ownership);
-    }
+	public ItemOwnershipCondition(int ownership)
+	{
+		this.ownership = Ownership.fromOrdinal(ownership);
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return item.getOwnership() == ownership.ordinal();
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return item.getOwnership() == ownership.ordinal();
+	}
 }

@@ -37,15 +37,18 @@ import lombok.ToString;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
-public class ItemStackableCondition extends LeafCondition {
-    private final boolean target;
+public class ItemStackableCondition extends LeafCondition
+{
+	private final boolean target;
 
-    public ItemStackableCondition(boolean target) {
-        this.target = target;
-    }
+	public ItemStackableCondition(boolean target)
+	{
+		this.target = target;
+	}
 
-    @Override
-    public boolean test(FilterContext plugin, ItemFacts item) {
-        return item.isStackable() == target;
-    }
+	@Override
+	public boolean test(FilterContext plugin, ItemFacts item)
+	{
+		return item.isStackable() == target;
+	}
 }
