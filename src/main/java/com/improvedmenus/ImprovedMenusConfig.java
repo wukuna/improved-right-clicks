@@ -316,7 +316,33 @@ public interface ImprovedMenusConfig extends Config
 		}
 	}
 
-	@ConfigItem(keyName = "lootFiltersCompatibility", name = "Loot display compatibility", description = "Use resolved icons from Improved Looting or a compatible Loot Filters version. Requires Custom or Both and an enabled provider. Colors stay separate.", position = 27, section = presentationSection)
+	enum CustomIconProvider
+	{
+		OFF("Off", null), IMPROVED_LOOTING("Improved Looting", "improved-looting"),
+		LOOT_FILTERS("Loot Filters", "loot-filters");
+
+		final String label, namespace;
+
+		CustomIconProvider(String label, String namespace)
+		{
+			this.label = label;
+			this.namespace = namespace;
+		}
+
+		@Override
+		public String toString()
+		{
+			return label;
+		}
+	}
+
+	@ConfigItem(keyName = "customIconProvider", name = "Custom icon provider", description = "Choose the enabled plugin that supplies custom icons in Custom or Both mode. Off keeps only saved manual/imported icons. Does not change menu colours, ordering or either plugin's settings.", position = 28, section = presentationSection)
+	default CustomIconProvider customIconProvider()
+	{
+		return CustomIconProvider.OFF;
+	}
+
+	@ConfigItem(keyName = "lootFiltersCompatibility", name = "Loot display compatibility", description = "Retained legacy setting; custom icons now use Custom icon provider.", hidden = true)
 	default boolean lootFiltersCompatibility()
 	{
 		return false;
@@ -334,7 +360,7 @@ public interface ImprovedMenusConfig extends Config
 		return false;
 	}
 
-	@ConfigItem(keyName = "groundIconSource", name = "Icon source", description = "Used when Ground loot icons is enabled. Custom uses the connected loot display when compatibility is enabled, otherwise imported icons. Manual assignments take priority. Both shows custom and item icons; Custom never falls back to native icons; Both keeps native item icons when a custom icon is unavailable. Colors are controlled separately.", position = 28, section = presentationSection)
+	@ConfigItem(keyName = "groundIconSource", name = "Icon source", description = "Native shows item sprites. Custom uses your chosen Custom icon provider, or saved imported icons when the provider is Off. Manual assignments take priority. Both adds the native item icon; Custom never falls back to it. Colours are controlled separately.", position = 27, section = presentationSection)
 	default GroundIconSource groundIconSource()
 	{
 		return GroundIconSource.NATIVE;

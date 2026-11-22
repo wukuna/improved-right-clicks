@@ -39,7 +39,7 @@ Enable **Hide side panel** under General to remove the Improved Right-Clicks too
 2. Use the side panel for profiles, settings import/export, undo and diagnostics.
 3. Hold the configured reveal modifier before opening a menu to temporarily show options this plugin hid.
 
-**Compatibility status:** Improved Looting can share icons through its **Connect menu icons** option. Loot Filters supports sharing through its [merged image-provider update](https://github.com/riktenx/loot-filters/pull/219). Select **Custom** or **Both** icons and enable **Loot display compatibility**. If both providers are active, Improved Looting takes priority while **Connect menu icons** is on; turn it off to use Loot Filters instead. The compatibility status identifies the provider after opening a Take menu.
+**Custom icon provider:** Choose **Off** (default), **Improved Looting** or **Loot Filters**, then use **Custom** or **Both** icons. Enable the selected plugin. No connection checkbox in the other plugin needs changing. The compatibility status identifies the selected provider after opening a Take menu. Menu ordering and colours keep their separate controls.
 
 ## Usage
 
@@ -88,7 +88,7 @@ In RuneLite's **Improved Right-Clicks** settings, open **Presentation**, enable 
 - **Custom** shows the selected custom icon. Hidden, unassigned or unavailable icons remain absent.
 - **Both** shows custom and native icons together, avoiding duplicate Current Item icons. The native picture remains when no custom icon is available, unless **Both: respect filter visibility** is enabled.
 
-Enable **Loot display compatibility**, then choose Custom or Both. With Improved Looting active and **Connect menu icons** enabled, its resolved settings take priority. Otherwise a compatible Loot Filters provider is used. Improved Right-Clicks caches independent images without reading another plugin's files or evaluating its rules. Existing manual assignments remain explicit overrides; previously imported filter backups remain saved and can supply icons with compatibility off.
+Select **Improved Looting** or **Loot Filters** under **Custom icon provider**, then choose Custom or Both. Only that provider supplies artwork; an unavailable provider does not trigger a fallback to the other plugin. **Off** requests no external icons, even if the old compatibility checkbox was saved as enabled. Improved Right-Clicks caches independent images without reading another plugin's files or evaluating its rules. Existing manual assignments remain explicit overrides; previously imported filter backups remain saved and can supply icons with the provider Off.
 
 Loot Filters still requires the upstream provider update described above. File, sprite and item images load through the active provider; no direct access to its icon directory is used. Both plugins retain their own settings.
 

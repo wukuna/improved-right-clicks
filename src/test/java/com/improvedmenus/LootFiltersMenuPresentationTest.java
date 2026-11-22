@@ -89,6 +89,8 @@ public class LootFiltersMenuPresentationTest
 		assertFalse(defaults.useLootFiltersInMenu());
 		assertFalse(defaults.lootFiltersMenuColors());
 		assertFalse(defaults.lootFiltersCompatibility());
+		assertEquals(ImprovedMenusConfig.CustomIconProvider.OFF, defaults.customIconProvider());
+		assertEquals("OFF", SettingsCatalog.ALL.get("customIconProvider").defaultValue);
 		assertEquals(ImprovedMenusConfig.GroundIconSource.NATIVE, defaults.groundIconSource());
 		assertEquals("false", SettingsCatalog.ALL.get("useLootFiltersInMenu").defaultValue);
 		assertEquals("false", SettingsCatalog.ALL.get("lootFiltersMenuColors").defaultValue);

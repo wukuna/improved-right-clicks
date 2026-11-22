@@ -20,7 +20,7 @@ public class ImprovedLootingAdapterTest
 		Client client = mock(Client.class);
 		when(client.isClientThread()).thenReturn(true);
 		ImprovedMenusConfig config = mock(ImprovedMenusConfig.class);
-		when(config.lootFiltersCompatibility()).thenReturn(true);
+		when(config.useLootFiltersInMenu()).thenReturn(true);
 		PluginManager plugins = mock(PluginManager.class);
 		EventBus events = mock(EventBus.class);
 		Plugin looting = mock(Plugin.class), filters = mock(Plugin.class);
@@ -58,6 +58,6 @@ public class ImprovedLootingAdapterTest
 		assertTrue(compatibility.status().contains("Loot Filters"));
 		when(plugins.isPluginActive(any(Plugin.class))).thenReturn(false);
 		compatibility.refresh();
-		assertTrue(compatibility.status().startsWith("Enable"));
+		assertTrue(compatibility.status().contains("Enable a loot provider"));
 	}
 }

@@ -32,13 +32,13 @@ Existing action colours and menu themes stay saved; their editors have been reti
 
 ## Loot icons and other menu plugins
 
-Under **Presentation**, enable **Ground loot icons** and select **Native**, **Custom** or **Both**. Improved Looting can supply custom images through **Connect menu icons** when compatibility is enabled. Ordinary menu features do not require an icon provider.
+Under **Presentation**, enable **Ground loot icons** and select **Native**, **Custom** or **Both**. **Custom icon provider** chooses **Off** (default), **Improved Looting** or **Loot Filters**. The selected plugin must be enabled. This choice only supplies custom artwork; it does not change menu colours, ordering or either plugin's settings.
 
 ![Ground-item menu showing item icons and colored Take entries](docs/media/ground-item-menu.png)
 
 Item icons and action colors in an opened menu. The cards above the menu come from Improved Looting.
 
-Automatic Loot Filters sharing uses its [merged provider update](https://github.com/riktenx/loot-filters/pull/219). Enable **Loot display compatibility** and use **Custom** or **Both** icons. If Improved Looting is also active, turn off its **Connect menu icons** option to use Loot Filters instead. Improved Right-Clicks does not read another plugin’s private icon files.
+Loot Filters sharing uses its [resolved-display provider](https://github.com/riktenx/loot-filters/blob/21fc0b87d58228b292e6c1e98acd3692f29aed80/plugin-messages.md). Choose **Loot Filters** as the custom icon provider and use **Custom** or **Both** icons. No setting in Improved Looting needs changing. An unavailable selected provider never silently switches to another plugin. **Off** retains saved manual/imported icons without requesting external artwork. Improved Right-Clicks does not read another plugin’s private icon files.
 
 Keep Menu Entry Swapper for swaps and specialist plugins for features you still use. Disable overlapping filters or color rules when comparing results. The reveal modifier cannot restore an entry removed by another plugin.
 

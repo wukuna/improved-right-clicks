@@ -1,5 +1,6 @@
 package com.improvedmenus;
 
+import com.improvedmenus.ImprovedMenusConfig.CustomIconProvider;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -24,10 +25,11 @@ class LootFiltersCompatibility
 	private final PluginManager plugins;
 	private final EventBus events;
 	private final LootFilterImageCache images;
-	private boolean collecting, enabled;
-	private String namespace = "loot-filters", providerName = "Loot Filters";
+	private boolean collecting, iconsEnabled;
+	private CustomIconProvider menuProvider = CustomIconProvider.OFF, iconProvider = CustomIconProvider.OFF;
 	private final Map<Tile, Map<Integer, Result>> menuResults = new IdentityHashMap<>();
-	private volatile String status = "Open a Take menu to check loot display compatibility.";
+	private final Map<Tile, Map<Integer, Result>> iconResults = new IdentityHashMap<>();
+	private volatile String menuStatus = "Loot menu settings are off.", iconStatus = "Custom icon provider is Off.";
 
 	@Inject
 	LootFiltersCompatibility(Client client, ClientThread clientThread, ImprovedMenusConfig config,
@@ -81,7 +83,7 @@ class LootFiltersCompatibility
 
 	String status()
 	{
-		return status;
+		return iconStatus + " " + menuStatus;
 	}
 
 	long revision()
@@ -93,69 +95,86 @@ class LootFiltersCompatibility
 	{
 		if (!client.isClientThread())
 			return;
-		boolean running = false;
-		String next = "loot-filters", name = "Loot Filters";
-		if (config.lootFiltersCompatibility() || config.useLootFiltersInMenu())
+		CustomIconProvider nextMenu = CustomIconProvider.OFF;
+		if (config.useLootFiltersInMenu())
 		{
-			for (Plugin plugin : plugins.getPlugins())
-				if (("Loot Filters".equals(plugin.getName()) || "Loot Filters TEST".equals(plugin.getName()))
-						&& plugins.isPluginActive(plugin))
-				{
-					running = true;
-				}
-			for (Plugin plugin : plugins.getPlugins())
-				if (("Improved Looting".equals(plugin.getName()) || "Improved Looting TEST".equals(plugin.getName()))
-						&& plugins.isPluginActive(plugin))
-				{
-					Map<String, Object> capability = new HashMap<>();
-					events.post(new PluginMessage("improved-looting", "provider-status-v1", capability));
-					if (Boolean.TRUE.equals(capability.get("enabled")))
-					{
-						running = true;
-						next = "improved-looting";
-						name = "Improved Looting";
-						break;
-					}
-				}
+			if (available(CustomIconProvider.IMPROVED_LOOTING, false))
+				nextMenu = CustomIconProvider.IMPROVED_LOOTING;
+			else if (available(CustomIconProvider.LOOT_FILTERS, false))
+				nextMenu = CustomIconProvider.LOOT_FILTERS;
 		}
-		if (running != enabled || !next.equals(namespace))
+		CustomIconProvider nextIcon = config.customIconProvider();
+		if (nextIcon == null)
+			nextIcon = CustomIconProvider.OFF;
+		boolean ready = available(nextIcon, true);
+		if (nextIcon != iconProvider || ready != iconsEnabled)
 		{
 			images.clear();
 			endMenu();
-			enabled = running;
-			namespace = next;
-			providerName = name;
+			iconProvider = nextIcon;
+			iconsEnabled = ready;
+			iconStatus = ready ? "Custom icons: " + iconProvider + "." : "Enable " + iconProvider + " for custom icons.";
 		}
-		if (!config.lootFiltersCompatibility() && !config.useLootFiltersInMenu())
-			status = "Loot display compatibility is off.";
-		else if (!running)
-			status = "Enable Loot Filters or Improved Looting to use its resolved display settings.";
+		if (nextMenu != menuProvider)
+		{
+			endMenu();
+			menuProvider = nextMenu;
+			menuStatus = "Loot menu settings: " + menuProvider + ".";
+		}
+		if (iconProvider == CustomIconProvider.OFF)
+			iconStatus = "Custom icon provider is Off.";
+		if (menuProvider == CustomIconProvider.OFF)
+			menuStatus = config.useLootFiltersInMenu() ? "Enable a loot provider to use its menu settings."
+					: "Loot menu settings are off.";
+	}
+
+	private boolean available(CustomIconProvider provider, boolean iconsOnly)
+	{
+		if (provider == CustomIconProvider.OFF)
+			return false;
+		for (Plugin plugin : plugins.getPlugins())
+			if ((provider.label.equals(plugin.getName()) || (provider.label + " TEST").equals(plugin.getName()))
+					&& plugins.isPluginActive(plugin))
+			{
+				if (provider == CustomIconProvider.LOOT_FILTERS)
+					return true;
+				Map<String, Object> capability = new HashMap<>();
+				if (iconsOnly)
+					capability.put("iconsOnly", true);
+				events.post(new PluginMessage(provider.namespace, "provider-status-v1", capability));
+				return Boolean.TRUE.equals(capability.get("enabled"));
+			}
+		return false;
 	}
 
 	void reset()
 	{
 		endMenu();
 		images.clear();
-		enabled = false;
-		status = "Open a Take menu to check loot display compatibility.";
+		iconsEnabled = false;
+		menuProvider = iconProvider = CustomIconProvider.OFF;
+		iconStatus = "Custom icon provider is Off.";
+		menuStatus = "Open a Take menu to check loot menu settings.";
 	}
 
 	void beginMenu()
 	{
 		refresh();
 		menuResults.clear();
+		iconResults.clear();
 		collecting = true;
 	}
 
 	void endMenu()
 	{
 		menuResults.clear();
+		iconResults.clear();
 		collecting = false;
 	}
 
 	Result findIcon(MenuEntry entry)
 	{
-		Result result = find(entry);
+		Result result = find(entry, true);
 		image(result);
 		return result;
 	}
@@ -171,7 +190,12 @@ class LootFiltersCompatibility
 
 	Result find(MenuEntry entry)
 	{
-		if (!enabled || !client.isClientThread())
+		return find(entry, false);
+	}
+
+	private Result find(MenuEntry entry, boolean forIcons)
+	{
+		if (!(forIcons ? iconsEnabled : menuProvider != CustomIconProvider.OFF) || !client.isClientThread())
 			return null;
 		WorldView view = client.getWorldView(entry.getWorldViewId());
 		if (view == null || view.getScene() == null)
@@ -183,29 +207,44 @@ class LootFiltersCompatibility
 				|| tiles[plane][x][y] == null)
 			return null;
 		if (!collecting)
-			return request(view, x, y, plane, entry.getIdentifier());
-		Map<Integer, Result> results = menuResults.computeIfAbsent(tiles[plane][x][y], ignored -> new HashMap<>());
+			return request(view, x, y, plane, entry.getIdentifier(), forIcons);
+		Map<Integer, Result> results = (forIcons ? iconResults : menuResults)
+				.computeIfAbsent(tiles[plane][x][y], ignored -> new HashMap<>());
 		if (!results.containsKey(entry.getIdentifier()))
-			results.put(entry.getIdentifier(), request(view, x, y, plane, entry.getIdentifier()));
+			results.put(entry.getIdentifier(), request(view, x, y, plane, entry.getIdentifier(), forIcons));
 		return results.get(entry.getIdentifier());
 	}
 
 	Result request(WorldView view, int x, int y, int plane, int itemId)
 	{
+		return request(view, x, y, plane, itemId, false);
+	}
+
+	private Result request(WorldView view, int x, int y, int plane, int itemId, boolean forIcons)
+	{
+		CustomIconProvider provider = forIcons ? iconProvider : menuProvider;
+		if (provider == CustomIconProvider.OFF)
+			return null;
 		Map<String, Object> data = new HashMap<>();
 		data.put("worldViewId", view.getId());
 		data.put("x", view.getBaseX() + x);
 		data.put("y", view.getBaseY() + y);
 		data.put("z", plane);
 		data.put("itemId", itemId);
-		events.post(new PluginMessage(namespace, "resolved-display-request-v1", data));
+		if (forIcons && provider == CustomIconProvider.IMPROVED_LOOTING)
+			data.put("iconsOnly", true);
+		events.post(new PluginMessage(provider.namespace, "resolved-display-request-v1", data));
 		Result result = decode(data, itemId);
-		status = result != null
-				? "Connected to " + providerName + ". Icons, menu behavior and colors use their separate settings."
+		String status = result != null
+				? (forIcons ? "Custom icons: " : "Loot menu settings: ") + provider + "."
 				: data.containsKey("status")
-						? providerName + " has no ready, unambiguous display settings for this pile."
-						: "This " + providerName
+						? provider + " has no ready, unambiguous display settings for this pile."
+						: "This " + provider
 								+ " version does not provide resolved display settings. A compatible provider update is required.";
+		if (forIcons)
+			iconStatus = status;
+		else
+			menuStatus = status;
 		return result;
 	}
 

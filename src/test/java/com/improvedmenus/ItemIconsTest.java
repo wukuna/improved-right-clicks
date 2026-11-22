@@ -275,7 +275,8 @@ public class ItemIconsTest
 		ImprovedMenusConfig config = mock(ImprovedMenusConfig.class);
 		when(config.groundIcons()).thenReturn(true);
 		when(config.groundIconSource()).thenReturn(source);
-		when(config.lootFiltersCompatibility()).thenReturn(linked);
+		when(config.customIconProvider()).thenReturn(linked ? ImprovedMenusConfig.CustomIconProvider.LOOT_FILTERS
+				: ImprovedMenusConfig.CustomIconProvider.OFF);
 		when(config.bothRespectFilterVisibility()).thenReturn(respect);
 		net.runelite.client.game.ChatIconManager icons = mock(net.runelite.client.game.ChatIconManager.class);
 		when(icons.reserveChatIcon()).thenReturn(2);

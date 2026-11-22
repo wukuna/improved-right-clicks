@@ -121,7 +121,8 @@ final class MenuPresentation
 				LootFiltersCompatibility.Result linked = null;
 				if (custom == null && source != null && source != ImprovedMenusConfig.GroundIconSource.NATIVE)
 				{
-					if (config.lootFiltersCompatibility())
+					if (config.customIconProvider() != null
+							&& config.customIconProvider() != ImprovedMenusConfig.CustomIconProvider.OFF)
 					{
 						linked = lootCompatibility.findIcon(entry);
 						if (linked != null && !linked.hasIcon())

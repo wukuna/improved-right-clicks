@@ -104,6 +104,8 @@ final class SettingsCatalog
 		bool("groupGroundItems", "Group duplicate ground items", "Presentation", false);
 		bool("groundExamineLast", "Group ground Examine at bottom", "Presentation", false);
 		bool("lootFiltersCompatibility", "Loot Filters compatibility", "Presentation", false);
+		add("customIconProvider", "Custom icon provider", "Presentation", "OFF", "OFF", "IMPROVED_LOOTING",
+				"LOOT_FILTERS");
 		bool("useLootFiltersInMenu", "Use Loot Filters in menu", "Presentation", false);
 		bool("lootFiltersMenuColors", "Use Loot Filters menu colors", "Colors", false);
 		add("groundIconSource", "Icon source", "Presentation", "NATIVE", "NATIVE", "CUSTOM", "BOTH");
