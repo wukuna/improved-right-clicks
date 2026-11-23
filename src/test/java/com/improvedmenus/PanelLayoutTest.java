@@ -23,7 +23,12 @@ public class PanelLayoutTest
 			try
 			{
 				UIManager.setLookAndFeel(new net.runelite.client.ui.laf.RuneLiteLAF());
-				ProfileStore store = new ProfileStore();
+				net.runelite.client.config.ConfigManager manager = mock(net.runelite.client.config.ConfigManager.class);
+				ProfileStore store = com.google.inject.Guice.createInjector(binder ->
+				{
+					binder.bind(net.runelite.client.config.ConfigManager.class).toInstance(manager);
+					binder.bind(com.google.gson.Gson.class).toInstance(new com.google.gson.Gson());
+				}).getInstance(ProfileStore.class);
 				MenuEngine engine = new MenuEngine();
 				Runnable settings = mock(Runnable.class);
 				ImprovedMenusPanel panel = new ImprovedMenusPanel(store, engine, settings, () -> "Ready");
@@ -32,16 +37,16 @@ public class PanelLayoutTest
 					panel.setSize(225, 650);
 					layout(panel);
 					JTabbedPane tabs = find(panel, JTabbedPane.class);
-					assertEquals(3, tabs.getTabCount());
+					assertEquals(4, tabs.getTabCount());
 					assertEquals(1, tabs.getTabRunCount());
 					assertTrue(tabs.getBoundsAt(2).getMaxX() <= tabs.getWidth());
-					button(panel, "Open plugin settings").doClick();
+					button(panel, "All plugin settings").doClick();
 					verify(settings).run();
-					tabs.setSelectedIndex(1);
+					tabs.setSelectedIndex(3);
 					button(panel, "Undo last change").doClick();
-					tabs.setSelectedIndex(2);
+					tabs.setSelectedIndex(3);
 					button(panel, "Diagnostics").doClick();
-					assertTrue(find(panel, javax.swing.JTextArea.class).getText().contains("Ready"));
+					assertTrue(find((Container) tabs.getSelectedComponent(), javax.swing.JTextArea.class).getText().contains("Ready"));
 					tabs.setSelectedIndex(0);
 					layout(panel);
 					BufferedImage image = new BufferedImage(225, 650, BufferedImage.TYPE_INT_RGB);

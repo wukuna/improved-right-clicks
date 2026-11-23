@@ -13,7 +13,7 @@ import net.runelite.client.config.ConfigManager;
 @Singleton
 final class ReleaseNotesNotice
 {
-	static final String RELEASE = "2026-11-21-styler-compatibility";
+	static final String RELEASE = "2026-11-23-sidebar-and-previews";
 	static final String KEY = "recentChangesSeen";
 	private final Client client;
 	private final ClientThread thread;
@@ -54,7 +54,7 @@ final class ReleaseNotesNotice
 				|| RELEASE.equals(config.getConfiguration(ImprovedMenusConfig.GROUP, KEY)))
 			return;
 		chat.queue(QueuedMessage.builder().type(ChatMessageType.CONSOLE).value(
-				"[Improved Right-Clicks] Updates:<br>* Loot icons now draw with menu text.<br>* Existing colours are saved. Use Right Click Styler for new colour and theme changes.<br>* +N options can optionally follow a compatible Styler version.")
+				"[Improved Right-Clicks] Updates:<br>* Find controls under Icons, Actions, Style and General; changes apply immediately.<br>* Profiles, Undo, saved colors and Right Click Styler compatibility are preserved.")
 				.build());
 		config.setConfiguration(ImprovedMenusConfig.GROUP, KEY, RELEASE);
 	}

@@ -10,6 +10,10 @@ Previously **Menu Workshop**. Your saved settings and profiles keep their existi
 
 [Features](#features) · [Getting started](#getting-started) · [Usage](#usage) · [Saved settings](#saved-settings) · [Compatibility](#compatibility) · [Inspiration and recipe](#inspiration-and-recipe) · [Support](#support) · [License and attribution](#license-and-attribution)
 
+## Side panel
+
+Use **Icons, Actions, Style and General** for focused controls. **Icons** contains item artwork and player badges; **Actions** contains tool requirements and menu cleanup. **Style** retains saved colors, Right Click Styler integration and **+N options**. Profiles, import/export, Undo and diagnostics remain available under **General**. Existing keys and saved choices are preserved.
+
 ## Features
 
 - **Inventory:** protect potion Empty, hide selected item actions by name, and support item-on-item Use targets.
@@ -74,9 +78,9 @@ Use **Right Click Styler** for editable colours/themes. The sidebar links to its
 
 Item icons and action colors in an opened menu. The cards above the menu come from Improved Looting.
 
-**Presentation → Group ground Examine at bottom** places ground-item Examine below other actions, just above Cancel. It is optional, retains Take order and works independently of duplicate grouping. Reopen the menu after changing it; the reveal modifier bypasses it.
+**Actions → Menu cleanup → Group ground Examine at bottom** places ground-item Examine below other actions, just above Cancel. It is optional, retains Take order and works independently of duplicate grouping. Reopen the menu after changing it; the reveal modifier bypasses it.
 
-Enable **Presentation > Group duplicate ground items** to combine matching actions for the same item on the same tile. It starts off and works without Ground Items or Improved Looting enabled. Reopen the menu after changing it. Hold your reveal modifier before opening to see separate entries.
+Enable **Actions → Menu cleanup → Group duplicate ground items** to combine matching actions for the same item on the same tile. It starts off and works without Ground Items or Improved Looting enabled. Reopen the menu after changing it. Hold your reveal modifier before opening to see separate entries.
 
 The count represents identical menu entries, not a Take-all action. Different tiles, item variants, displayed quantities, colors, priorities and custom callbacks remain separate. Entries already counted by Ground Items are left alone. Existing icons and menu themes continue to work; ground-label/card grouping remains a separate Improved Looting setting. The switch is included in profiles, imports and undo.
 

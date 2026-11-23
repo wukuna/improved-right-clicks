@@ -17,6 +17,11 @@ final class ProfileStore
 	static final String PROFILE_KEY = "savedProfiles";
 	static final int MAX_JSON = 100000;
 
+	long profileId()
+	{
+		return manager.getProfile() == null ? -1 : manager.getProfile().getId();
+	}
+
 	String value(SettingsCatalog.Setting setting)
 	{
 		String value = manager.getConfiguration(ImprovedMenusConfig.GROUP, setting.key);

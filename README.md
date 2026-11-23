@@ -2,6 +2,10 @@
 
 Make right-click menus easier to read and harder to misclick. Enable the protections you want, hide unwanted item options, retain saved action colours and add loot icons or player relationship badges. Save different setups for different activities.
 
+## Side panel
+
+Use **Icons, Actions, Style and General** for focused controls. **Icons** contains item artwork and player badges; **Actions** contains tool requirements and menu cleanup. **Style** retains saved colors, Right Click Styler integration and **+N options**. Profiles, import/export, Undo and diagnostics remain available under **General**. Existing keys and saved choices are preserved.
+
 ## What you can do
 
 - **Avoid item misclicks:** protect potion Empty and selected inventory actions, with separate bank protections.
@@ -18,7 +22,7 @@ Make right-click menus easier to read and harder to misclick. Enable the protect
 1. Install **Improved Right-Clicks** from RuneLite’s Plugin Hub.
 2. Open its normal RuneLite settings and enable the protections or presentation choices you want. Protection switches start off and button modes start at Normal.
 3. Hold **Ctrl before opening a menu** to reveal options hidden by this plugin. The modifier can be changed to Shift, Alt or None.
-4. Use the **Menus**, **Profiles** and **Tools** sidebar tabs for settings access, saved setups and diagnostics.
+4. Use **Icons**, **Actions**, **Style** and **General** for settings, saved setups and diagnostics.
 
 **General → Hide side panel** removes the toolbar icon while menu features remain active. Clear it in RuneLite’s normal plugin settings to access profiles and tools again.
 
@@ -28,11 +32,11 @@ Use one `action,item name` rule per line. Matching ignores case; `*` matches any
 
 Existing action colours and menu themes stay saved; their editors have been retired. **Appearance → Use saved action colours** controls whether the retained action rules apply. Native rank icons and existing name colors are preserved when player badges are added.
 
-**Presentation → Group ground Examine at bottom** optionally moves ground-item Examine just above Cancel without changing Take order. It works independently of duplicate grouping.
+**Actions → Menu cleanup → Group ground Examine at bottom** optionally moves ground-item Examine just above Cancel without changing Take order. It works independently of duplicate grouping.
 
 ## Loot icons and other menu plugins
 
-Under **Presentation**, enable **Ground loot icons** and select **Native**, **Custom** or **Both**. **Custom icon provider** chooses **Off** (default), **Improved Looting** or **Loot Filters**. The selected plugin must be enabled. This choice only supplies custom artwork; it does not change menu colours, ordering or either plugin's settings.
+Under **Icons**, enable **Ground loot icons** and select **Native**, **Custom** or **Both**. **Custom icon provider** chooses **Off** (default), **Improved Looting** or **Loot Filters**. The selected plugin must be enabled. This choice only supplies custom artwork; it does not change menu colours, ordering or either plugin's settings.
 
 ![Ground-item menu showing item icons and colored Take entries](docs/media/ground-item-menu.png)
 

@@ -46,7 +46,7 @@ public class PanelTest
 			Runnable openSettings = mock(Runnable.class);
 			ImprovedMenusPanel panel = new ImprovedMenusPanel(injector.getInstance(ProfileStore.class),
 					injector.getInstance(MenuEngine.class), openSettings, () -> "Compatibility is off");
-			components(panel, JButton.class).stream().filter(b -> "Open plugin settings…".equals(b.getText()))
+			components(panel, JButton.class).stream().filter(b -> "All plugin settings…".equals(b.getText()))
 					.findFirst().get().doClick();
 			verify(openSettings).run();
 			panel.run(() ->
@@ -57,9 +57,9 @@ public class PanelTest
 			assertTrue(
 					components(panel, JLabel.class).stream().anyMatch(label -> "No changes".equals(label.getText())));
 			clearInvocations(manager);
-			assertEquals(0, components(panel, JCheckBox.class).size());
-			assertEquals(0, components(panel, JTextField.class).size());
-			assertEquals(0, components(panel, JSpinner.class).size());
+			assertTrue(components(panel, JCheckBox.class).size() > 0);
+			assertTrue(components(panel, JTextField.class).size() > 0);
+			assertTrue(components(panel, JSpinner.class).size() > 0);
 			assertEquals(3, components(panel, JButton.class)
 					.stream().filter(b -> java.util.Arrays
 							.asList("Saved profiles…", "Import / export…", "Undo last change").contains(b.getText()))
@@ -79,9 +79,8 @@ public class PanelTest
 					.get().doClick();
 			verify(manager).setConfiguration("improvedmenus", "potionEmpty", "false");
 			assertTrue(components(panel, JLabel.class).stream().anyMatch(label -> "Undone".equals(label.getText())));
-			assertFalse(components(panel, JButton.class).stream().anyMatch(
-					b -> b.getText().toLowerCase().contains("icon") || b.getText().toLowerCase().contains("filter")));
-			assertEquals(0, components(panel, JComboBox.class).size());
+			assertTrue(components(panel, JCheckBox.class).stream().noneMatch(b -> "colors".equals(b.getName())));
+			assertTrue(components(panel, JComboBox.class).size() > 0);
 			panel.setSize(225, 850);
 			layout(panel);
 			BufferedImage image = new BufferedImage(225, 850, BufferedImage.TYPE_INT_RGB);

@@ -8,6 +8,7 @@ import net.runelite.client.ui.PluginPanel;
 final class ImprovedMenusPanel extends PluginPanel
 {
 	private final ProfileStore store;
+	private final MenuSidebarSettings settings;
 	private final MenuEngine engine;
 	private final JTextArea preview = new JTextArea(9, 18);
 	private final JLabel status = new JLabel(" ");
@@ -16,35 +17,25 @@ final class ImprovedMenusPanel extends PluginPanel
 	ImprovedMenusPanel(ProfileStore store, MenuEngine engine, Runnable openSettings,
 			java.util.function.Supplier<String> compatibilityStatus)
 	{
-		super(true);
+		super(false);
 		this.store = store;
 		this.engine = engine;
-		setLayout(new BorderLayout(0, 10));
-		setBorder(BorderFactory.createEmptyBorder(10, 8, 10, 8));
-		JLabel title = new JLabel("Improved Right-Clicks");
-		title.setFont(title.getFont().deriveFont(Font.BOLD));
-		add(title, BorderLayout.NORTH);
+		settings = new MenuSidebarSettings(store, this::run);
+		setLayout(new BorderLayout(0, 6));
+		setBorder(BorderFactory.createEmptyBorder(8, 6, 8, 6));
+		setBackground(SidebarStyle.BACKGROUND);
+		add(SidebarStyle.title("IMPROVED RIGHT-CLICKS"), BorderLayout.NORTH);
 		JTabbedPane tabs = new JTabbedPane();
-		JPanel menus = section("Menu settings");
-		button(menus, "Open plugin settings…", openSettings);
-		menus.add(help("For editable menu colours and themes, use Right Click Styler. Your saved colours are retained."));
-		button(menus, "Right Click Styler…", () -> net.runelite.client.util.LinkBrowser.browse(
+		JPanel menus = SidebarStyle.column();
+		settings.style(menus);
+		JPanel themes = SidebarStyle.section(menus, "Right Click Styler", false);
+		JButton styler = new JButton("Get Right Click Styler…");
+		styler.setToolTipText("For editable menu colors and themes. Your saved colors are retained.");
+		SidebarStyle.control(styler);
+		styler.addActionListener(e -> net.runelite.client.util.LinkBrowser.browse(
 				"https://runelite.net/plugin-hub/show/right-click-styler"));
-		button(menus, "Export saved action colours…", this::exportColours);
-		JButton features = new JButton("▶ Menu features…");
-		fullWidth(features);
-		menus.add(features);
-		JLabel details = help(
-				"Menu appearance, item icons, hidden options and misclick protection are in plugin settings.");
-		details.setVisible(false);
-		menus.add(details);
-		features.addActionListener(e ->
-		{
-			boolean show = !details.isVisible();
-			details.setVisible(show);
-			features.setText((show ? "▼ " : "▶ ") + "Menu features…");
-			menus.revalidate();
-		});
+		themes.add(styler);
+		button(themes, "Export saved action colors…", this::exportColours);
 		JPanel profiles = section("Settings profiles");
 		button(profiles, "Saved profiles…", this::profiles);
 		button(profiles, "Import / export…", this::imports);
@@ -71,37 +62,38 @@ final class ImprovedMenusPanel extends PluginPanel
 				refresh.run();
 			tools.revalidate();
 		});
-		tabs.addTab("Menus", scroll(menus));
-		tabs.addTab("Profiles", scroll(profiles));
-		tabs.addTab("Tools", scroll(tools));
+		JPanel general = SidebarStyle.column();
+		SidebarStyle.section(general, "Saved profiles", profiles, true);
+		SidebarStyle.section(general, "More settings", tools, false);
+		button(tools, "All plugin settings…", openSettings);
+		tabs.addTab("Icons", scroll(settings.icons()));
+		tabs.addTab("Actions", scroll(settings.actions()));
+		tabs.addTab("Style", scroll(menus));
+		tabs.addTab("General", scroll(general));
+		SidebarStyle.tabs(tabs);
+		settings.refresh();
 		add(tabs, BorderLayout.CENTER);
 		add(status, BorderLayout.SOUTH);
 		timer = new javax.swing.Timer(500, e ->
 		{
-			if (isShowing() && tabs.getSelectedIndex() == 2 && diagnostics.isVisible())
-				refresh.run();
+			if (isShowing())
+			{
+				settings.refresh();
+				if (tabs.getSelectedIndex() == 3 && diagnostics.isVisible())
+					refresh.run();
+			}
 		});
 		timer.start();
 	}
 
 	private static JScrollPane scroll(JPanel contents)
 	{
-		JPanel body = new JPanel(new BorderLayout());
-		body.add(contents, BorderLayout.NORTH);
-		JScrollPane scroll = new JScrollPane(body);
-		scroll.setBorder(null);
-		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		scroll.getVerticalScrollBar().setUnitIncrement(16);
-		return scroll;
+		return SidebarStyle.scroll(contents);
 	}
 
 	private static JPanel section(String title)
 	{
-		JPanel panel = new JPanel(new net.runelite.client.ui.DynamicGridLayout(0, 1, 0, 5));
-		panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(title),
-				BorderFactory.createEmptyBorder(4, 6, 6, 6)));
-		panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-		return panel;
+		return SidebarStyle.column();
 	}
 
 	private static String wrapped(String text)
@@ -124,6 +116,12 @@ final class ImprovedMenusPanel extends PluginPanel
 		component.setMaximumSize(new Dimension(Integer.MAX_VALUE, component.getPreferredSize().height));
 	}
 
+	@Override
+	public void onActivate()
+	{
+		settings.refresh();
+	}
+
 	void stop()
 	{
 		timer.stop();
@@ -132,6 +130,7 @@ final class ImprovedMenusPanel extends PluginPanel
 	private void button(JPanel parent, String name, Runnable action)
 	{
 		JButton b = new JButton(name);
+		SidebarStyle.control(b);
 		b.setMargin(new Insets(5, 4, 5, 4));
 		fullWidth(b);
 		b.addActionListener(e -> run(action));
